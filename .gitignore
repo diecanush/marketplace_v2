@@ -1,0 +1,43 @@
+# --- GITIGNORE FOR MARKETPLACE V2 ---
+
+# Local database configuration with credentials
+api/config/db.php
+
+# Developer archive folder (all backups and temporary dev files)
+_archive_dev/
+
+# Scratch folder (contains local developer scripts)
+scratch/
+
+# Backup files generated during development
+*.bak
+*.bak_*
+*.bak2
+
+# User uploaded files (handled dynamically by PHP backend)
+uploads/**
+!uploads/
+!uploads/**/
+!uploads/**/.gitkeep
+
+# Local logs
+logs/
+*.log
+
+# SQL backups / local database dumps (except the database_migrations.sql which is needed)
+*.sql.bak
+*.sql.zip
+*.sql.gz
+
+# Local OS files
+.DS_Store
+Thumbs.db
+
+# IDE and Editor configs
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

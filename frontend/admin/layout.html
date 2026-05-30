@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel Admin - Diseño Home</title>
+  
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Google Fonts for Dynamic Editor -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Montserrat:wght@400;600&family=Poppins:wght@400;600&family=Lora:ital@0;1&family=Merriweather:ital@0;1&family=Playfair+Display:ital,wght@0,600;1,600&family=Roboto:wght@400;700&family=Raleway:wght@400;700&family=Nunito:wght@400;700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Custom Style -->
+  <link href="../assets/css/style.css" rel="stylesheet">
+  <style>
+    /* Drag & Drop Visual Styles */
+    tr[draggable="true"] {
+      user-select: none;
+    }
+    tr.dragging {
+      opacity: 0.55;
+      background-color: var(--bg-soft) !important;
+      outline: 2px dashed var(--primary);
+    }
+    tr.drag-over {
+      border-top: 2px solid var(--accent) !important;
+    }
+    .drag-handle {
+      cursor: grab;
+      padding: 0 4px;
+      display: inline-block;
+    }
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-md-3 col-lg-2 side p-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+          <span class="brand-logo mb-0">AS</span>
+          <h5 class="mb-0 side-title">Artesanías Sur</h5>
+        </div>
+        <div class="small text-white-50 mb-4 px-2 border-bottom border-secondary pb-3">
+          <i class="bi bi-shield-lock text-accent"></i> <span id="userBox">Cargando...</span>
+        </div>
+        <nav class="nav flex-column">
+          <a href="dashboard.html"><i class="bi bi-speedometer2"></i> Inicio</a>
+          <a href="usuarios.html"><i class="bi bi-people"></i> Usuarios</a>
+          <a href="tiendas.html"><i class="bi bi-shop"></i> Tiendas</a>
+          <a href="categorias.html"><i class="bi bi-tags"></i> Categorías</a>
+          <a href="ventas.html"><i class="bi bi-receipt"></i> Ventas</a>
+          <a href="solicitudes.html"><i class="bi bi-send-check"></i> Solicitudes <span id="navPendingBadge" class="badge text-bg-warning rounded-pill" style="display:none;">0</span></a>
+          <a href="layout.html" class="active"><i class="bi bi-grid-1x2"></i> Diseño Home</a>
+          <hr class="text-white-50">
+          <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
+          <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-10 p-4 bg-light" style="min-height: 100vh;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h1 class="h2 mb-1 fw-bold text-dark">Diseño de la Página de Inicio</h1>
+            <p class="text-muted mb-0">Activa, desactiva o reordena las secciones visibles de la homepage.</p>
+          </div>
+          <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm" id="currentDate"></span>
+        </div>
+        
+        <div id="msg"></div>
+
+        <div class="card border-0 rounded-4 shadow-sm">
+          <div class="card-body p-4">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 50px;"></th>
+                    <th style="width: 80px;">ID</th>
+                    <th>Componente</th>
+                    <th>Clave</th>
+                    <th style="width: 120px;" class="text-center">Orden</th>
+                    <th style="width: 150px;" class="text-center">Estado</th>
+                    <th style="width: 150px;" class="text-end">Contenido</th>
+                  </tr>
+                </thead>
+                <tbody id="layoutTableBody">
+                  <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                      <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                      Cargando distribución de la página...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4 gap-2">
+              <button class="btn btn-outline-secondary px-4 rounded-pill" onclick="loadLayout()">
+                <i class="bi bi-arrow-clockwise"></i> Cancelar / Descartar
+              </button>
+              <button class="btn btn-dark px-4 rounded-pill fw-bold" id="btnSaveOrder" onclick="saveOrder()">
+                <i class="bi bi-save"></i> Guardar Orden
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Edit Component Content Modal -->
+        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+              <div class="modal-header bg-dark text-white border-0" style="border-top-left-radius: 16px; border-top-right-radius: 16px;">
+                <h5 class="modal-title fw-bold" id="editModalLabel">Editar Componente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body p-0 bg-light">
+                <div class="row g-0">
+                  <!-- Left column: inputs form -->
+                  <div class="col-lg-5 p-4 border-end bg-white" style="max-height: 75vh; overflow-y: auto;" id="dynamicFormFields">
+                    <!-- Dynamically generated fields -->
+                  </div>
+                  <!-- Right column: live preview -->
+                  <div class="col-lg-7 p-4 d-flex flex-column bg-light" style="max-height: 75vh; overflow-y: auto;">
+                    <h6 class="fw-bold mb-3 text-secondary text-uppercase tracking-wider small"><i class="bi bi-eye"></i> Vista Previa en Vivo</h6>
+                    <div id="msg-contrast" class="mb-3"></div>
+                    <div id="component-preview-container" class="border rounded-4 bg-white shadow-sm overflow-hidden p-0 w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-center" style="min-height: 350px;">
+                      <!-- Real-time compiled preview -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer border-top bg-light justify-content-between" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+                <button type="button" class="btn btn-outline-danger px-4 rounded-pill fw-bold" id="btnRestoreDefault" onclick="restoreDefaultConfig()">
+                  <i class="bi bi-arrow-counterclockwise"></i> Restaurar por Defecto
+                </button>
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="button" class="btn btn-dark px-4 rounded-pill fw-bold" id="btnSaveContent" onclick="saveComponentContent()">Guardar Cambios</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Script Imports -->
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../js/homepage-templates.js"></script>
+  <script src="js/homepage_admin.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    Auth.role(['admin']);
+    Auth.paint();
+
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-AR', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    // Cargar estadísticas y badges comunes
+    async function loadCommonStats() {
+      let pendingRes = await API.get('/solicitudes.php?pending_count=1', true);
+      if (pendingRes.success) {
+        let badge = document.getElementById('navPendingBadge');
+        if (pendingRes.count > 0) {
+          badge.textContent = pendingRes.count;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+    }
+
+    // Alertas de feedback
+    function showToast(msg, type = 'success') {
+      const msgContainer = document.getElementById('msg');
+      msgContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show shadow-sm border-0 rounded-3" role="alert">
+          <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2"></i>
+          ${msg}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      `;
+      setTimeout(() => {
+        const alertEl = msgContainer.querySelector('.alert');
+        if (alertEl) {
+          const bsAlert = bootstrap.Alert.getOrCreateInstance(alertEl);
+          bsAlert.close();
+        }
+      }, 3500);
+    }
+
+    function showErrorBlock(msg) {
+      document.getElementById('msg').innerHTML = `
+        <div class="alert alert-danger border-0 shadow-sm rounded-3">
+          <i class="bi bi-exclamation-octagon-fill me-2"></i> ${msg}
+        </div>
+      `;
+    }
+
+    // Obtener y listar componentes
+    async function loadLayout() {
+      try {
+        let res = await API.get('/homepage.php?admin=1', true);
+        if (!res.success) {
+          showErrorBlock('Error al consultar el layout del servidor: ' + res.message);
+          return;
+        }
+
+        const layout = res.layout || [];
+        window.adminLayoutData = layout; // Guardar globalmente para el modal de edición
+        window.adminComponentsData = res.components || []; // Guardar catálogo de componentes
+        const tbody = document.getElementById('layoutTableBody');
+        
+        if (layout.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">No hay componentes registrados en el layout.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = layout.map(item => {
+          const isEnabled = item.is_enabled;
+          const labelName = item.name.toUpperCase().replace('_', ' ');
+
+          return `
+            <tr draggable="true" data-id="${item.id}">
+              <td class="text-center px-1">
+                <i class="bi bi-grip-vertical text-muted drag-handle fs-5"></i>
+              </td>
+              <td><span class="badge bg-secondary-subtle text-secondary px-2.5 py-1.5 rounded-3 fw-bold">${item.id}</span></td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="p-2 bg-soft-primary rounded-3 text-primary d-flex align-items-center justify-content-center">
+                    <i class="bi ${getComponentIcon(item.name)} fs-5"></i>
+                  </div>
+                  <div>
+                    <span class="fw-bold text-dark d-block">${labelName}</span>
+                    <small class="text-muted text-capitalize">${item.name} section</small>
+                  </div>
+                </div>
+              </td>
+              <td><code>${item.name}</code></td>
+              <td class="text-center">
+                <input type="number" class="form-control form-control-sm text-center mx-auto order-input" 
+                       style="width: 80px; border-radius: 8px;"
+                       value="${item.order_index}" 
+                       data-id="${item.id}"
+                       min="0" max="999">
+              </td>
+              <td class="text-center">
+                <div class="form-check form-switch d-inline-block">
+                  <input class="form-check-input" type="checkbox" role="switch" 
+                         id="switch-${item.id}" 
+                         ${isEnabled ? 'checked' : ''} 
+                         onchange="toggleEnabled(${item.id}, this.checked)">
+                  <label class="form-check-label small text-muted ms-1" id="label-${item.id}">${isEnabled ? 'Activo' : 'Inactivo'}</label>
+                </div>
+              </td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold" onclick="openEditModal(${item.id})">
+                  <i class="bi bi-pencil-square"></i> Editar
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        initDragAndDrop();
+
+      } catch (err) {
+        showErrorBlock('Error de conexión al cargar la distribución.');
+      }
+    }
+
+    // Helper para retornar iconos descriptivos
+    function getComponentIcon(name) {
+      const icons = {
+        hero: 'bi-image',
+        categories: 'bi-tags',
+        stores: 'bi-shop',
+        offers: 'bi-percent',
+        products: 'bi-grid-3x3-gap',
+        seller_cta: 'bi-megaphone'
+      };
+      return icons[name] || 'bi-layers';
+    }
+
+    // Drag & Drop Handling
+    let dragSrcEl = null;
+
+    function initDragAndDrop() {
+      const tbody = document.getElementById('layoutTableBody');
+      if (!tbody) return;
+
+      const rows = tbody.querySelectorAll('tr[draggable="true"]');
+      rows.forEach(row => {
+        row.addEventListener('dragstart', handleDragStart);
+        row.addEventListener('dragover', handleDragOver);
+        row.addEventListener('dragenter', handleDragEnter);
+        row.addEventListener('dragleave', handleDragLeave);
+        row.addEventListener('dragend', handleDragEnd);
+        row.addEventListener('drop', handleDrop);
+      });
+    }
+
+    function handleDragStart(e) {
+      dragSrcEl = this;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', this.innerHTML);
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function handleDragEnter(e) {
+      if (this !== dragSrcEl) {
+        this.classList.add('drag-over');
+      }
+    }
+
+    function handleDragLeave(e) {
+      this.classList.remove('drag-over');
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (dragSrcEl !== this) {
+        const tbody = document.getElementById('layoutTableBody');
+        const rect = this.getBoundingClientRect();
+        // Insert before or after depending on mouse Y coordinate
+        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+        tbody.insertBefore(dragSrcEl, next ? this.nextSibling : this);
+        
+        recalculateOrderIndices();
+      }
+      return false;
+    }
+
+    function handleDragEnd(e) {
+      const tbody = document.getElementById('layoutTableBody');
+      if (tbody) {
+        tbody.querySelectorAll('tr').forEach(row => {
+          row.classList.remove('dragging');
+          row.classList.remove('drag-over');
+        });
+      }
+    }
+
+    function recalculateOrderIndices() {
+      const rows = document.querySelectorAll('#layoutTableBody tr');
+      rows.forEach((row, index) => {
+        const input = row.querySelector('.order-input');
+        if (input) {
+          input.value = index + 1;
+        }
+      });
+    }
+
+    // Toggle para habilitar/deshabilitar componente de forma instantánea
+    async function toggleEnabled(id, isChecked) {
+      const el = document.getElementById(`switch-${id}`);
+      const label = document.getElementById(`label-${id}`);
+      el.disabled = true;
+
+      try {
+        let res = await API.put(`/homepage.php?id=${id}`, { is_enabled: isChecked });
+        if (res.success) {
+          showToast(`Componente ${isChecked ? 'activado' : 'desactivado'} con éxito.`, 'success');
+          label.textContent = isChecked ? 'Activo' : 'Inactivo';
+        } else {
+          showToast('Error al actualizar el estado: ' + res.message, 'danger');
+          el.checked = !isChecked; // Revertir
+        }
+      } catch (e) {
+        showToast('Error de conexión al guardar cambios.', 'danger');
+        el.checked = !isChecked; // Revertir
+      } finally {
+        el.disabled = false;
+      }
+    }
+
+    // Guardado masivo de order_index
+    async function saveOrder() {
+      const btn = document.getElementById('btnSaveOrder');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+
+      let payload = [];
+      const inputs = document.querySelectorAll('.order-input');
+      inputs.forEach(input => {
+        payload.push({
+          id: Number(input.dataset.id),
+          order_index: Number(input.value)
+        });
+      });
+
+      try {
+        let res = await API.put('/homepage.php', payload);
+        if (res.success) {
+          showToast('Distribución del orden guardada con éxito.', 'success');
+          await loadLayout(); // Recargar para ordenar de forma ascendente
+        } else {
+          showToast('Error de validación al ordenar: ' + res.message, 'danger');
+        }
+      } catch (e) {
+        showToast('Error de comunicación con el servidor al reordenar.', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-save"></i> Guardar Orden';
+      }
+    }
+
+    // Inicializar cargas
+    loadCommonStats();
+    loadLayout();
+  </script>
+</body>
+</html>

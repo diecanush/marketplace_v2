@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel Admin - Artesanías Sur</title>
+  
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Custom Style -->
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-md-3 col-lg-2 side p-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+          <span class="brand-logo mb-0">AS</span>
+          <h5 class="mb-0 side-title">Artesanías Sur</h5>
+        </div>
+        <div class="small text-white-50 mb-4 px-2 border-bottom border-secondary pb-3">
+          <i class="bi bi-shield-lock text-accent"></i> <span id="userBox">Cargando...</span>
+        </div>
+        <nav class="nav flex-column">
+          <a href="dashboard.html" class="active"><i class="bi bi-speedometer2"></i> Inicio</a>
+          <a href="usuarios.html"><i class="bi bi-people"></i> Usuarios</a>
+          <a href="tiendas.html"><i class="bi bi-shop"></i> Tiendas</a>
+          <a href="categorias.html"><i class="bi bi-tags"></i> Categorías</a>
+          <a href="ventas.html"><i class="bi bi-receipt"></i> Ventas</a>
+          <a href="solicitudes.html"><i class="bi bi-send-check"></i> Solicitudes <span id="navPendingBadge" class="badge text-bg-warning rounded-pill" style="display:none;">0</span></a>
+          <a href="layout.html"><i class="bi bi-grid-1x2"></i> Diseño Home</a>
+          <hr class="text-white-50">
+          <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
+          <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-10 p-4 bg-light" style="min-height: 100vh;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h1 class="h2 mb-0">Panel de Administración Global</h1>
+          <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm" id="currentDate"></span>
+        </div>
+        
+        <div id="msg"></div>
+
+        <!-- KPI Cards -->
+        <div class="row g-3 mb-4">
+          <!-- Revenue -->
+          <div class="col-md-3 col-sm-6">
+            <div class="card stat-card p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <span class="text-muted small fw-bold d-block text-uppercase">Volumen de Ventas</span>
+                  <h3 class="fw-bold my-1 text-dark" id="kpiRevenue">$0</h3>
+                  <span class="text-success small"><i class="bi bi-graph-up"></i> Total de la plataforma</span>
+                </div>
+                <div class="stat-icon bg-soft-success">
+                  <i class="bi bi-cash-coin"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Stores -->
+          <div class="col-md-3 col-sm-6">
+            <div class="card stat-card p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <span class="text-muted small fw-bold d-block text-uppercase">Tiendas</span>
+                  <h3 class="fw-bold my-1 text-dark" id="kpiStores">0</h3>
+                  <span class="text-primary small" id="kpiActiveStores">0 activas</span>
+                </div>
+                <div class="stat-icon bg-soft-primary">
+                  <i class="bi bi-shop"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Users -->
+          <div class="col-md-3 col-sm-6">
+            <div class="card stat-card p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <span class="text-muted small fw-bold d-block text-uppercase">Usuarios</span>
+                  <h3 class="fw-bold my-1 text-dark" id="kpiUsers">0</h3>
+                  <span class="text-info small" id="kpiAdmins">0 administradores</span>
+                </div>
+                <div class="stat-icon bg-soft-info">
+                  <i class="bi bi-people"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Categories -->
+          <div class="col-md-3 col-sm-6">
+            <div class="card stat-card p-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <span class="text-muted small fw-bold d-block text-uppercase">Categorías</span>
+                  <h3 class="fw-bold my-1 text-dark" id="kpiCategories">0</h3>
+                  <span class="text-warning small" id="kpiActiveCategories">0 activas</span>
+                </div>
+                <div class="stat-icon bg-soft-warning">
+                  <i class="bi bi-tags"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Access Section -->
+        <div class="card border-0 rounded-4 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h4 class="fw-bold mb-3">Secciones de Administración</h4>
+            <p class="text-muted">Gestión global de usuarios, tiendas, taxonomía de categorías y volumen general de ventas.</p>
+            
+            <div class="row g-3 mt-2">
+              <div class="col-md-3">
+                <a class="card p-3 text-center text-decoration-none border shadow-sm rounded-3 h-100 hover-card" href="usuarios.html">
+                  <i class="bi bi-people-fill text-primary display-6 mb-2"></i>
+                  <h5 class="fw-bold text-dark mb-1">Usuarios</h5>
+                  <p class="text-muted small mb-0">Controla roles de administrador, vendedor y cliente.</p>
+                </a>
+              </div>
+              <div class="col-md-3">
+                <a class="card p-3 text-center text-decoration-none border shadow-sm rounded-3 h-100 hover-card" href="tiendas.html">
+                  <i class="bi bi-shop text-primary display-6 mb-2"></i>
+                  <h5 class="fw-bold text-dark mb-1">Tiendas</h5>
+                  <p class="text-muted small mb-0">Modera y destaca las tiendas de artesanos.</p>
+                </a>
+              </div>
+              <div class="col-md-3">
+                <a class="card p-3 text-center text-decoration-none border shadow-sm rounded-3 h-100 hover-card" href="categorias.html">
+                  <i class="bi bi-tags-fill text-primary display-6 mb-2"></i>
+                  <h5 class="fw-bold text-dark mb-1">Categorías</h5>
+                  <p class="text-muted small mb-0">Administra las secciones y sus iconos de Bootstrap.</p>
+                </a>
+              </div>
+              <div class="col-md-3">
+                <a class="card p-3 text-center text-decoration-none border shadow-sm rounded-3 h-100 hover-card" href="ventas.html">
+                  <i class="bi bi-receipt-cutoff text-primary display-6 mb-2"></i>
+                  <h5 class="fw-bold text-dark mb-1">Ventas</h5>
+                  <p class="text-muted small mb-0">Revisa todos los pedidos realizados a nivel general.</p>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script>
+    Auth.role(['admin']);
+    Auth.paint();
+
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-AR', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    async function loadStats() {
+      let [storesRes, usersRes, catsRes, ordersRes] = await Promise.all([
+        API.get('/tiendas.php', true),
+        API.get('/usuarios.php', true),
+        API.get('/categorias.php?all=1', true),
+        API.get('/pedidos.php', true)
+      ]);
+
+      if (storesRes.success) {
+        let stores = storesRes.data || [];
+        let active = stores.filter(t => t.activa == 1 && t.estado === 'activa').length;
+        document.getElementById('kpiStores').textContent = stores.length;
+        document.getElementById('kpiActiveStores').textContent = `${active} activas/visibles`;
+      }
+
+      if (usersRes.success) {
+        let users = usersRes.data || [];
+        let admins = users.filter(u => u.rol === 'admin').length;
+        document.getElementById('kpiUsers').textContent = users.length;
+        document.getElementById('kpiAdmins').textContent = `${admins} administradores`;
+      }
+
+      if (catsRes.success) {
+        let cats = catsRes.data || [];
+        let activeCats = cats.filter(c => c.activa == 1).length;
+        document.getElementById('kpiCategories').textContent = cats.length;
+        document.getElementById('kpiActiveCategories').textContent = `${activeCats} activas`;
+      }
+
+      if (ordersRes.success) {
+        let orders = ordersRes.data || [];
+        let totalRevenue = orders.filter(o => o.estado !== 'cancelado').reduce((sum, o) => sum + Number(o.total), 0);
+        document.getElementById('kpiRevenue').textContent = money(totalRevenue);
+      }
+
+      // Conteo de solicitudes pendientes para el sidebar
+      let pendingRes = await API.get('/solicitudes.php?pending_count=1', true);
+      if (pendingRes.success) {
+        let badge = document.getElementById('navPendingBadge');
+        if (pendingRes.count > 0) {
+          badge.textContent = pendingRes.count;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+    }
+
+    loadStats();
+  </script>
+</body>
+</html>

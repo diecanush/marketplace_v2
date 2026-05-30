@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mis Productos - Panel Vendedor</title>
+  
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Custom Style -->
+  <link href="../assets/css/style.css" rel="stylesheet">
+  <!-- Cropper.js CSS & JS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-md-3 col-lg-2 side p-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+          <span class="brand-logo mb-0">AS</span>
+          <h5 class="mb-0 side-title">Artesanías Sur</h5>
+        </div>
+        <div class="small text-white-50 mb-4 px-2 border-bottom border-secondary pb-3">
+          <i class="bi bi-person-circle text-accent"></i> <span id="userBox">Cargando...</span>
+        </div>
+        <nav class="nav flex-column">
+          <a href="dashboard.html"><i class="bi bi-speedometer2"></i> Inicio</a>
+          <a href="tienda.html"><i class="bi bi-palette"></i> Diseño de tienda</a>
+          <a href="productos.html" class="active"><i class="bi bi-grid"></i> Productos</a>
+          <a href="ventas.html"><i class="bi bi-currency-dollar"></i> Ventas</a>
+          <hr class="text-white-50">
+          <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
+          <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-10 p-4 bg-light" style="min-height: 100vh;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h1 class="h2 mb-0">Gestión de Productos</h1>
+          <button class="btn btn-dark d-flex align-items-center gap-1" onclick="resetForm();">
+            <i class="bi bi-plus-lg"></i> Nuevo Producto
+          </button>
+        </div>
+        
+        <div id="msg"></div>
+
+        <!-- Form Card (Add/Edit) -->
+        <div class="card border-0 rounded-4 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h4 class="fw-bold mb-3" id="formTitle">Agregar Nuevo Producto</h4>
+            <form id="f" class="row g-3">
+              <input type="hidden" id="id">
+              
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-dark">Nombre del Producto</label>
+                <input id="nombre" class="form-control rounded-3" placeholder="Ej: Plato Rústico Cerámica" required>
+              </div>
+              
+              <div class="col-md-2">
+                <label class="form-label fw-bold small text-dark">Precio ($)</label>
+                <input id="precio" type="number" step="0.01" class="form-control rounded-3" placeholder="0.00" required>
+              </div>
+              
+              <div class="col-md-2">
+                <label class="form-label fw-bold small text-dark">Stock disponible</label>
+                <input id="stock" type="number" class="form-control rounded-3" placeholder="Cantidad" required>
+              </div>
+              
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-dark">Categoría</label>
+                <select id="categoria_id" class="form-select rounded-3" required></select>
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-dark">Imagen del Producto</label>
+                <div class="input-group">
+                  <input id="imagen" class="form-control rounded-start-3" placeholder="URL o Archivo subido..." readonly>
+                  <button type="button" class="btn btn-outline-dark" onclick="document.getElementById('fileInput').click()">
+                    <i class="bi bi-file-earmark-arrow-up"></i> Explorar
+                  </button>
+                </div>
+                <input type="file" id="fileInput" class="d-none" accept="image/*">
+                <!-- Thumbnail Preview -->
+                <div class="mt-2" style="display: none;" id="imagenPreviewContainer">
+                  <span class="text-muted small d-block mb-1">Previsualización de recorte:</span>
+                  <img id="imagenPreview" src="" class="img-thumbnail" style="max-height: 120px; object-fit: cover;">
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-dark">Descripción</label>
+                <textarea id="descripcion" class="form-control rounded-3" rows="1" placeholder="Breve descripción del producto y sus materiales..."></textarea>
+              </div>
+              
+              <div class="col-12 d-flex flex-wrap gap-4 align-items-center mt-3">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="oferta">
+                  <label class="form-check-label fw-bold small" for="oferta">Colocar en Oferta</label>
+                </div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="destacado">
+                  <label class="form-check-label fw-bold small" for="destacado">Destacar Producto</label>
+                </div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="activo" checked>
+                  <label class="form-check-label fw-bold small" for="activo">Producto Activo / Visible</label>
+                </div>
+              </div>
+
+              <div class="col-12 mt-4 d-flex gap-2">
+                <button class="btn btn-dark px-4 py-2" id="saveBtn">Guardar Producto</button>
+                <button type="button" class="btn btn-outline-secondary px-4 py-2" id="cancelBtn" onclick="resetForm();" style="display: none;">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Products List Grid -->
+        <h4 class="fw-bold mb-3 text-dark"><i class="bi bi-box-seam text-primary me-2"></i>Mis Productos</h4>
+        <div id="list" class="row g-3">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Cropper Modal -->
+  <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0" style="border-radius: var(--border-radius-lg);">
+        <div class="modal-header border-bottom pb-2">
+          <h5 class="modal-title fw-bold"><i class="bi bi-crop text-primary"></i> Ajustar Recuadro de Imagen</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-3 text-center">
+          <div class="img-container" style="max-height: 450px; overflow: hidden; background: #f8f9fa; border-radius: 8px;">
+            <img id="cropperImage" style="max-width: 100%; display: block;">
+          </div>
+        </div>
+        <div class="modal-footer border-top pt-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-dark btn-sm" id="cropperConfirmBtn">Confirmar y Recortar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  
+  <!-- Page Logic -->
+  <script>
+    Auth.role(['vendedor','admin']);
+    Auth.paint();
+
+    async function cats() {
+      let r = await API.get('/categorias.php');
+      categoria_id.innerHTML = '<option value="">Selecciona una categoría...</option>' + 
+        (r.data || []).map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+    }
+
+    async function load() {
+      let r = await API.get('/productos.php?mine=1', true);
+      if (!r.success) return showError('msg', r);
+      
+      list.innerHTML = (r.data || []).map(p => {
+        let statusBadge = p.activo == 1 
+          ? '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Activo</span>'
+          : '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill">Pausado</span>';
+        
+        let offerBadge = p.oferta == 1 
+          ? '<span class="badge bg-danger rounded-pill">Oferta</span>' 
+          : '';
+        
+        let destBadge = p.destacado == 1 
+          ? '<span class="badge bg-warning text-dark rounded-pill">Destacado</span>' 
+          : '';
+        
+        let img = getImgUrl(p.imagen, 2);
+        
+        return `
+          <div class="col-md-4 col-sm-6">
+            <div class="card h-100 shadow-sm border border-0 rounded-4 overflow-hidden position-relative">
+              <img src="${img}" class="card-img-top" style="height: 160px; object-fit: cover;">
+              <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-1">
+                ${statusBadge}
+                ${offerBadge}
+                ${destBadge}
+              </div>
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                  <span class="text-muted small">${p.categoria || 'Sin categoría'}</span>
+                  <h5 class="fw-bold text-truncate mb-2" title="${p.nombre}">${p.nombre}</h5>
+                  <p class="text-primary fw-bold mb-0">${money(p.precio)} <span class="text-muted small font-body fw-normal">| Stock: ${p.stock}</span></p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                  <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-grow-1 justify-content-center" onclick='edit(${JSON.stringify(p).replaceAll("'", "&apos;")})'>
+                    <i class="bi bi-pencil"></i> Editar
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1" onclick='del(${p.id})'>
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('') || '<div class="col-12"><div class="alert alert-info">Aún no has agregado ningún producto.</div></div>';
+
+      // Check if there is an edit parameter in the URL
+      const editId = new URLSearchParams(location.search).get('edit');
+      if (editId) {
+        const prodToEdit = (r.data || []).find(x => +x.id === +editId);
+        if (prodToEdit) {
+          edit(prodToEdit);
+        }
+      }
+    }
+
+    function edit(p) {
+      document.getElementById('formTitle').textContent = 'Editar Producto';
+      id.value = p.id;
+      nombre.value = p.nombre || '';
+      precio.value = p.precio || 0;
+      stock.value = p.stock || 0;
+      categoria_id.value = p.categoria_id || '';
+      imagen.value = p.imagen || '';
+      descripcion.value = p.descripcion || '';
+      oferta.checked = p.oferta == 1;
+      destacado.checked = p.destacado == 1;
+      activo.checked = p.activo == 1;
+      
+      if (p.imagen) {
+        document.getElementById('imagenPreview').src = getImgUrl(p.imagen, 2);
+        document.getElementById('imagenPreviewContainer').style.display = 'block';
+      } else {
+        document.getElementById('imagenPreviewContainer').style.display = 'none';
+      }
+      
+      document.getElementById('cancelBtn').style.display = 'inline-block';
+      scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+      document.getElementById('formTitle').textContent = 'Agregar Nuevo Producto';
+      f.reset();
+      activo.checked = true;
+      id.value = '';
+      document.getElementById('imagenPreviewContainer').style.display = 'none';
+      document.getElementById('imagenPreview').src = '';
+      croppedBase64 = '';
+      document.getElementById('cancelBtn').style.display = 'none';
+    }
+
+    f.onsubmit = async e => {
+      e.preventDefault();
+      
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`;
+
+      let d = {
+        nombre: nombre.value,
+        precio: precio.value,
+        stock: stock.value,
+        categoria_id: categoria_id.value || null,
+        imagen: imagen.value,
+        descripcion: descripcion.value,
+        oferta: oferta.checked,
+        destacado: destacado.checked,
+        activo: activo.checked
+      };
+      
+      let r = id.value 
+        ? await API.put('/productos.php?id=' + id.value, d)
+        : await API.post('/productos.php', d, true);
+        
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Guardar Producto';
+
+      if (!r.success) return alert(r.message);
+      
+      resetForm();
+      load();
+    };
+
+    async function del(id) {
+      if (confirm('¿Seguro que deseas eliminar este producto permanentemente?')) {
+        let r = await API.del('/productos.php?id=' + id);
+        if (!r.success) alert(r.message);
+        load();
+      }
+    }
+
+    // Lógica de recorte de imágenes con Cropper.js
+    let cropper = null;
+    let croppedBase64 = '';
+    let cropperModal = null;
+    
+    document.getElementById('fileInput').onchange = function(e) {
+      let file = e.target.files[0];
+      if (!file) return;
+      
+      let reader = new FileReader();
+      reader.onload = function(evt) {
+        let cropImg = document.getElementById('cropperImage');
+        cropImg.onload = null; // reset onload
+        cropImg.src = evt.target.result;
+        
+        if (!cropperModal) {
+          cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
+        }
+        cropperModal.show();
+      };
+      reader.readAsDataURL(file);
+    };
+
+    function initCropper() {
+      let cropImg = document.getElementById('cropperImage');
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+      cropper = new Cropper(cropImg, {
+        aspectRatio: 1, // Cuadrado para productos
+        viewMode: 1,
+        dragMode: 'move',
+        autoCropArea: 0.9,
+        restore: false,
+        guides: true,
+        center: true,
+        highlight: false,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        toggleDragModeOnDblclick: false
+      });
+    }
+
+    document.getElementById('cropperModal').addEventListener('shown.bs.modal', function () {
+      let cropImg = document.getElementById('cropperImage');
+      if (cropImg.complete && cropImg.naturalWidth > 0) {
+        initCropper();
+      } else {
+        cropImg.onload = function() {
+          initCropper();
+          cropImg.onload = null;
+        };
+      }
+    });
+
+    document.getElementById('cropperModal').addEventListener('hidden.bs.modal', function () {
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+      let cropImg = document.getElementById('cropperImage');
+      cropImg.onload = null;
+      cropImg.src = '';
+      document.getElementById('fileInput').value = '';
+    });
+
+    document.getElementById('cropperConfirmBtn').onclick = function() {
+      if (!cropper) return;
+      
+      let canvas = cropper.getCroppedCanvas({
+        width: 800,
+        height: 800,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+      });
+      
+      croppedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+      
+      document.getElementById('imagenPreview').src = croppedBase64;
+      document.getElementById('imagenPreviewContainer').style.display = 'block';
+      document.getElementById('imagen').value = croppedBase64;
+      
+      if (cropperModal) {
+        cropperModal.hide();
+      } else {
+        let inst = bootstrap.Modal.getOrCreateInstance(document.getElementById('cropperModal'));
+        if (inst) inst.hide();
+      }
+    };
+
+    cats();
+    load();
+  </script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solicitudes de Vendedor - Panel Admin</title>
+  
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Custom Style -->
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-md-3 col-lg-2 side p-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+          <span class="brand-logo mb-0">AS</span>
+          <h5 class="mb-0 side-title">Artesanías Sur</h5>
+        </div>
+        <div class="small text-white-50 mb-4 px-2 border-bottom border-secondary pb-3">
+          <i class="bi bi-shield-lock text-accent"></i> <span id="userBox">Cargando...</span>
+        </div>
+        <nav class="nav flex-column">
+          <a href="dashboard.html"><i class="bi bi-speedometer2"></i> Inicio</a>
+          <a href="usuarios.html"><i class="bi bi-people"></i> Usuarios</a>
+          <a href="tiendas.html"><i class="bi bi-shop"></i> Tiendas</a>
+          <a href="categorias.html"><i class="bi bi-tags"></i> Categorías</a>
+          <a href="ventas.html"><i class="bi bi-receipt"></i> Ventas</a>
+          <a href="solicitudes.html" class="active"><i class="bi bi-send-check"></i> Solicitudes <span id="navPendingBadge" class="badge text-bg-warning rounded-pill" style="display:none;">0</span></a>
+          <a href="layout.html"><i class="bi bi-grid-1x2"></i> Diseño Home</a>
+          <hr class="text-white-50">
+          <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
+          <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-10 p-4 bg-light" style="min-height: 100vh;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h1 class="h2 mb-0">Postulaciones de Vendedor</h1>
+          <span class="text-muted small">Aprueba, rechaza o edita los datos de postulantes para vendedor.</span>
+        </div>
+        
+        <div id="msg"></div>
+
+        <!-- Filter tabs -->
+        <div class="d-flex flex-wrap gap-2 mb-4 bg-white p-3 rounded-4 shadow-sm border">
+          <span class="text-muted d-flex align-items-center me-2"><i class="bi bi-funnel"></i> Filtrar estado:</span>
+          <button class="btn btn-sm btn-outline-secondary rounded-pill active" onclick="filterState('all', this)">Todas</button>
+          <button class="btn btn-sm btn-outline-primary rounded-pill" onclick="filterState('pendiente', this)">Pendientes</button>
+          <button class="btn btn-sm btn-outline-warning rounded-pill" onclick="filterState('correcion', this)">En Corrección</button>
+          <button class="btn btn-sm btn-outline-success rounded-pill" onclick="filterState('aprobado', this)">Aprobadas</button>
+          <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="filterState('rechazado', this)">Rechazadas</button>
+        </div>
+
+        <div id="list">
+          <!-- Dynamically populated requests -->
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Review & Edit Request Modal -->
+  <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0" style="border-radius: var(--border-radius-lg);">
+        <div class="modal-header border-bottom pb-2 bg-dark text-white">
+          <h5 class="modal-title fw-bold" id="reviewModalTitle">Revisar Solicitud de Vendedor</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-3">
+          <form id="reviewForm" class="row g-3">
+            <input type="hidden" id="revId">
+            
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Postulante</label>
+              <input type="text" id="revPostulante" class="form-control rounded-3 bg-light" readonly>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Correo Electrónico</label>
+              <input type="text" id="revEmail" class="form-control rounded-3 bg-light" readonly>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Nombre de la Tienda</label>
+              <input type="text" id="revNombreTienda" class="form-control rounded-3" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Rubro / Especialidad</label>
+              <input type="text" id="revRubro" class="form-control rounded-3" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">WhatsApp de Negocios</label>
+              <input type="text" id="revWhatsapp" class="form-control rounded-3" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Usuario de Instagram</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light">@</span>
+                <input type="text" id="revInstagram" class="form-control rounded-3 border-start-0">
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small fw-bold text-dark">Descripción</label>
+              <textarea id="revDescripcion" class="form-control rounded-3" rows="3" required></textarea>
+            </div>
+
+            <!-- Product Images display in Modal -->
+            <div class="col-12" id="revImagesContainer" style="display: none;">
+              <label class="form-label small fw-bold text-dark">Imágenes del Producto de Muestra</label>
+              <div class="d-flex flex-wrap gap-2 mt-1" id="revImagesList"></div>
+            </div>
+
+            <hr class="my-3">
+
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Estado de la Solicitud</label>
+              <select id="revEstado" class="form-select rounded-3" onchange="toggleFeedbackField()">
+                <option value="pendiente">Pendiente de revisión</option>
+                <option value="aprobado">Aprobado (Convertir en vendedor)</option>
+                <option value="correcion">Solicitar Corrección</option>
+                <option value="rechazado">Rechazado</option>
+              </select>
+            </div>
+
+            <div class="col-md-6" id="revFeedbackCol" style="display: none;">
+              <label class="form-label small fw-bold text-dark">Observaciones / Feedback al usuario</label>
+              <textarea id="revFeedbackText" class="form-control rounded-3" rows="2" placeholder="Escribe los motivos de la corrección o rechazo..."></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-top pt-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-dark btn-sm" id="reviewModalSaveBtn">Guardar Cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script>
+    Auth.role(['admin']);
+    Auth.paint();
+
+    let allSolicitudes = [];
+    let activeFilter = 'all';
+
+    async function load() {
+      // Cargar contador de pendientes en sidebar
+      let countRes = await API.get('/solicitudes.php?pending_count=1', true);
+      if (countRes.success) {
+        let badge = document.getElementById('navPendingBadge');
+        if (countRes.count > 0) {
+          badge.textContent = countRes.count;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+
+      let r = await API.get('/solicitudes.php', true);
+      if (!r.success) return showError('msg', r);
+      
+      allSolicitudes = r.data || [];
+      renderSolicitudes();
+    }
+
+    function renderSolicitudes() {
+      let filtered = allSolicitudes;
+      if (activeFilter !== 'all') {
+        filtered = allSolicitudes.filter(s => s.estado === activeFilter);
+      }
+
+      list.innerHTML = filtered.map(s => {
+        let stateBadgeClass = '';
+        if (s.estado === 'pendiente') stateBadgeClass = 'badge-state-nuevo';
+        else if (s.estado === 'correcion') stateBadgeClass = 'badge-state-preparacion';
+        else if (s.estado === 'aprobado') stateBadgeClass = 'badge-state-entregado';
+        else if (s.estado === 'rechazado') stateBadgeClass = 'badge-state-cancelado';
+
+        let dateStr = new Date(s.fecha_creacion).toLocaleDateString('es-AR', {
+          day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+
+        let imagesCount = 0;
+        try {
+          let imgs = JSON.parse(s.imagenes) || [];
+          imagesCount = imgs.length;
+        } catch(e) {
+          imagesCount = 0;
+        }
+
+        let instagramText = s.instagram ? `@${s.instagram}` : '<span class="text-danger small fw-bold">Sin Instagram</span>';
+        let imagesBadge = imagesCount > 0 
+          ? `<span class="badge bg-light text-dark border"><i class="bi bi-image"></i> ${imagesCount} fotos</span>` 
+          : '<span class="badge bg-light text-danger-emphasis border border-danger-subtle">Sin fotos</span>';
+
+        return `
+          <div class="card border-0 rounded-4 shadow-sm mb-3 overflow-hidden">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                <div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge text-uppercase font-title px-2.5 py-1.5 ${stateBadgeClass} badge-state">${s.estado}</span>
+                    <span class="text-muted small">${dateStr}</span>
+                  </div>
+                  <h5 class="fw-bold mt-2 mb-1">Postulante: ${s.nombre}</h5>
+                  <p class="text-muted small mb-0"><i class="bi bi-envelope"></i> ${s.email}</p>
+                </div>
+                <div>
+                  <button class="btn btn-dark btn-sm rounded-3 d-flex align-items-center gap-1 shadow-sm" onclick="openReviewModal(${s.id})">
+                    <i class="bi bi-pencil-square"></i> Revisar / Editar
+                  </button>
+                </div>
+              </div>
+              <div class="row g-3 bg-light p-3 rounded-3 border">
+                <div class="col-md-3 col-sm-6">
+                  <span class="text-muted d-block small">Nombre de la Tienda</span>
+                  <span class="fw-bold text-dark">${s.nombre_tienda}</span>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                  <span class="text-muted d-block small">Rubro / Especialidad</span>
+                  <span class="fw-bold text-dark">${s.rubro || 'No especificado'}</span>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                  <span class="text-muted d-block small">Instagram</span>
+                  <span>${instagramText}</span>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                  <span class="text-muted d-block small">Imágenes</span>
+                  <span>${imagesBadge}</span>
+                </div>
+              </div>
+              ${s.comentarios_admin ? `
+                <div class="mt-3 text-bg-warning-subtle text-warning-emphasis p-2.5 border border-warning-subtle rounded-3 small">
+                  <i class="bi bi-chat-left-dots"></i> <strong>Retroalimentación registrada:</strong> ${s.comentarios_admin}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('') || '<div class="alert alert-info py-4 text-center rounded-4">No se encontraron solicitudes con este filtro.</div>';
+    }
+
+    function filterState(state, btn) {
+      activeFilter = state;
+      document.querySelectorAll('.d-flex button').forEach(el => el.classList.remove('active'));
+      btn.classList.add('active');
+      renderSolicitudes();
+    }
+
+    function openReviewModal(id) {
+      let s = allSolicitudes.find(x => x.id === id);
+      if (!s) return;
+      
+      document.getElementById('revId').value = s.id;
+      document.getElementById('revPostulante').value = s.nombre;
+      document.getElementById('revEmail').value = s.email;
+      document.getElementById('revNombreTienda').value = s.nombre_tienda;
+      document.getElementById('revRubro').value = s.rubro || '';
+      document.getElementById('revWhatsapp').value = s.whatsapp || '';
+      document.getElementById('revInstagram').value = s.instagram || '';
+      document.getElementById('revDescripcion').value = s.descripcion || '';
+      
+      document.getElementById('revEstado').value = s.estado;
+      document.getElementById('revFeedbackText').value = s.comentarios_admin || '';
+      
+      // Mostrar imágenes si las hay
+      let imagesContainer = document.getElementById('revImagesContainer');
+      let imagesList = document.getElementById('revImagesList');
+      imagesList.innerHTML = '';
+      
+      let imgs = [];
+      try {
+        imgs = JSON.parse(s.imagenes) || [];
+      } catch(e) {
+        imgs = [];
+      }
+      
+      if (imgs.length > 0) {
+        imagesContainer.style.display = 'block';
+        imagesList.innerHTML = imgs.map(img => `
+          <a href="${getImgUrl(img, 2)}" target="_blank" class="border rounded overflow-hidden shadow-sm hover-card d-inline-block" style="width: 100px; height: 100px; margin-right: 5px;">
+            <img src="${getImgUrl(img, 2)}" class="w-100 h-100" style="object-fit: cover;">
+          </a>
+        `).join('');
+      } else {
+        imagesContainer.style.display = 'none';
+      }
+      
+      toggleFeedbackField();
+      
+      const modal = new bootstrap.Modal(document.getElementById('reviewModal'));
+      modal.show();
+    }
+
+    function toggleFeedbackField() {
+      let state = document.getElementById('revEstado').value;
+      let feedbackCol = document.getElementById('revFeedbackCol');
+      if (state === 'correcion' || state === 'rechazado') {
+        feedbackCol.style.display = 'block';
+      } else {
+        feedbackCol.style.display = 'none';
+      }
+    }
+
+    document.getElementById('reviewModalSaveBtn').onclick = async () => {
+      let id = document.getElementById('revId').value;
+      let estado = document.getElementById('revEstado').value;
+      let comentarios_admin = document.getElementById('revFeedbackText').value.trim();
+      
+      if ((estado === 'correcion' || estado === 'rechazado') && !comentarios_admin) {
+        alert('Debes ingresar comentarios para que el usuario conozca los motivos o correcciones requeridas.');
+        return;
+      }
+      
+      let d = {
+        nombre_tienda: document.getElementById('revNombreTienda').value.trim(),
+        rubro: document.getElementById('revRubro').value.trim(),
+        whatsapp: document.getElementById('revWhatsapp').value.trim(),
+        instagram: document.getElementById('revInstagram').value.trim(),
+        descripcion: document.getElementById('revDescripcion').value.trim(),
+        estado: estado,
+        comentarios_admin: comentarios_admin
+      };
+      
+      if (!d.nombre_tienda) {
+        alert('El nombre de la tienda es obligatorio.');
+        return;
+      }
+      
+      const saveBtn = document.getElementById('reviewModalSaveBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Guardando...`;
+      
+      let r = await API.put('/solicitudes.php?id=' + id, d);
+      
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Guardar Cambios';
+      
+      let inst = bootstrap.Modal.getInstance(document.getElementById('reviewModal'));
+      if (!inst) {
+        inst = bootstrap.Modal.getOrCreateInstance(document.getElementById('reviewModal'));
+      }
+      if (inst) inst.hide();
+      alert('¡Solicitud guardada y actualizada con éxito!');
+      load();
+    };
+
+    load();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
