@@ -17,3 +17,4 @@ uploads/solicitudes/*
 !/uploads/tiendas/
 uploads/tiendas/*
 !/uploads/tiendas/.gitkeep
+/api/config/db.php
