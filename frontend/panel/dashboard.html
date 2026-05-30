@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel Vendedor - Artesanías Sur</title>
+  
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Custom Style -->
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-md-3 col-lg-2 side p-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+          <span class="brand-logo mb-0">AS</span>
+          <h5 class="mb-0 side-title">Artesanías Sur</h5>
+        </div>
+        <div class="small text-white-50 mb-4 px-2 border-bottom border-secondary pb-3">
+          <i class="bi bi-person-circle text-accent"></i> <span id="userBox">Cargando...</span>
+        </div>
+        <nav class="nav flex-column">
+          <a href="dashboard.html" class="active"><i class="bi bi-speedometer2"></i> Inicio</a>
+          <a href="tienda.html" id="navShop"><i class="bi bi-palette"></i> Diseño de tienda</a>
+          <a href="productos.html" id="navProducts"><i class="bi bi-grid"></i> Productos</a>
+          <a href="ventas.html" id="navSales"><i class="bi bi-currency-dollar"></i> Ventas</a>
+          <hr class="text-white-50">
+          <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
+          <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-10 p-4 bg-light" style="min-height: 100vh;">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h1 class="h2 mb-0" id="pageTitle">Panel de Control</h1>
+          <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm" id="currentDate"></span>
+        </div>
+        
+        <div id="msg"></div>
+
+        <!-- -------------------- VENDOR DASHBOARD -------------------- -->
+        <div id="vendorDashboard" style="display: none;">
+          <!-- KPI Cards -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="card stat-card p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <span class="text-muted small fw-bold d-block text-uppercase">Ingresos Totales</span>
+                    <h3 class="fw-bold my-1 text-dark" id="kpiRevenue">$0</h3>
+                    <span class="text-success small"><i class="bi bi-arrow-up-short"></i> Ventas confirmadas</span>
+                  </div>
+                  <div class="stat-icon bg-soft-success">
+                    <i class="bi bi-cash-stack"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card stat-card p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <span class="text-muted small fw-bold d-block text-uppercase">Pedidos Recibidos</span>
+                    <h3 class="fw-bold my-1 text-dark" id="kpiOrders">0</h3>
+                    <span class="text-info small" id="kpiPendingOrders">0 pendientes</span>
+                  </div>
+                  <div class="stat-icon bg-soft-info">
+                    <i class="bi bi-cart-check"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card stat-card p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <span class="text-muted small fw-bold d-block text-uppercase">Productos en Catálogo</span>
+                    <h3 class="fw-bold my-1 text-dark" id="kpiProducts">0</h3>
+                    <span class="text-warning small" id="kpiActiveProducts">0 activos</span>
+                  </div>
+                  <div class="stat-icon bg-soft-warning">
+                    <i class="bi bi-box-seam"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Access -->
+          <div class="card border-0 rounded-4 shadow-sm mb-4">
+            <div class="card-body p-4">
+              <h4 class="fw-bold mb-3">Accesos Rápidos</h4>
+              <p class="text-muted">Administra los aspectos clave de tu emprendimiento local artesanal.</p>
+              <div class="row g-3 mt-2">
+                <div class="col-md-4">
+                  <a class="card p-3 text-center text-decoration-none border shadow-sm rounded-3 h-100 hover-card" href="tienda.html">
+                    <i class="bi bi-shop text-primary display-5 mb-2"></i>
+                    <h5 class="fw-bold text-dark mb-1">Mi Tienda</h5>
+                    <p class="text-muted small mb-0">Personaliza nombre, logo, rubro y redes sociales.</p>
+                  </a>
+                </div>
+                <div class="col-md-4">
+                  <a class="card p-3 text-center text-decoration-none border shadow-sm rounded-3 h-100 hover-card" href="productos.html">
+                    <i class="bi bi-grid-fill text-primary display-5 mb-2"></i>
+                    <h5 class="fw-bold text-dark mb-1">Mis Productos</h5>
+                    <p class="text-muted small mb-0">Agrega, edita y pausa productos del catálogo.</p>
+                  </a>
+                </div>
+                <div class="col-md-4">
+                  <a class="card p-3 text-center text-decoration-none border shadow-sm rounded-3 h-100 hover-card" href="ventas.html">
+                    <i class="bi bi-currency-dollar text-primary display-5 mb-2"></i>
+                    <h5 class="fw-bold text-dark mb-1">Ventas</h5>
+                    <p class="text-muted small mb-0">Gestiona pedidos de clientes y actualiza su estado.</p>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- -------------------- CLIENT POSTULATION (APPLY AS VENDOR) -------------------- -->
+        <div id="clientPostulation" style="display: none;">
+          <!-- Status Alerts -->
+          <div id="solPendingAlert" class="alert alert-info border border-info-subtle rounded-4 p-4 mb-4" style="display: none;">
+            <div class="d-flex align-items-center gap-3">
+              <i class="bi bi-hourglass-split display-5 text-info"></i>
+              <div>
+                <h4 class="alert-heading fw-bold mb-1">Postulación Recibida y en Revisión</h4>
+                <p class="mb-0">Hemos recibido tu solicitud para ser vendedor correctamente. Nuestro equipo de administración la está evaluando. Te notificaremos por correo electrónico una vez se tome una decisión.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="solCorrectionAlert" class="alert alert-warning border border-warning-subtle rounded-4 p-4 mb-4" style="display: none;">
+            <div class="d-flex align-items-center gap-3">
+              <i class="bi bi-exclamation-triangle-fill display-5 text-warning"></i>
+              <div>
+                <h4 class="alert-heading fw-bold mb-1">Se Solicitan Correcciones</h4>
+                <p class="fw-bold mb-2">Observaciones del Administrador:</p>
+                <div class="bg-white p-3 rounded-3 border mb-3 text-dark font-monospace" id="solCorrectionComments"></div>
+                <p class="mb-0">Por favor, realiza los cambios solicitados en el formulario de abajo y vuelve a enviar tu solicitud.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="solRejectedAlert" class="alert alert-danger border border-danger-subtle rounded-4 p-4 mb-4" style="display: none;">
+            <div class="d-flex align-items-center gap-3">
+              <i class="bi bi-x-circle-fill display-5 text-danger"></i>
+              <div>
+                <h4 class="alert-heading fw-bold mb-1">Postulación Rechazada</h4>
+                <p class="fw-bold mb-2">Motivos de la decisión:</p>
+                <div class="bg-white p-3 rounded-3 border mb-3 text-dark font-monospace" id="solRejectedComments"></div>
+                <p class="mb-0">Si lo deseas, puedes modificar tus datos y presentar una nueva postulación.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Application Form -->
+          <div class="card border-0 rounded-4 shadow-sm" id="postulationCard">
+            <div class="card-body p-4">
+              <h4 class="fw-bold mb-3 border-bottom pb-2"><i class="bi bi-send-fill text-primary me-1"></i> Postulación para Vendedor</h4>
+              <p class="text-muted">Si eres artesano o emprendedor, completa los datos de tu emprendimiento para solicitar tu cuenta de vendedor y comenzar a publicar tus artesanías en nuestra tienda.</p>
+              
+              <form id="solForm" class="row g-3 mt-2">
+                <input type="hidden" id="solId">
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-dark">Nombre de la Tienda Propuesta</label>
+                  <input id="solNombreTienda" class="form-control rounded-3" placeholder="Ej: Tallados del Sur" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-dark">Rubro / Especialidad</label>
+                  <input id="solRubro" class="form-control rounded-3" placeholder="Ej: Madera, Joyería, Telas" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-bold small text-dark">Descripción del Emprendimiento</label>
+                  <textarea id="solDescripcion" class="form-control rounded-3" rows="4" placeholder="Describe los materiales que utilizas, tu historia, el proceso de fabricación y qué hace únicos a tus artículos..." required></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-dark">WhatsApp de Negocios</label>
+                  <input id="solWhatsapp" class="form-control rounded-3" placeholder="Ej: 5492944123456" required>
+                  <div class="form-text">Código de país + área + número (sin espacios ni el signo +).</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold small text-dark">Usuario de Instagram (Opcional)</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light">@</span>
+                    <input id="solInstagram" class="form-control rounded-3 border-start-0" placeholder="mi.tienda.artesanias">
+                  </div>
+                </div>
+                
+                <div class="col-12 mt-3">
+                  <label class="form-label fw-bold small text-dark">Imágenes de tus Productos</label>
+                  <input type="file" id="solImagenes" class="form-control rounded-3" multiple accept="image/*">
+                  <div class="form-text text-muted" id="solImagenesHelp">Si no tienes cuenta de Instagram, debes subir al menos una imagen de tus productos para que podamos evaluar tu postulación.</div>
+                  <div class="d-flex flex-wrap gap-2 mt-3" id="solImagenesPreview"></div>
+                </div>
+                
+                <div class="col-12 mt-4">
+                  <button class="btn btn-dark px-4 py-2" id="solSubmitBtn">Enviar Solicitud de Vendedor</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script>
+    // Permitir clientes, vendedores y administradores en el dashboard
+    Auth.role(['cliente','vendedor','admin']);
+    Auth.paint();
+
+    async function syncSession() {
+      let r = await API.get('/auth.php?action=me', true);
+      if (r.success && r.token) {
+        Auth.save(r);
+        location.reload();
+      }
+    }
+    syncSession();
+
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-AR', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    let u = API.user();
+    
+    // Configuración inicial de UI basada en Rol
+    if (u && u.rol === 'cliente') {
+      document.getElementById('pageTitle').textContent = 'Postularme como Vendedor';
+      // Ocultar links de vendedor en el sidebar
+      document.getElementById('navShop').style.display = 'none';
+      document.getElementById('navProducts').style.display = 'none';
+      document.getElementById('navSales').style.display = 'none';
+      
+      document.getElementById('clientPostulation').style.display = 'block';
+      loadClientApplication();
+    } else {
+      document.getElementById('pageTitle').textContent = 'Panel Vendedor';
+      document.getElementById('vendorDashboard').style.display = 'block';
+      loadStats();
+    }
+
+    // -------------------- CLIENT APPLICATION LOGIC --------------------
+    let solImagenesBase64 = [];
+
+    async function loadClientApplication() {
+      let r = await API.get('/solicitudes.php?mine=1', true);
+      if (!r.success) return showError('msg', r);
+      
+      let sol = r.data;
+      if (sol) {
+        document.getElementById('solId').value = sol.id;
+        document.getElementById('solNombreTienda').value = sol.nombre_tienda || '';
+        document.getElementById('solRubro').value = sol.rubro || '';
+        document.getElementById('solDescripcion').value = sol.descripcion || '';
+        document.getElementById('solWhatsapp').value = sol.whatsapp || '';
+        document.getElementById('solInstagram').value = sol.instagram || '';
+
+        try {
+          solImagenesBase64 = JSON.parse(sol.imagenes) || [];
+        } catch(e) {
+          solImagenesBase64 = [];
+        }
+
+        // Manejar visualización de estados
+        if (sol.estado === 'pendiente') {
+          document.getElementById('solPendingAlert').style.display = 'block';
+          // Desactivar formulario y ocultar botón de envío
+          disableApplicationForm(true);
+          document.getElementById('solSubmitBtn').style.display = 'none';
+          renderImagenesPreview(true);
+        } else if (sol.estado === 'correcion') {
+          document.getElementById('solCorrectionAlert').style.display = 'block';
+          document.getElementById('solCorrectionComments').textContent = sol.comentarios_admin || 'Sin comentarios específicos.';
+          document.getElementById('solSubmitBtn').textContent = 'Enviar Correcciones';
+          renderImagenesPreview(false);
+        } else if (sol.estado === 'rechazado') {
+          document.getElementById('solRejectedAlert').style.display = 'block';
+          document.getElementById('solRejectedComments').textContent = sol.comentarios_admin || 'Sin comentarios.';
+          document.getElementById('solSubmitBtn').textContent = 'Reenviar Postulación';
+          renderImagenesPreview(false);
+        }
+      } else {
+        renderImagenesPreview(false);
+      }
+    }
+
+    function renderImagenesPreview(disabled) {
+      const preview = document.getElementById('solImagenesPreview');
+      preview.innerHTML = solImagenesBase64.map((img, idx) => {
+        let src = getImgUrl(img, 2);
+        return `
+          <div class="position-relative border rounded-3 overflow-hidden bg-white shadow-sm" style="width: 100px; height: 100px;">
+            <img src="${src}" class="w-100 h-100" style="object-fit: cover;">
+            ${!disabled ? `
+              <button type="button" class="btn btn-danger btn-sm p-0 d-flex align-items-center justify-content-center position-absolute top-0 end-0 m-1 rounded-circle" style="width: 22px; height: 22px; font-size: 10px;" onclick="removeSolImage(${idx})">
+                <i class="bi bi-trash"></i>
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function removeSolImage(idx) {
+      solImagenesBase64.splice(idx, 1);
+      renderImagenesPreview(false);
+    }
+
+    document.getElementById('solImagenes').onchange = function(e) {
+      let files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      
+      let count = files.length;
+      let loaded = 0;
+      
+      files.forEach(file => {
+        let reader = new FileReader();
+        reader.onload = function(evt) {
+          let img = new Image();
+          img.onload = function() {
+            // Redimensionar la imagen a máximo 800px para evitar payloads gigantescos
+            let canvas = document.createElement('canvas');
+            let max_size = 800;
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > height) {
+              if (width > max_size) {
+                height *= max_size / width;
+                width = max_size;
+              }
+            } else {
+              if (height > max_size) {
+                width *= max_size / height;
+                height = max_size;
+              }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            let ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Generar string Base64 liviano (calidad 80%)
+            let dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            solImagenesBase64.push(dataUrl);
+            
+            loaded++;
+            if (loaded === count) {
+              renderImagenesPreview(false);
+              document.getElementById('solImagenes').value = '';
+            }
+          };
+          img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    };
+
+    function disableApplicationForm(val) {
+      document.getElementById('solNombreTienda').disabled = val;
+      document.getElementById('solRubro').disabled = val;
+      document.getElementById('solDescripcion').disabled = val;
+      document.getElementById('solWhatsapp').disabled = val;
+      document.getElementById('solInstagram').disabled = val;
+      document.getElementById('solImagenes').disabled = val;
+    }
+
+    document.getElementById('solForm').onsubmit = async e => {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('solSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...`;
+
+      let d = {
+        nombre_tienda: document.getElementById('solNombreTienda').value.trim(),
+        rubro: document.getElementById('solRubro').value.trim(),
+        descripcion: document.getElementById('solDescripcion').value.trim(),
+        whatsapp: document.getElementById('solWhatsapp').value.trim(),
+        instagram: document.getElementById('solInstagram').value.trim(),
+        imagenes: solImagenesBase64
+      };
+
+      let solId = document.getElementById('solId').value;
+      let r;
+
+      if (solId) {
+        // Si ya tiene registro y es una edición (corrección o rechazo)
+        r = await API.put('/solicitudes.php?id=' + solId, d);
+      } else {
+        // Si es postulación de primera vez
+        r = await API.post('/solicitudes.php', d, true);
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = solId ? 'Enviar Correcciones' : 'Enviar Solicitud de Vendedor';
+
+      if (!r.success) {
+        alert(r.message);
+        return;
+      }
+
+      alert('¡Tu solicitud ha sido enviada correctamente al administrador!');
+      location.href = '../index.html';
+    };
+
+    // -------------------- VENDOR DASHBOARD LOGIC --------------------
+    async function loadStats() {
+      let [ordersRes, productsRes] = await Promise.all([
+        API.get('/pedidos.php', true),
+        API.get('/productos.php?mine=1', true)
+      ]);
+
+      if (ordersRes.success) {
+        let orders = ordersRes.data || [];
+        let totalRevenue = 0;
+        let pending = 0;
+
+        orders.forEach(o => {
+          if (o.estado !== 'cancelado') {
+            totalRevenue += Number(o.total);
+          }
+          if (o.estado === 'nuevo' || o.estado === 'confirmado' || o.estado === 'preparacion') {
+            pending++;
+          }
+        });
+
+        document.getElementById('kpiRevenue').textContent = money(totalRevenue);
+        document.getElementById('kpiOrders').textContent = orders.length;
+        document.getElementById('kpiPendingOrders').textContent = `${pending} pendientes`;
+      }
+
+      if (productsRes.success) {
+        let products = productsRes.data || [];
+        let active = products.filter(p => p.activo == 1).length;
+
+        document.getElementById('kpiProducts').textContent = products.length;
+        document.getElementById('kpiActiveProducts').textContent = `${active} activos`;
+      }
+    }
+  </script>
+</body>
+</html>

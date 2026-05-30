@@ -1,0 +1,1129 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi Tienda - Panel Vendedor</title>
+  
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Custom Style -->
+  <link href="../assets/css/style.css" rel="stylesheet">
+  <!-- Cropper.js CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
+
+  <style>
+    /* Premium Inline Editor Styles */
+    .edit-overlay-btn {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #2c2420;
+      font-size: 0.8rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      border-radius: 50px;
+      padding: 0.45rem 0.9rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+    .edit-overlay-btn:hover {
+      background: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+      color: #af4220;
+    }
+    .logo-container-relative {
+      position: relative;
+      display: inline-block;
+    }
+    .logo-edit-btn {
+      position: absolute;
+      bottom: 0px;
+      right: 0px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid #fff;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+    }
+    
+    /* Mockup design overrides */
+    .mockup-header-wrapper {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 2rem;
+    }
+    .banner-edit-container {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 10;
+    }
+    .styles-edit-badge {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+    .product-mock-card {
+      border: 1px solid rgba(0,0,0,0.06);
+      transition: transform 0.2s ease;
+    }
+    .product-mock-card:hover {
+      transform: translateY(-4px);
+    }
+    
+    /* Sticky Save Actions Bar */
+    .actions-sticky-bar {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-md-3 col-lg-2 side p-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+          <span class="brand-logo mb-0">AS</span>
+          <h5 class="mb-0 side-title">Artesanías Sur</h5>
+        </div>
+        <div class="small text-white-50 mb-4 px-2 border-bottom border-secondary pb-3">
+          <i class="bi bi-person-circle text-accent"></i> <span id="userBox">Cargando...</span>
+        </div>
+        <nav class="nav flex-column">
+          <a href="dashboard.html"><i class="bi bi-speedometer2"></i> Inicio</a>
+          <a href="tienda.html" class="active"><i class="bi bi-palette"></i> Diseño de tienda</a>
+          <a href="productos.html"><i class="bi bi-grid"></i> Productos</a>
+          <a href="ventas.html"><i class="bi bi-currency-dollar"></i> Ventas</a>
+          <hr class="text-white-50">
+          <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
+          <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-10 p-4 bg-light" style="min-height: 100vh;">
+        
+        <!-- Sticky Save Actions Bar -->
+        <div class="actions-sticky-bar d-flex flex-wrap justify-content-between align-items-center p-3 mb-4 gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="bg-primary bg-opacity-10 text-primary p-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+              <i class="bi bi-sliders"></i>
+            </span>
+            <div>
+              <h5 class="fw-bold mb-0 text-dark" style="font-size: 1.05rem;">Editor Visual de Tienda</h5>
+              <span class="text-muted small">Vista Previa Interactiva Inline</span>
+            </div>
+          </div>
+          
+          <div class="d-flex gap-2">
+            <a id="viewPublicStoreLink" href="#" target="_blank" class="btn btn-outline-dark btn-sm px-3 rounded-pill fw-bold d-flex align-items-center gap-1">
+              <i class="bi bi-globe"></i> Ver Tienda
+            </a>
+            <button type="button" class="btn btn-outline-secondary btn-sm px-3 rounded-pill fw-bold" onclick="discardChanges()">
+              <i class="bi bi-arrow-counterclockwise"></i> Descartar
+            </button>
+            <button type="button" class="btn btn-dark btn-sm px-4 rounded-pill fw-bold shadow-sm" id="btnSubmit" onclick="saveChanges()">
+              <i class="bi bi-check-lg"></i> Guardar Cambios
+            </button>
+          </div>
+        </div>
+        
+        <div id="msg"></div>
+
+        <!-- MOCKUP CANVAS (PÁGINA PÚBLICA INTEGRADA) -->
+        <div class="mockup-header-wrapper" id="storeHeaderMockup">
+          
+          <!-- Banner Edit Button Overlay -->
+          <div class="banner-edit-container">
+            <button class="btn btn-sm edit-overlay-btn" onclick="openFilePicker('banner')">
+              <i class="bi bi-camera"></i> Editar Portada
+            </button>
+          </div>
+          
+          <header class="py-5 text-white" style="background: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.7));">
+            <div class="container py-3">
+              <div class="row align-items-center g-4">
+                
+                <!-- Logo with overlay edit button -->
+                <div class="col-md-3 text-center text-md-start">
+                  <div class="logo-container-relative">
+                    <img id="logoPreviewMockup" src="" class="rounded-circle shadow border border-3 border-white" style="width: 150px; height: 150px; object-fit: cover;">
+                    <button class="btn logo-edit-btn" onclick="openFilePicker('logo')" title="Editar Foto de Perfil">
+                      <i class="bi bi-camera-fill text-dark" style="font-size: 1.1rem;"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Store Info & Text Editor Overlay -->
+                <div class="col-md-9 text-center text-md-start position-relative">
+                  <div class="d-flex align-items-center justify-content-center justify-content-md-start mb-2 gap-2">
+                    <span id="rubroMockup" class="badge text-bg-warning rounded-pill py-2 px-3 text-uppercase fw-bold">Cargando...</span>
+                    <button class="btn btn-sm edit-overlay-btn py-1 px-2" onclick="openEditInfoModal()" style="font-size: 0.75rem;">
+                      <i class="bi bi-pencil-fill"></i> Editar Información
+                    </button>
+                  </div>
+                  
+                  <h1 id="nombreMockup" class="display-5 fw-bold mb-2">Cargando Nombre...</h1>
+                  <p id="descripcionMockup" class="lead mb-4 text-white-50" style="font-size: 0.95rem;">Cargando descripción detallada de tu local...</p>
+                  
+                  <div class="d-flex justify-content-center justify-content-md-start flex-wrap gap-2">
+                    <button id="whatsappBtnMockup" class="btn btn-success d-inline-flex align-items-center gap-2 rounded-3 me-2" disabled>
+                      <i class="bi bi-whatsapp"></i> WhatsApp
+                    </button>
+                    <button id="instagramBtnMockup" class="btn btn-outline-light d-inline-flex align-items-center gap-2 rounded-3" disabled>
+                      <i class="bi bi-instagram"></i> Instagram
+                    </button>
+                    <button class="btn btn-sm edit-overlay-btn" onclick="openEditContactModal()">
+                      <i class="bi bi-telephone-fill"></i> Editar Enlaces
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </header>
+        </div>
+
+        <!-- MUESTRA DE DISEÑO DE CATÁLOGO (INTEGRACIÓN REAL) -->
+        <div class="card border-0 rounded-4 shadow-sm" id="catalogMockup">
+          <div class="card-body p-4">
+            
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4 flex-wrap gap-3">
+              <div>
+                <span class="badge bg-primary bg-opacity-10 text-primary mb-1 styles-edit-badge"><i class="bi bi-stars"></i> Muestra de tu Catálogo</span>
+                <h4 class="fw-bold mb-0 text-dark">Estilos de tus Productos</h4>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm edit-overlay-btn border-secondary-subtle px-3 d-flex align-items-center gap-1" onclick="openAddProductModal()">
+                  <i class="bi bi-plus-lg text-success"></i> Agregar Producto
+                </button>
+                <button class="btn btn-sm edit-overlay-btn border-secondary-subtle px-3 d-flex align-items-center gap-1" onclick="openEditStylesModal()">
+                  <i class="bi bi-palette-fill text-danger"></i> Personalizar Colores y Fuentes
+                </button>
+              </div>
+            </div>
+            
+            <!-- Category Chips Preview -->
+            <div class="d-flex gap-2 mb-4 overflow-hidden" id="mockupCategoryChips">
+              <!-- Dynamically populated -->
+            </div>
+            
+            <!-- Grid of Mock Products -->
+            <div class="row g-4" id="mockupProductsGrid">
+              <!-- Dynamically populated -->
+            </div>
+
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Hidden inputs for file loaders -->
+  <input type="file" id="logoFileInput" class="d-none" accept="image/*">
+  <input type="file" id="bannerFileInput" class="d-none" accept="image/*">
+  <input type="file" id="prodFileInput" class="d-none" accept="image/*">
+  <input type="hidden" id="id">
+
+  <!-- MODAL: INFO -->
+  <div class="modal fade" id="modalEditInfo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4">
+        <div class="modal-header border-bottom pb-2">
+          <h5 class="modal-title fw-bold"><i class="bi bi-info-circle text-primary"></i> Editar Información</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Nombre de la Tienda</label>
+            <input type="text" id="inputNombre" class="form-control rounded-3" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Rubro / Especialidad</label>
+            <input type="text" id="inputRubro" class="form-control rounded-3" required placeholder="Ej: Madera, Cerámica">
+          </div>
+          <div class="mb-2">
+            <label class="form-label fw-bold small">Descripción</label>
+            <textarea id="inputDescripcion" class="form-control rounded-3" rows="4" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-top pt-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-dark btn-sm rounded-pill px-3" onclick="applyInfoDraft()">Aplicar Borrador</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONTACT -->
+  <div class="modal fade" id="modalEditContact" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4">
+        <div class="modal-header border-bottom pb-2">
+          <h5 class="modal-title fw-bold"><i class="bi bi-telephone-fill text-success"></i> Editar Contactos</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-bold small">WhatsApp de Contacto</label>
+            <input type="text" id="inputWhatsapp" class="form-control rounded-3" placeholder="Ej: 5492944123456">
+            <div class="form-text text-muted">Incluye código de país + código de área + número sin espacios ni signos +.</div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label fw-bold small">Usuario de Instagram</label>
+            <div class="input-group rounded-3 overflow-hidden">
+              <span class="input-group-text">@</span>
+              <input type="text" id="inputInstagram" class="form-control" placeholder="ejemplo.artesanias">
+            </div>
+            <div class="form-text text-muted">Sólo el nombre del usuario, sin el signo @.</div>
+          </div>
+        </div>
+        <div class="modal-footer border-top pt-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-dark btn-sm rounded-pill px-3" onclick="applyContactDraft()">Aplicar Borrador</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: STYLES -->
+  <div class="modal fade" id="modalEditStyles" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4">
+        <div class="modal-header border-bottom pb-2">
+          <h5 class="modal-title fw-bold"><i class="bi bi-palette-fill text-danger"></i> Colores y Tipografía</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Color Principal</label>
+            <div class="d-flex align-items-center gap-2 border p-2 rounded-3 bg-light">
+              <input type="color" id="inputColorPrimary" class="form-control form-control-color border-0 p-0" style="width:42px; height:32px; border-radius:6px; cursor:pointer;">
+              <code id="textHexPrimary" class="fw-bold text-dark">#af4220</code>
+            </div>
+            <div class="form-text">Para badges de rubro y precio de los productos.</div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Color de Botones</label>
+            <div class="d-flex align-items-center gap-2 border p-2 rounded-3 bg-light">
+              <input type="color" id="inputColorButton" class="form-control form-control-color border-0 p-0" style="width:42px; height:32px; border-radius:6px; cursor:pointer;">
+              <code id="textHexButton" class="fw-bold text-dark">#dfa84a</code>
+            </div>
+            <div class="form-text">Fondo para los botones de compra e interacción.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Color de Títulos</label>
+            <div class="d-flex align-items-center gap-2 border p-2 rounded-3 bg-light">
+              <input type="color" id="inputColorText" class="form-control form-control-color border-0 p-0" style="width:42px; height:32px; border-radius:6px; cursor:pointer;">
+              <code id="textHexText" class="fw-bold text-dark">#2c2420</code>
+            </div>
+            <div class="form-text">Color de fuente de los títulos de la tienda y productos.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Tipografía</label>
+            <select id="selectFontFamily" class="form-select rounded-3">
+              <option value="inherit">Por defecto (System font)</option>
+              <option value="Outfit">Outfit</option>
+              <option value="Montserrat">Montserrat</option>
+              <option value="Poppins">Poppins</option>
+              <option value="Lora">Lora</option>
+              <option value="Merriweather">Merriweather</option>
+              <option value="Playfair Display">Playfair Display</option>
+              <option value="Roboto">Roboto</option>
+              <option value="Raleway">Raleway</option>
+              <option value="Nunito">Nunito</option>
+              <option value="Quicksand">Quicksand</option>
+            </select>
+          </div>
+          
+          <div class="mt-2 border-top pt-3 text-center">
+            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill w-100 fw-bold" onclick="resetStylesDraft()">
+              <i class="bi bi-arrow-counterclockwise"></i> Restablecer Valores de Fábrica
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer border-top pt-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-dark btn-sm rounded-pill px-3" onclick="applyStylesDraft()">Aplicar Borrador</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD/EDIT PRODUCT (FASE 5D) -->
+  <div class="modal fade" id="modalEditProduct" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header border-bottom pb-2">
+          <h5 class="modal-title fw-bold" id="productModalTitle"><i class="bi bi-box-seam text-primary"></i> Agregar Producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formProduct" class="row g-3">
+            <input type="hidden" id="prodId">
+            
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-dark">Nombre del Producto</label>
+              <input id="prodNombre" class="form-control rounded-3" placeholder="Ej: Plato Rústico Cerámica" required>
+            </div>
+            
+            <div class="col-md-3">
+              <label class="form-label fw-bold small text-dark">Precio ($)</label>
+              <input id="prodPrecio" type="number" step="0.01" class="form-control rounded-3" placeholder="0.00" required>
+            </div>
+            
+            <div class="col-md-3">
+              <label class="form-label fw-bold small text-dark">Stock</label>
+              <input id="prodStock" type="number" class="form-control rounded-3" placeholder="Cantidad" required>
+            </div>
+            
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-dark">Categoría</label>
+              <select id="prodCategoriaId" class="form-select rounded-3" required>
+                <!-- Categorías pobladas vía JS -->
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-dark">Imagen del Producto</label>
+              <div class="input-group">
+                <input id="prodImagen" class="form-control rounded-start-3" placeholder="URL o Archivo subido..." readonly>
+                <button type="button" class="btn btn-outline-dark" onclick="openFilePicker('product')">
+                  <i class="bi bi-file-earmark-arrow-up"></i> Explorar
+                </button>
+              </div>
+              <!-- Thumbnail Preview -->
+              <div class="mt-2" style="display: none;" id="prodImagenPreviewContainer">
+                <span class="text-muted small d-block mb-1">Previsualización de recorte:</span>
+                <img id="prodImagenPreview" src="" class="img-thumbnail" style="max-height: 100px; object-fit: cover;">
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <label class="form-label fw-bold small text-dark">Descripción</label>
+              <textarea id="prodDescripcion" class="form-control rounded-3" rows="3" placeholder="Breve descripción del producto y sus materiales..."></textarea>
+            </div>
+            
+            <div class="col-12 d-flex flex-wrap gap-4 align-items-center mt-3">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="prodOferta">
+                <label class="form-check-label fw-bold small" for="prodOferta">Colocar en Oferta</label>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="prodDestacado">
+                <label class="form-check-label fw-bold small" for="prodDestacado">Destacar Producto</label>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="prodActivo" checked>
+                <label class="form-check-label fw-bold small" for="prodActivo">Producto Activo / Visible</label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-top pt-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-dark btn-sm rounded-pill px-3" id="btnSaveProduct" onclick="saveProductForm()">Guardar Producto</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CROPPER MODAL (SHARED) -->
+  <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 rounded-4">
+        <div class="modal-header border-bottom pb-2">
+          <h5 class="modal-title fw-bold" id="cropperModalTitle"><i class="bi bi-crop text-primary"></i> Ajustar Imagen</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-3 text-center">
+          <div class="img-container" style="max-height: 450px; overflow: hidden; background: #f8f9fa; border-radius: 8px;">
+            <img id="cropperImage" style="max-width: 100%; display: block;">
+          </div>
+        </div>
+        <div class="modal-footer border-top pt-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-dark btn-sm rounded-pill px-3" id="cropperConfirmBtn">Confirmar y Recortar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+
+  <!-- Page Logic -->
+  <script>
+    Auth.role(['vendedor','admin']);
+    Auth.paint();
+
+    // Local Draft State
+    let draftState = {
+      nombre: '',
+      rubro: '',
+      descripcion: '',
+      imagen: '',
+      banner: '',
+      whatsapp: '',
+      instagram: '',
+      config_diseno: {
+        style_primary_color: '#af4220',
+        style_button_color: '#dfa84a',
+        style_text_color: '#2c2420',
+        style_font_family: 'Outfit'
+      }
+    };
+
+    // Original State Cached for resets
+    let savedState = null;
+
+    // Apply local draftState directly to the current DOM elements for real-time preview
+    function applyDraftToDOM() {
+      // Texts
+      document.getElementById('nombreMockup').textContent = draftState.nombre || 'Sin nombre';
+      document.getElementById('rubroMockup').textContent = draftState.rubro || 'General';
+      document.getElementById('descripcionMockup').textContent = draftState.descripcion || 'Bienvenido a mi tienda.';
+      
+      // WhatsApp Button
+      const waBtn = document.getElementById('whatsappBtnMockup');
+      if (draftState.whatsapp) {
+        waBtn.style.display = 'inline-flex';
+      } else {
+        waBtn.style.display = 'none';
+      }
+
+      // Instagram Button
+      const igBtn = document.getElementById('instagramBtnMockup');
+      if (draftState.instagram) {
+        igBtn.style.display = 'inline-flex';
+      } else {
+        igBtn.style.display = 'none';
+      }
+
+      // Logo Image
+      const logoEl = document.getElementById('logoPreviewMockup');
+      if (draftState.imagen) {
+        let url = getImgUrl(draftState.imagen, 2);
+        if (!draftState.imagen.startsWith('data:')) {
+          url += '?t=' + new Date().getTime();
+        }
+        logoEl.src = url;
+      } else {
+        logoEl.src = 'https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=800&q=80';
+      }
+
+      // Banner Cover
+      const bannerEl = document.getElementById('storeHeaderMockup');
+      if (draftState.banner) {
+        let url = getImgUrl(draftState.banner, 2);
+        if (!draftState.banner.startsWith('data:')) {
+          url += '?t=' + new Date().getTime();
+        }
+        bannerEl.style.backgroundImage = `url('${url}')`;
+        bannerEl.style.backgroundSize = 'cover';
+        bannerEl.style.backgroundPosition = 'center';
+      } else {
+        bannerEl.style.backgroundImage = `url('https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1600&q=80')`;
+        bannerEl.style.backgroundSize = 'cover';
+        bannerEl.style.backgroundPosition = 'center';
+      }
+
+      // CSS Variables for styling previews
+      let styleEl = document.getElementById('dynamicStoreStyles');
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'dynamicStoreStyles';
+        document.head.appendChild(styleEl);
+      }
+
+      const styles = draftState.config_diseno;
+      const primary = styles.style_primary_color || '#af4220';
+      const button = styles.style_button_color || '#dfa84a';
+      const text = styles.style_text_color || '#2c2420';
+      const font = styles.style_font_family || 'Outfit';
+
+      // Load Google Fonts link dynamically
+      if (font && font !== 'inherit') {
+        const fontId = 'gfont-' + font.replace(/\s+/g, '-').toLowerCase();
+        if (!document.getElementById(fontId)) {
+          const link = document.createElement('link');
+          link.id = fontId;
+          link.rel = 'stylesheet';
+          link.href = `https://fonts.googleapis.com/css2?family=${font.replace(/\s+/g, '+')}:wght@300;400;500;600;700;800&display=swap`;
+          document.head.appendChild(link);
+        }
+      }
+
+      const serifFonts = ['Lora', 'Merriweather', 'Playfair Display'];
+      const generic = serifFonts.includes(font) ? 'serif' : 'sans-serif';
+      const fontDeclaration = font === 'inherit' ? 'inherit' : `'${font}', ${generic}`;
+
+      let btnTextColor = '#ffffff';
+      if (button.length >= 7) {
+        let r = parseInt(button.substring(1,3), 16);
+        let g = parseInt(button.substring(3,5), 16);
+        let b = parseInt(button.substring(5,7), 16);
+        let yiq = ((r*299)+(g*587)+(b*114))/1000;
+        btnTextColor = (yiq >= 128) ? '#2c2420' : '#ffffff';
+      }
+
+      styleEl.innerHTML = `
+        #catalogMockup, #storeHeaderMockup, #storeHeaderMockup p, #storeHeaderMockup button, #storeHeaderMockup span {
+          font-family: ${fontDeclaration} !important;
+        }
+        #nombreMockup, .mockup-title-text {
+          font-family: ${fontDeclaration} !important;
+          color: ${text} !important;
+        }
+        #rubroMockup {
+          background-color: ${primary} !important;
+          color: #ffffff !important;
+        }
+        .mockup-category-chip.active {
+          background-color: ${primary} !important;
+          border-color: ${primary} !important;
+          color: #ffffff !important;
+        }
+        .mockup-price-text {
+          color: ${primary} !important;
+        }
+        .mockup-btn {
+          background-color: ${button} !important;
+          border-color: ${button} !important;
+          color: ${btnTextColor} !important;
+        }
+      `;
+    }
+
+    // Modal Info: Open & Apply
+    function openEditInfoModal() {
+      document.getElementById('inputNombre').value = draftState.nombre;
+      document.getElementById('inputRubro').value = draftState.rubro;
+      document.getElementById('inputDescripcion').value = draftState.descripcion;
+      new bootstrap.Modal(document.getElementById('modalEditInfo')).show();
+    }
+
+    function applyInfoDraft() {
+      draftState.nombre = document.getElementById('inputNombre').value.trim();
+      draftState.rubro = document.getElementById('inputRubro').value.trim();
+      draftState.descripcion = document.getElementById('inputDescripcion').value.trim();
+      
+      applyDraftToDOM();
+      bootstrap.Modal.getInstance(document.getElementById('modalEditInfo')).hide();
+    }
+
+    // Modal Contact: Open & Apply
+    function openEditContactModal() {
+      document.getElementById('inputWhatsapp').value = draftState.whatsapp;
+      document.getElementById('inputInstagram').value = draftState.instagram;
+      new bootstrap.Modal(document.getElementById('modalEditContact')).show();
+    }
+
+    function applyContactDraft() {
+      draftState.whatsapp = document.getElementById('inputWhatsapp').value.trim();
+      draftState.instagram = document.getElementById('inputInstagram').value.trim();
+      
+      applyDraftToDOM();
+      bootstrap.Modal.getInstance(document.getElementById('modalEditContact')).hide();
+    }
+
+    // Modal Styles: Open & Apply
+    function openEditStylesModal() {
+      const styles = draftState.config_diseno;
+      
+      document.getElementById('inputColorPrimary').value = styles.style_primary_color || '#af4220';
+      document.getElementById('textHexPrimary').textContent = styles.style_primary_color || '#af4220';
+
+      document.getElementById('inputColorButton').value = styles.style_button_color || '#dfa84a';
+      document.getElementById('textHexButton').textContent = styles.style_button_color || '#dfa84a';
+
+      document.getElementById('inputColorText').value = styles.style_text_color || '#2c2420';
+      document.getElementById('textHexText').textContent = styles.style_text_color || '#2c2420';
+
+      document.getElementById('selectFontFamily').value = styles.style_font_family || 'Outfit';
+
+      // Link pickers change events
+      document.getElementById('inputColorPrimary').oninput = e => document.getElementById('textHexPrimary').textContent = e.target.value;
+      document.getElementById('inputColorButton').oninput = e => document.getElementById('textHexButton').textContent = e.target.value;
+      document.getElementById('inputColorText').oninput = e => document.getElementById('textHexText').textContent = e.target.value;
+
+      new bootstrap.Modal(document.getElementById('modalEditStyles')).show();
+    }
+
+    function applyStylesDraft() {
+      draftState.config_diseno.style_primary_color = document.getElementById('inputColorPrimary').value;
+      draftState.config_diseno.style_button_color = document.getElementById('inputColorButton').value;
+      draftState.config_diseno.style_text_color = document.getElementById('inputColorText').value;
+      draftState.config_diseno.style_font_family = document.getElementById('selectFontFamily').value;
+      
+      applyDraftToDOM();
+      bootstrap.Modal.getInstance(document.getElementById('modalEditStyles')).hide();
+    }
+
+    function resetStylesDraft() {
+      if (confirm('¿Deseas restablecer los colores y la fuente del borrador a los valores rústicos de fábrica?')) {
+        document.getElementById('inputColorPrimary').value = '#af4220';
+        document.getElementById('textHexPrimary').textContent = '#af4220';
+
+        document.getElementById('inputColorButton').value = '#dfa84a';
+        document.getElementById('textHexButton').textContent = '#dfa84a';
+
+        document.getElementById('inputColorText').value = '#2c2420';
+        document.getElementById('textHexText').textContent = '#2c2420';
+
+        document.getElementById('selectFontFamily').value = 'Outfit';
+      }
+    }
+
+    // Real products array
+    let realProducts = [];
+
+    // Render products catalog dynamically in the visual preview
+    function renderCatalogMockup() {
+      const chipsEl = document.getElementById('mockupCategoryChips');
+      const gridEl = document.getElementById('mockupProductsGrid');
+      
+      if (!gridEl) return;
+
+      if (!realProducts || realProducts.length === 0) {
+        if (chipsEl) chipsEl.style.display = 'none';
+        gridEl.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <div class="mb-3">
+              <span class="bg-light p-4 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; border: 1px dashed rgba(0,0,0,0.15);">
+                <i class="bi bi-box-seam text-muted" style="font-size: 2.2rem;"></i>
+              </span>
+            </div>
+            <h5 class="fw-bold text-dark mb-2 font-title">Todavía no cargaste productos</h5>
+            <p class="text-muted small mb-4">Sube tus artesanías para que tus clientes puedan verlas y comprarlas.</p>
+            <button type="button" onclick="openAddProductModal()" class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm font-body">
+              <i class="bi bi-plus-lg me-1"></i> Agregar tu primer producto
+            </button>
+          </div>
+        `;
+        return;
+      }
+      
+      if (chipsEl) {
+        chipsEl.style.display = 'flex';
+        // Category Chips: extract unique category names
+        const categories = ['Todos', ...new Set(realProducts.map(p => p.categoria).filter(Boolean))];
+        chipsEl.innerHTML = categories.map((cat, idx) => `
+          <button class="btn btn-sm rounded-pill px-3 py-1.5 ${idx === 0 ? 'active mockup-category-chip' : 'btn-outline-secondary'}" disabled>${cat}</button>
+        `).join('');
+      }
+      
+      // Grid of Real Products (up to 3 for visual preview)
+      const displayProducts = realProducts.slice(0, 3);
+      
+      gridEl.innerHTML = displayProducts.map(p => {
+        const img = getImgUrl(p.imagen, 2);
+        
+        const statusBadge = p.activo == 1 
+          ? '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill" style="font-size:0.7rem;">Activo</span>'
+          : '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill" style="font-size:0.7rem;">Pausado</span>';
+        
+        const offerBadge = p.oferta == 1 
+          ? '<span class="badge bg-danger rounded-pill" style="font-size:0.7rem;">Oferta</span>' 
+          : '';
+        
+        const destBadge = p.destacado == 1 
+          ? '<span class="badge bg-warning text-dark rounded-pill" style="font-size:0.7rem;">Destacado</span>' 
+          : '';
+          
+        return `
+          <div class="col-md-4 col-sm-6">
+            <div class="card h-100 product-mock-card border-0 shadow-sm rounded-4 overflow-hidden position-relative">
+              <img src="${img}" class="card-img-top" style="height: 150px; object-fit: cover;">
+              <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-1">
+                ${statusBadge}
+                ${offerBadge}
+                ${destBadge}
+              </div>
+              <div class="card-body p-3 d-flex flex-column justify-content-between">
+                <div>
+                  <h6 class="fw-bold mb-1 mockup-title-text text-truncate" title="${p.nombre}">${p.nombre}</h6>
+                  <p class="text-muted small mb-2 text-truncate">${p.descripcion || 'Sin descripción'}</p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <span class="fw-bold mockup-price-text">${money(p.precio)}</span>
+                  <div class="d-flex gap-1 align-items-center">
+                    <button type="button" onclick="openEditProductModal(${p.id})" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 py-1 d-flex align-items-center gap-1 font-body" style="font-size: 0.75rem;">
+                      <i class="bi bi-pencil"></i> Editar
+                    </button>
+                    <button class="btn btn-sm btn-dark mockup-btn" disabled><i class="bi bi-plus-lg"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      if (realProducts.length > 3) {
+        gridEl.innerHTML += `
+          <div class="col-12 text-center mt-2">
+            <span class="text-muted small font-body">Mostrando 3 de ${realProducts.length} productos. </span>
+            <a href="productos.html" class="text-decoration-none small fw-bold text-primary font-body">Gestionar todos los productos <i class="bi bi-arrow-right"></i></a>
+          </div>
+        `;
+      }
+    }
+
+    // Global variable for categories
+    let categoriesList = [];
+
+    // Load original store state
+    async function load() {
+      // Fetch store config, seller products, and categories concurrently
+      let [resStore, resProds, resCats] = await Promise.all([
+        API.get('/tiendas.php?mine=1', true),
+        API.get('/productos.php?mine=1', true),
+        API.get('/categorias.php', true)
+      ]);
+      
+      if (!resStore.success) return showError('msg', resStore);
+      
+      let t = resStore.data || {};
+      
+      // Load saved state values
+      draftState = {
+        nombre: t.nombre || '',
+        rubro: t.rubro || '',
+        descripcion: t.descripcion || '',
+        imagen: t.imagen || '',
+        banner: t.banner || '',
+        whatsapp: t.whatsapp || '',
+        instagram: t.instagram || '',
+        config_diseno: t.config_diseno || {
+          style_primary_color: '#af4220',
+          style_button_color: '#dfa84a',
+          style_text_color: '#2c2420',
+          style_font_family: 'Outfit'
+        }
+      };
+
+      const hiddenIdEl = document.getElementById('id');
+      if (hiddenIdEl) hiddenIdEl.value = t.id || '';
+      
+      // Cache savedState for discard
+      savedState = JSON.parse(JSON.stringify(draftState));
+      
+      const viewLink = document.getElementById('viewPublicStoreLink');
+      if (viewLink && t.id) {
+        viewLink.href = `../tienda.html?id=${t.id}`;
+      }
+
+      // Store real products loaded from the server
+      realProducts = resProds.success ? (resProds.data || []) : [];
+
+      // Store categories and populate selector
+      categoriesList = resCats.success ? (resCats.data || []) : [];
+      const prodCatSelect = document.getElementById('prodCategoriaId');
+      if (prodCatSelect) {
+        prodCatSelect.innerHTML = '<option value="">Selecciona una categoría...</option>' + 
+          categoriesList.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+      }
+
+      applyDraftToDOM();
+      renderCatalogMockup();
+    }
+
+    // Discard draft state changes and reload
+    function discardChanges() {
+      if (confirm('¿Estás seguro de que deseas descartar los cambios sin guardar y restablecer tu diseño al último guardado?')) {
+        draftState = JSON.parse(JSON.stringify(savedState));
+        applyDraftToDOM();
+        alert('Se han descartado los cambios locales.');
+      }
+    }
+
+    // Save final changes via PUT to tiendas.php
+    async function saveChanges() {
+      const submitBtn = document.getElementById('btnSubmit');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`;
+
+      const hiddenIdEl = document.getElementById('id');
+      const hiddenId = hiddenIdEl ? hiddenIdEl.value : '';
+      let r = await API.put('/tiendas.php?id=' + hiddenId, {
+        nombre: draftState.nombre,
+        rubro: draftState.rubro,
+        descripcion: draftState.descripcion,
+        imagen: draftState.imagen,
+        banner: draftState.banner,
+        whatsapp: draftState.whatsapp,
+        instagram: draftState.instagram,
+        config_diseno: draftState.config_diseno
+      });
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<i class="bi bi-check-lg"></i> Guardar Cambios`;
+
+      if (!r.success) {
+        return alert(r.message);
+      }
+      
+      alert('¡Tus cambios de diseño e información han sido guardados con éxito!');
+      load();
+    }
+
+    // Image Upload & Crop logic
+    let cropper = null;
+    let cropperModal = null;
+    let activeCropType = 'logo'; // 'logo' | 'banner'
+
+    function openFilePicker(type) {
+      if (type === 'logo') {
+        document.getElementById('logoFileInput').click();
+      } else if (type === 'banner') {
+        document.getElementById('bannerFileInput').click();
+      } else if (type === 'product') {
+        document.getElementById('prodFileInput').click();
+      }
+    }
+
+    document.getElementById('logoFileInput').onchange = function(e) {
+      handleFileSelect(e.target.files[0], 'logo');
+    };
+
+    document.getElementById('bannerFileInput').onchange = function(e) {
+      handleFileSelect(e.target.files[0], 'banner');
+    };
+
+    document.getElementById('prodFileInput').onchange = function(e) {
+      handleFileSelect(e.target.files[0], 'product');
+    };
+
+    function handleFileSelect(file, type) {
+      if (!file) return;
+      activeCropType = type;
+      
+      let reader = new FileReader();
+      reader.onload = function(evt) {
+        let cropImg = document.getElementById('cropperImage');
+        cropImg.onload = null;
+        cropImg.src = evt.target.result;
+        
+        const modalTitle = document.getElementById('cropperModalTitle');
+        if (modalTitle) {
+          if (type === 'logo') {
+            modalTitle.innerHTML = '<i class="bi bi-crop text-primary"></i> Recortar Logo / Perfil (1:1)';
+          } else if (type === 'banner') {
+            modalTitle.innerHTML = '<i class="bi bi-crop text-primary"></i> Recortar Portada / Banner (2:1)';
+          } else if (type === 'product') {
+            modalTitle.innerHTML = '<i class="bi bi-crop text-primary"></i> Recortar Imagen de Producto (1:1)';
+          }
+        }
+
+        if (!cropperModal) {
+          cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
+        }
+        cropperModal.show();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function initCropper() {
+      let cropImg = document.getElementById('cropperImage');
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+      
+      const aspect = (activeCropType === 'logo' || activeCropType === 'product') ? 1 : 2;
+      
+      cropper = new Cropper(cropImg, {
+        aspectRatio: aspect,
+        viewMode: 1,
+        dragMode: 'move',
+        autoCropArea: 0.9,
+        restore: false,
+        guides: true,
+        center: true,
+        highlight: false,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        toggleDragModeOnDblclick: false
+      });
+    }
+
+    document.getElementById('cropperModal').addEventListener('shown.bs.modal', function () {
+      let cropImg = document.getElementById('cropperImage');
+      if (cropImg.naturalWidth > 0) {
+        initCropper();
+      } else {
+        cropImg.onload = function() {
+          initCropper();
+          cropImg.onload = null;
+        };
+      }
+    });
+
+    document.getElementById('cropperModal').addEventListener('hidden.bs.modal', function () {
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+      let cropImg = document.getElementById('cropperImage');
+      cropImg.onload = null;
+      cropImg.src = '';
+      document.getElementById('logoFileInput').value = '';
+      document.getElementById('bannerFileInput').value = '';
+      document.getElementById('prodFileInput').value = '';
+    });
+
+    document.getElementById('cropperConfirmBtn').onclick = function() {
+      if (!cropper) return;
+      
+      const width = (activeCropType === 'logo' || activeCropType === 'product') ? 800 : 1000;
+      const height = (activeCropType === 'logo' || activeCropType === 'product') ? 800 : 500;
+      
+      let canvas = cropper.getCroppedCanvas({
+        width: width,
+        height: height,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+      });
+      
+      let croppedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+      
+      if (activeCropType === 'logo') {
+        draftState.imagen = croppedBase64;
+        applyDraftToDOM();
+      } else if (activeCropType === 'banner') {
+        draftState.banner = croppedBase64;
+        applyDraftToDOM();
+      } else if (activeCropType === 'product') {
+        document.getElementById('prodImagenPreview').src = croppedBase64;
+        document.getElementById('prodImagenPreviewContainer').style.display = 'block';
+        document.getElementById('prodImagen').value = croppedBase64;
+      }
+      
+      if (cropperModal) {
+        cropperModal.hide();
+      } else {
+        let inst = bootstrap.Modal.getOrCreateInstance(document.getElementById('cropperModal'));
+        if (inst) inst.hide();
+      }
+    };
+
+    // Modal Add/Edit product inline handlers (FASE 5D)
+    function openAddProductModal() {
+      document.getElementById('productModalTitle').innerHTML = '<i class="bi bi-plus-lg text-success"></i> Agregar Producto';
+      document.getElementById('prodId').value = '';
+      document.getElementById('formProduct').reset();
+      document.getElementById('prodImagenPreviewContainer').style.display = 'none';
+      document.getElementById('prodImagenPreview').src = '';
+      document.getElementById('prodImagen').value = '';
+      document.getElementById('prodActivo').checked = true;
+      document.getElementById('prodOferta').checked = false;
+      document.getElementById('prodDestacado').checked = false;
+      
+      new bootstrap.Modal(document.getElementById('modalEditProduct')).show();
+    }
+
+    function openEditProductModal(pid) {
+      const p = realProducts.find(x => +x.id === +pid);
+      if (!p) return;
+
+      document.getElementById('productModalTitle').innerHTML = '<i class="bi bi-pencil text-primary"></i> Editar Producto';
+      document.getElementById('prodId').value = p.id;
+      document.getElementById('prodNombre').value = p.nombre || '';
+      document.getElementById('prodPrecio').value = p.precio || 0;
+      document.getElementById('prodStock').value = p.stock || 0;
+      document.getElementById('prodCategoriaId').value = p.categoria_id || '';
+      document.getElementById('prodImagen').value = p.imagen || '';
+      document.getElementById('prodDescripcion').value = p.descripcion || '';
+      document.getElementById('prodOferta').checked = p.oferta == 1;
+      document.getElementById('prodDestacado').checked = p.destacado == 1;
+      document.getElementById('prodActivo').checked = p.activo == 1;
+
+      if (p.imagen) {
+        document.getElementById('prodImagenPreview').src = getImgUrl(p.imagen, 2);
+        document.getElementById('prodImagenPreviewContainer').style.display = 'block';
+      } else {
+        document.getElementById('prodImagenPreviewContainer').style.display = 'none';
+        document.getElementById('prodImagenPreview').src = '';
+      }
+
+      new bootstrap.Modal(document.getElementById('modalEditProduct')).show();
+    }
+
+    async function saveProductForm() {
+      const form = document.getElementById('formProduct');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const saveBtn = document.getElementById('btnSaveProduct');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`;
+
+      const pid = document.getElementById('prodId').value;
+      const data = {
+        nombre: document.getElementById('prodNombre').value.trim(),
+        precio: document.getElementById('prodPrecio').value,
+        stock: document.getElementById('prodStock').value,
+        categoria_id: document.getElementById('prodCategoriaId').value || null,
+        imagen: document.getElementById('prodImagen').value,
+        descripcion: document.getElementById('prodDescripcion').value.trim(),
+        oferta: document.getElementById('prodOferta').checked,
+        destacado: document.getElementById('prodDestacado').checked,
+        activo: document.getElementById('prodActivo').checked
+      };
+
+      let r = pid 
+        ? await API.put('/productos.php?id=' + pid, data)
+        : await API.post('/productos.php', data, true);
+
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = `Guardar Producto`;
+
+      if (!r.success) {
+        alert(r.message || 'Error al guardar el producto');
+        return;
+      }
+
+      // Hide modal
+      const modalInst = bootstrap.Modal.getInstance(document.getElementById('modalEditProduct'));
+      if (modalInst) modalInst.hide();
+
+      // Reload products catalog
+      let resProds = await API.get('/productos.php?mine=1', true);
+      if (resProds.success) {
+        realProducts = resProds.data || [];
+        renderCatalogMockup();
+      } else {
+        alert('El producto se guardó pero hubo un problema al actualizar la vista previa.');
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>

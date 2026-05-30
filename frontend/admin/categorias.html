@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Categorías - Panel Admin</title>
+  
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Custom Style -->
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-md-3 col-lg-2 side p-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+          <span class="brand-logo mb-0">AS</span>
+          <h5 class="mb-0 side-title">Artesanías Sur</h5>
+        </div>
+        <div class="small text-white-50 mb-4 px-2 border-bottom border-secondary pb-3">
+          <i class="bi bi-shield-lock text-accent"></i> <span id="userBox">Cargando...</span>
+        </div>
+        <nav class="nav flex-column">
+          <a href="dashboard.html"><i class="bi bi-speedometer2"></i> Inicio</a>
+          <a href="usuarios.html"><i class="bi bi-people"></i> Usuarios</a>
+          <a href="tiendas.html"><i class="bi bi-shop"></i> Tiendas</a>
+          <a href="categorias.html" class="active"><i class="bi bi-tags"></i> Categorías</a>
+          <a href="ventas.html"><i class="bi bi-receipt"></i> Ventas</a>
+          <a href="solicitudes.html"><i class="bi bi-send-check"></i> Solicitudes <span id="navPendingBadge" class="badge text-bg-warning rounded-pill" style="display:none;">0</span></a>
+          <a href="layout.html"><i class="bi bi-grid-1x2"></i> Diseño Home</a>
+          <hr class="text-white-50">
+          <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
+          <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-10 p-4 bg-light" style="min-height: 100vh;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h1 class="h2 mb-0">Gestión de Categorías</h1>
+          <button class="btn btn-dark d-flex align-items-center gap-1" onclick="resetForm()">
+            <i class="bi bi-plus-lg"></i> Nueva Categoría
+          </button>
+        </div>
+        
+        <div id="msg"></div>
+
+        <!-- Form Card -->
+        <div class="card border-0 rounded-4 shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h4 class="fw-bold mb-3" id="formTitle">Agregar Nueva Categoría</h4>
+            <form id="f" class="row g-3">
+              <input type="hidden" id="id">
+              
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-dark">Nombre de la Categoría</label>
+                <input id="nombre" class="form-control rounded-3" placeholder="Ej: Cerámica, Madera, Joyería" required>
+              </div>
+              
+              <div class="col-md-3">
+                <label class="form-label fw-bold small text-dark">Icono (Bootstrap Icon Class)</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-tag" id="iconPreview"></i></span>
+                  <input id="icono" class="form-control rounded-3 border-start-0" placeholder="bi-cup-hot" oninput="updateIconPreview(this.value)">
+                </div>
+                <div class="form-text">Ej: bi-gem, bi-tree, bi-basket, bi-cup-hot</div>
+              </div>
+              
+              <div class="col-md-2">
+                <label class="form-label fw-bold small text-dark">Orden de visualización</label>
+                <input id="orden" type="number" class="form-control rounded-3" placeholder="0">
+              </div>
+              
+              <div class="col-md-3 d-flex align-items-center pt-md-4">
+                <div class="form-check form-switch mb-0">
+                  <input id="activa" class="form-check-input" type="checkbox" role="switch" checked>
+                  <label class="form-check-label fw-bold small" for="activa">Categoría Activa</label>
+                </div>
+              </div>
+
+              <div class="col-12 mt-4 d-flex gap-2">
+                <button class="btn btn-dark px-4 py-2" id="saveBtn">Guardar Categoría</button>
+                <button type="button" class="btn btn-outline-secondary px-4 py-2" id="cancelBtn" onclick="resetForm()" style="display: none;">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Categories List -->
+        <h4 class="fw-bold mb-3 text-dark"><i class="bi bi-tags-fill text-primary me-2"></i>Categorías Existentes</h4>
+        <div class="row g-3" id="list">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script>
+    Auth.role(['admin']);
+    Auth.paint();
+
+    async function load() {
+      // Conteo de solicitudes pendientes para el sidebar
+      let pendingRes = await API.get('/solicitudes.php?pending_count=1', true);
+      if (pendingRes.success) {
+        let badge = document.getElementById('navPendingBadge');
+        if (pendingRes.count > 0) {
+          badge.textContent = pendingRes.count;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+
+      let r = await API.get('/categorias.php?all=1', true);
+      if (!r.success) return showError('msg', r);
+      
+      list.innerHTML = (r.data || []).map(c => {
+        let activeBadge = c.activa == 1 
+          ? '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Activa</span>'
+          : '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill">Inactiva</span>';
+        
+        let iconClass = c.icono || 'bi-tag';
+        
+        return `
+          <div class="col-md-4 col-sm-6">
+            <div class="card h-100 shadow-sm border border-0 rounded-4 overflow-hidden">
+              <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="bg-soft-primary p-3 rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 48px; height: 48px;">
+                      <i class="bi ${iconClass} fs-4"></i>
+                    </div>
+                    <div>
+                      <h5 class="fw-bold mb-0 text-dark">${c.nombre}</h5>
+                      <span class="text-muted small" style="font-size:0.75rem;">Slug: ${c.slug}</span>
+                    </div>
+                  </div>
+                  ${activeBadge}
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-2">
+                  <span class="text-muted small">Orden: <strong class="text-dark">${c.orden || 0}</strong></span>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" onclick='edit(${JSON.stringify(c).replaceAll("'", "&apos;")})'>
+                      <i class="bi bi-pencil"></i> Editar
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1" onclick='del(${c.id})'>
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('') || '<div class="col-12"><div class="alert alert-info">No hay categorías registradas.</div></div>';
+    }
+
+    function updateIconPreview(val) {
+      const preview = document.getElementById('iconPreview');
+      preview.className = `bi ${val.trim() || 'bi-tag'}`;
+    }
+
+    function edit(c) {
+      document.getElementById('formTitle').textContent = 'Editar Categoría';
+      id.value = c.id;
+      nombre.value = c.nombre;
+      icono.value = c.icono || '';
+      orden.value = c.orden || 0;
+      activa.checked = c.activa == 1;
+      
+      updateIconPreview(c.icono || '');
+      document.getElementById('cancelBtn').style.display = 'inline-block';
+      scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+      document.getElementById('formTitle').textContent = 'Agregar Nueva Categoría';
+      f.reset();
+      activa.checked = true;
+      id.value = '';
+      updateIconPreview('');
+      document.getElementById('cancelBtn').style.display = 'none';
+    }
+
+    f.onsubmit = async e => {
+      e.preventDefault();
+      
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span>`;
+
+      let d = {
+        nombre: nombre.value.trim(),
+        icono: icono.value.trim(),
+        orden: +(orden.value || 0),
+        activa: activa.checked
+      };
+      
+      let r = id.value 
+        ? await API.put('/categorias.php?id=' + id.value, d)
+        : await API.post('/categorias.php', d, true);
+        
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Guardar Categoría';
+
+      if (!r.success) return alert(r.message);
+      
+      resetForm();
+      load();
+    };
+
+    async function del(id) {
+      if (confirm('¿Seguro que deseas eliminar esta categoría? Los productos asociados podrían quedar sin categoría.')) {
+        let r = await API.del('/categorias.php?id=' + id);
+        if (!r.success) alert(r.message);
+        load();
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>

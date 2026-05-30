@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Artesanías Sur - Diseño Local & Hecho a Mano</title>
+  <meta name="description" content="Encuentra artesanías únicas, productos de diseño local y apoya a emprendedores locales. Joyería, madera, textiles, cerámica y resina hechos a mano.">
+  <meta name="keywords" content="artesanías, hecho a mano, diseño local, emprendedores, cerámica, joyería, madera, textiles, resina">
+  
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Google Fonts for Dynamic Layout -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Montserrat:wght@400;600&family=Poppins:wght@400;600&family=Lora:ital@0;1&family=Merriweather:ital@0;1&family=Playfair+Display:ital,wght@0,600;1,600&family=Roboto:wght@400;700&family=Raleway:wght@400;700&family=Nunito:wght@400;700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Custom Style -->
+  <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
+        <span class="brand-logo">AS</span>Artesanías Sur
+      </a>
+      <button class="navbar-toggler border-0" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div id="navbarNav" class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto ms-lg-3">
+          <li class="nav-item"><a class="nav-link active" href="#tiendas">Tiendas</a></li>
+          <li class="nav-item"><a class="nav-link" href="#categorias">Categorías</a></li>
+          <li class="nav-item"><a class="nav-link" href="#ofertas">Ofertas</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 flex-column flex-lg-row w-100 w-lg-auto mt-2 mt-lg-0">
+          <div class="search-container w-100 w-lg-auto">
+            <i class="bi bi-search search-icon"></i>
+            <input id="searchInput" class="form-control" placeholder="Buscar..." onkeyup="buscar()">
+          </div>
+          <button class="btn btn-outline-light d-flex align-items-center gap-2 mt-2 mt-lg-0 w-100 w-lg-auto justify-content-center" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
+            <i class="bi bi-cart3"></i> Carrito
+            <span id="cartCount" class="badge text-bg-warning rounded-pill">0</span>
+          </button>
+          <div id="authBtnContainer" class="w-100 w-lg-auto mt-2 mt-lg-0">
+            <!-- Dynamically populated via JS -->
+            <a class="btn btn-light w-100" href="login.html">Ingresar</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div id="msg" class="container mt-3"></div>
+
+  <!-- Contenedor Dinámico para los Componentes de la Homepage (FASE 2) -->
+  <div id="homepageComponentsContainer" style="min-height: 85vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <div class="text-center py-5 text-muted">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Cargando secciones...</span>
+      </div>
+      <p class="mt-3 fs-5 font-title">Cargando contenido local...</p>
+    </div>
+  </div>
+
+
+  <!-- Footnote -->
+  <footer class="bg-dark text-white-50 py-4 mt-5 border-top border-secondary">
+    <div class="container text-center">
+      <p class="mb-1 fw-bold text-white">Artesanías Sur &copy; 2026</p>
+      <p class="small mb-0">Hecho con amor y diseño local. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- Offcanvas Slide-out Cart -->
+  <div class="offcanvas offcanvas-end offcanvas-cart" tabindex="-1" id="cartOffcanvas" aria-labelledby="cartOffcanvasLabel">
+    <div class="offcanvas-header shadow-sm">
+      <h5 class="offcanvas-title fw-bold" id="cartOffcanvasLabel"><i class="bi bi-cart3 text-primary"></i> Mi Carrito</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div id="cartItems">
+        <!-- Cart Items list -->
+      </div>
+      <div id="emptyCart" class="text-center py-5">
+        <i class="bi bi-cart-x text-muted" style="font-size: 3rem;"></i>
+        <p class="text-muted mt-3">Aún no has agregado productos al carrito.</p>
+        <button class="btn btn-sm btn-outline-primary rounded-pill mt-2" data-bs-dismiss="offcanvas">Explorar Catálogo</button>
+      </div>
+      
+      <!-- Checkout Form -->
+      <div id="checkoutFormContainer" class="mt-4 pt-3 border-top" style="display: none;">
+        <h6 class="fw-bold mb-3"><i class="bi bi-person-lines-fill"></i> Datos de contacto</h6>
+        <div class="mb-2">
+          <input id="cliNombre" class="form-control rounded-3" placeholder="Tu nombre completo" required>
+        </div>
+        <div class="mb-2">
+          <input id="cliTel" class="form-control rounded-3" placeholder="Teléfono de contacto" required>
+        </div>
+        <div class="mb-2">
+          <input id="cliEmail" class="form-control rounded-3" placeholder="Email (opcional)" type="email">
+        </div>
+        <div class="mb-3">
+          <textarea id="obs" class="form-control rounded-3" placeholder="Notas sobre el envío u observaciones del pedido..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="offcanvas-footer shadow-lg">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted font-title">Total estimado:</span>
+        <span class="fs-3 fw-bold text-primary" id="cartTotalSum">$0</span>
+      </div>
+      <div class="d-grid gap-2">
+        <button class="btn btn-dark py-2" id="btnCheckout" onclick="checkout()">Enviar pedido por WhatsApp</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="Cart.clear()">Vaciar carrito</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Detail Modal -->
+  <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0" style="border-radius: var(--border-radius-lg); overflow: hidden;">
+        <div class="position-relative">
+          <img id="modalProductImg" src="" class="w-100" style="height: 280px; object-fit: cover;">
+          <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white p-2 rounded-circle shadow-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <span class="badge bg-soft-primary text-primary mb-2" id="modalProductCategory">Categoría</span>
+          <h3 class="fw-bold mb-1" id="modalProductName">Nombre del Producto</h3>
+          <p class="text-muted small mb-3" id="modalProductStore">Vendido por: <a href="#" id="modalProductStoreLink">Tienda</a></p>
+          <hr class="my-3">
+          <p class="mb-4 text-secondary" id="modalProductDesc">Descripción detallada del producto.</p>
+          
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+              <span class="text-muted small d-block">Precio</span>
+              <span class="fs-3 fw-bold text-primary" id="modalProductPrice">$0</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div class="cart-quantity-control">
+                <button class="cart-quantity-btn" onclick="decrementModalQty()">-</button>
+                <span class="px-3 fw-bold" id="modalProductQty">1</span>
+                <button class="cart-quantity-btn" onclick="incrementModalQty()">+</button>
+              </div>
+              <button class="btn btn-dark px-4" id="modalProductAddBtn">Agregar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Imports -->
+  <script src="assets/js/api.js?v=1.0.3"></script>
+  <script src="assets/js/auth.js?v=1.0.1"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="js/homepage-templates.js"></script>
+  
+  <script>
+    let productos = [], tiendas = [], categorias = [], ofertas = [];
+    let selectedCategory = 'all';
+    let currentModalProduct = null;
+    let modalQty = 1;
+
+    // Arreglo estático fallback único para la FASE 2 & 3
+    const STATIC_LAYOUT = [
+      {
+        name: 'hero',
+        config_payload: {
+          "image_url": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1600&q=80",
+          "badge": "100% Hecho a Mano",
+          "title": "Diseño local, alma patagónica",
+          "description": "Conecta directamente con artesanos y adquiere piezas únicas con historia.",
+          "button_text": "Explorar tiendas",
+          "button_link": "#tiendas"
+        }
+      },
+      {
+        name: 'categories',
+        config_payload: {
+          "title": "Categorías"
+        }
+      },
+      {
+        name: 'stores',
+        config_payload: {
+          "title": "Tiendas Destacadas",
+          "subtitle": "Cada emprendedor tiene su esencia única"
+        }
+      },
+      {
+        name: 'offers',
+        config_payload: {
+          "title": "Ofertas Especiales"
+        }
+      },
+      {
+        name: 'products',
+        config_payload: {
+          "title": "Nuestros Productos"
+        }
+      },
+      {
+        name: 'seller_cta',
+        config_payload: {
+          "image_url": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=1200&q=80",
+          "badge": "¿Eres Artesano?",
+          "title": "Vende tus artesanías en Artesanías Sur",
+          "description": "Crea tu tienda virtual hoy mismo, llega a más personas de la Patagonia y gestiona tus productos fácilmente.",
+          "button_text": "Solicitar ser Vendedor"
+        }
+      }
+    ];
+
+    // Load auth status and paint appropriate button
+    function checkAuth() {
+      let u = API.user();
+      let container = document.getElementById('authBtnContainer');
+      let banner = document.getElementById('sellerCtaBanner');
+      
+      if (u) {
+        let dashboardPath = u.rol === 'admin' ? 'admin/dashboard.html' : 'panel/dashboard.html';
+        if (container) {
+          container.innerHTML = `
+            <div class="dropdown">
+              <button class="btn btn-light dropdown-toggle w-100 d-flex align-items-center justify-content-center gap-1" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-person-circle"></i> ${u.nombre}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                <li><a class="dropdown-item fw-bold" href="${dashboardPath}"><i class="bi bi-grid-fill me-2"></i>Mi Panel</a></li>
+                ${u.rol === 'cliente' ? `<li><a class="dropdown-item text-primary fw-bold" href="panel/dashboard.html"><i class="bi bi-shop me-2"></i>Solicitar ser Vendedor</a></li>` : ''}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="#" onclick="event.preventDefault(); Auth.logout();"><i class="bi bi-box-arrow-right me-2"></i>Salir</a></li>
+              </ul>
+            </div>
+          `;
+        }
+        
+        if (banner) {
+          if (u.rol === 'cliente') {
+            banner.style.display = 'block';
+          } else {
+            banner.style.display = 'none';
+          }
+        }
+      } else {
+        if (container) {
+          container.innerHTML = `<a class="btn btn-light w-100" href="login.html"><i class="bi bi-box-arrow-in-right me-1"></i>Ingresar</a>`;
+        }
+        if (banner) {
+          banner.style.display = 'block';
+        }
+      }
+    }
+
+    function goToSellerApplication() {
+      let u = API.user();
+      if (u) {
+        location.href = 'panel/dashboard.html';
+      } else {
+        location.href = 'registro.html';
+      }
+    }
+
+    async function initDynamicHomepage() {
+      let layout = STATIC_LAYOUT;
+
+      // 1. Obtener layout dinámico desde la Base de Datos a través de la API
+      try {
+        const res = await API.get('/homepage.php');
+        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+          layout = res.data;
+        } else {
+          console.warn('API de homepage no devolvió datos válidos. Usando STATIC_LAYOUT.', res);
+        }
+      } catch (err) {
+        console.error('Error de red al consultar la API de homepage. Usando STATIC_LAYOUT de fallback.', err);
+      }
+
+      // 2. Recorrer y compilar de manera síncrona
+      let html = '';
+      layout.forEach(item => {
+        const renderer = window.homepageTemplates[item.name];
+        if (typeof renderer !== 'function') {
+          console.warn(`Plantilla no encontrada para el componente: ${item.name}`);
+          return;
+        }
+        
+        let compiled = renderer(item.config_payload);
+        // Para componentes que no son Hero, los envolvemos en la grilla y espaciados container de Bootstrap
+        if (item.name !== 'hero') {
+          compiled = `<div class="container py-2">${compiled}</div>`;
+        }
+        html += compiled;
+      });
+
+      // 3. Single DOM Write e inyección única
+      const container = document.getElementById('homepageComponentsContainer');
+      if (container) {
+        container.removeAttribute('style'); // Liberar todos los estilos de carga temporal (reserva CLS y flex centering)
+        container.innerHTML = html;
+      }
+
+      // 4. Cargar el resto de la información del backend para hidratación
+      checkAuth();
+      try {
+        let [t, c, p, o] = await Promise.all([
+          API.get('/tiendas.php?public=1'),
+          API.get('/categorias.php'),
+          API.get('/productos.php'),
+          API.get('/productos.php?oferta=1')
+        ]);
+        
+        if (!t.success) return showError('msg', t);
+        
+        tiendas = t.data || [];
+        categorias = c.data || [];
+        productos = p.data || [];
+        ofertas = o.data || [];
+        
+        // 5. Invocar sub-renderizadores con salvaguardas por si algún componente fue desactivado
+        if (document.getElementById('chipsCategorias')) renderCategories(categorias);
+        if (document.getElementById('storesContainer')) renderStores(tiendas);
+        sortAndRender();
+
+        // 6. Si existe restoreCart de cart.js para persistencia de carrito, inicializar
+        if (typeof restoreCart === 'function') {
+          restoreCart();
+        }
+
+      } catch (err) {
+        showError('msg', { message: 'Fallo al inicializar los componentes dinámicos de la página.', raw: err.message });
+      }
+    }
+
+    function renderCategories(cats) {
+      const container = document.getElementById('chipsCategorias');
+      if (container) {
+        container.innerHTML = cats.map(c => `
+          <a class="category-chip" href="#cat-${c.id}" onclick="filterByCategory(${c.id}); return false;" id="chip-${c.id}">
+            <i class="bi ${c.icono || 'bi-tag'}"></i> ${c.nombre}
+          </a>
+        `).join('');
+      }
+    }
+
+    function renderStores(stores) {
+      const container = document.getElementById('storesContainer');
+      if (container) {
+        container.innerHTML = stores.map(t => `
+          <article class="card store-card position-relative" onclick="location.href='tienda.html?id=${t.id}'">
+            <img src="${getImgUrl(t.imagen, 1)}" alt="${t.nombre}">
+            <span class="store-badge">${t.rubro || 'General'}</span>
+            <div class="card-body">
+              <h5 class="fw-bold mb-1">${t.nombre}</h5>
+              <p class="text-muted small mb-3">${t.descripcion || 'Sin descripción.'}</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-primary fw-600 small">Ver Tienda <i class="bi bi-arrow-right"></i></span>
+                ${t.destacado == 1 ? '<span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">Destacada</span>' : ''}
+              </div>
+            </div>
+          </article>
+        `).join('') || '<div class="text-muted py-3">No hay tiendas activas.</div>';
+      }
+    }
+
+    function card(p) {
+      let obj = JSON.stringify({id: p.id, nombre: p.nombre, precio: p.precio, tienda: p.tienda, imagen: p.imagen}).replaceAll("'", "&apos;");
+      return `
+        <article class="card product-card" onclick="viewProduct(${p.id})">
+          <div class="position-relative">
+            <img src="${getImgUrl(p.imagen, 1)}" alt="${p.nombre}">
+            ${p.oferta == 1 ? '<span class="position-absolute top-0 end-0 badge bg-danger m-2">Oferta</span>' : ''}
+          </div>
+          <div class="card-body d-flex flex-column justify-content-between">
+            <div>
+              <span class="text-muted small mb-1"><i class="bi bi-shop"></i> ${p.tienda || ''}</span>
+              <h6 class="fw-bold text-truncate mb-2" title="${p.nombre}">${p.nombre}</h6>
+            </div>
+            <div>
+              <div class="d-flex align-items-center justify-content-between mt-2">
+                <span class="price">${money(p.price_num || p.precio)}</span>
+                <button class="btn btn-sm btn-dark" onclick="event.stopPropagation(); Cart.add(${obj})">
+                  <i class="bi bi-plus-lg"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function filterByCategory(catId) {
+      selectedCategory = catId;
+      
+      // Update filters UI
+      document.querySelectorAll('.category-chip').forEach(el => el.classList.remove('active'));
+      const activeBtn = document.getElementById('btnFilterAll');
+      if (catId === 'all') {
+        if (activeBtn) activeBtn.classList.add('active');
+      } else {
+        if (activeBtn) activeBtn.classList.remove('active');
+        const activeChip = document.getElementById('chip-' + catId);
+        if (activeChip) activeChip.classList.add('active');
+      }
+      
+      sortAndRender();
+    }
+
+    function sortAndRender() {
+      // Buscar inputs y selects locales con salvaguardas por si no existen en el DOM
+      const searchInputEl = document.getElementById('searchInput');
+      const sortSelectEl = document.getElementById('sortSelect');
+      const offersContainerEl = document.getElementById('offersContainer');
+      const categoriesContainerEl = document.getElementById('categoriesContainer');
+      const tiendasEl = document.getElementById('tiendas');
+
+      let q = searchInputEl ? searchInputEl.value.toLowerCase().trim() : '';
+      let filteredProducts = productos;
+      let filteredStores = tiendas;
+
+      // Filter by category
+      if (selectedCategory !== 'all') {
+        filteredProducts = productos.filter(p => +p.categoria_id === +selectedCategory);
+      }
+
+      // Filter by search query
+      if (q) {
+        filteredProducts = filteredProducts.filter(p => 
+          (p.nombre + (p.categoria || '') + (p.tienda || '')).toLowerCase().includes(q)
+        );
+        filteredStores = tiendas.filter(t => 
+          (t.nombre + (t.rubro || '') + (t.descripcion || '')).toLowerCase().includes(q)
+        );
+        
+        // Hide normal sections and show filtered elements
+        if (tiendasEl) tiendasEl.style.display = filteredStores.length ? 'block' : 'none';
+      } else {
+        if (tiendasEl) tiendasEl.style.display = 'block';
+      }
+
+      // Handle Sorting
+      const sortVal = sortSelectEl ? sortSelectEl.value : 'default';
+      if (sortVal === 'price-asc') {
+        filteredProducts.sort((a, b) => Number(a.precio) - Number(b.precio));
+      } else if (sortVal === 'price-desc') {
+        filteredProducts.sort((a, b) => Number(b.precio) - Number(a.precio));
+      } else if (sortVal === 'name-asc') {
+        filteredProducts.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      } else {
+        // default / featured
+        filteredProducts.sort((a, b) => Number(b.destacado || 0) - Number(a.destacado || 0));
+      }
+
+      // Render Offers
+      const filteredOffers = filteredProducts.filter(p => p.oferta == 1);
+      if (offersContainerEl) {
+        offersContainerEl.innerHTML = filteredOffers.map(card).join('') || '<div class="text-muted py-3 px-2">No hay ofertas que coincidan con la búsqueda.</div>';
+      }
+
+      // Render Categorized Products
+      if (categoriesContainerEl) {
+        const activeCats = selectedCategory === 'all' ? categorias : categorias.filter(c => +c.id === +selectedCategory);
+        
+        categoriesContainerEl.innerHTML = activeCats.map(c => {
+          let items = filteredProducts.filter(p => +p.categoria_id === +c.id);
+          if (selectedCategory === 'all' && items.length === 0) return ''; // Hide empty categories on "All" view
+          
+          return `
+            <div class="mb-5" id="cat-${c.id}">
+              <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                <h4 class="fw-bold mb-0"><i class="bi ${c.icono || 'bi-tag-fill'} text-primary me-2"></i>${c.nombre}</h4>
+                <span class="badge bg-secondary-subtle text-secondary rounded-pill d-flex align-items-center px-3">${items.length} productos</span>
+              </div>
+              <div class="scroll-row">${items.map(card).join('') || '<div class="text-muted py-3">Sin productos disponibles.</div>'}</div>
+            </div>
+          `;
+        }).join('') || '<div class="text-center py-5 text-muted border rounded-4 bg-white"><i class="bi bi-search display-3"></i><p class="mt-3 fs-5">No se encontraron productos en esta categoría o búsqueda.</p></div>';
+      }
+    }
+
+    function buscar() {
+      sortAndRender();
+    }
+
+    // Modal product details logic
+    function viewProduct(pid) {
+      const prod = productos.find(p => +p.id === +pid);
+      if (!prod) return;
+
+      currentModalProduct = prod;
+      modalQty = 1;
+
+      document.getElementById('modalProductImg').src = getImgUrl(prod.imagen, 1);
+      document.getElementById('modalProductName').textContent = prod.nombre;
+      document.getElementById('modalProductCategory').textContent = prod.categoria || 'Artesanía';
+      document.getElementById('modalProductDesc').textContent = prod.descripcion || 'Esta pieza está diseñada de forma artesanal con materiales locales de excelente calidad. Su fabricación respeta procesos tradicionales y promueve el comercio justo.';
+      document.getElementById('modalProductPrice').textContent = money(prod.precio);
+      document.getElementById('modalProductQty').textContent = modalQty;
+      
+      const storeLink = document.getElementById('modalProductStoreLink');
+      storeLink.textContent = prod.tienda || 'Emprendedor local';
+      storeLink.href = `tienda.html?id=${prod.tienda_id}`;
+
+      // Assign add button action
+      const addBtn = document.getElementById('modalProductAddBtn');
+      addBtn.onclick = () => {
+        const itemToAdd = {
+          id: prod.id,
+          nombre: prod.nombre,
+          precio: prod.precio,
+          tienda: prod.tienda,
+          imagen: prod.imagen
+        };
+        for (let i = 0; i < modalQty; i++) {
+          Cart.add(itemToAdd);
+        }
+        bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+      };
+
+      const myModal = new bootstrap.Modal(document.getElementById('productModal'));
+      myModal.show();
+    }
+
+    function incrementModalQty() {
+      modalQty++;
+      document.getElementById('modalProductQty').textContent = modalQty;
+    }
+
+    function decrementModalQty() {
+      if (modalQty > 1) {
+        modalQty--;
+        document.getElementById('modalProductQty').textContent = modalQty;
+      }
+    }
+
+    // Cart checkout
+    async function checkout() {
+      let items = Cart.items();
+      if (!items.length) return alert('Por favor, agrega productos al carrito.');
+      
+      let nombre = document.getElementById('cliNombre').value.trim();
+      let tel = document.getElementById('cliTel').value.trim();
+      let email = document.getElementById('cliEmail').value.trim();
+      let observaciones = document.getElementById('obs').value.trim();
+
+      if (!nombre || !tel) {
+        alert('Nombre y Teléfono son obligatorios para enviar tu pedido.');
+        return;
+      }
+
+      // Save order to Database via API
+      let r = await API.post('/pedidos.php', {
+        cliente: { nombre, telefono: tel, email },
+        observaciones: observaciones,
+        items: items.map(x => ({ producto_id: x.id, cantidad: x.cantidad }))
+      });
+      
+      if (!r.success) return alert(r.message);
+
+      // Separar items por tienda para WhatsApp si hay múltiples, o enviar en bloque.
+      // Vamos a generar el mensaje de WhatsApp para el usuario para mayor comodidad.
+      let message = `*Nuevo Pedido - Artesanías Sur*\n\n`;
+      message += `*Cliente:* ${nombre}\n`;
+      message += `*Teléfono:* ${tel}\n`;
+      if (email) message += `*Email:* ${email}\n`;
+      if (observaciones) message += `*Observaciones:* ${observaciones}\n`;
+      message += `\n*Detalle del Pedido:*\n`;
+      
+      let totalSum = 0;
+      items.forEach(it => {
+        let priceItem = Number(it.precio);
+        let subtotal = priceItem * it.cantidad;
+        totalSum += subtotal;
+        message += `- ${it.nombre} (${it.tienda}) x${it.cantidad} : ${money(subtotal)}\n`;
+      });
+      message += `\n*Total:* ${money(totalSum)}`;
+
+      Cart.clear();
+      
+      // Intentar redirigir a WhatsApp de la primera tienda o genérico
+      alert('¡Pedido registrado correctamente en el sistema! Te redirigiremos para enviar el detalle.');
+      
+      let encodedMsg = encodeURIComponent(message);
+      // Redirigir a WhatsApp
+      window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
+      
+      location.reload();
+    }
+
+    initDynamicHomepage();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
