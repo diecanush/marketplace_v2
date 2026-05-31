@@ -1,9 +1,10 @@
 <?php
 class Database {
   private $host = 'localhost';
-  private $db_name = 'marketplace';
-  private $username = 'root';
-  private $password = '';
+  private $db_name = 'your_database_name';
+  private $username = 'your_database_user';
+  private $password = 'your_database_password';
+
   public function connect() {
     try {
       return new PDO(
