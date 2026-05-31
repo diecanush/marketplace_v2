@@ -80,6 +80,7 @@ const Auth = {
       let isTienda = path.includes('/tienda.html');
       let isProductos = path.includes('/productos.html');
       let isVentas = path.includes('/ventas.html');
+      let isCampanas = path.includes('/campanas.html');
 
       const isSeller = u.rol === 'vendedor' || u.rol === 'admin';
       const displayStyle = isSeller ? '' : 'style="display: none !important;"';
@@ -88,6 +89,7 @@ const Auth = {
         <a href="dashboard.html" class="${isDashboard ? 'active' : ''}"><i class="bi bi-speedometer2"></i> Inicio</a>
         <a href="tienda.html" id="navShop" class="${isTienda ? 'active' : ''}" ${displayStyle}><i class="bi bi-palette"></i> Diseño de tienda</a>
         <a href="productos.html" id="navProducts" class="${isProductos ? 'active' : ''}" ${displayStyle}><i class="bi bi-grid"></i> Productos</a>
+        <a href="campanas.html" id="navCampanas" class="${isCampanas ? 'active' : ''}" ${displayStyle}><i class="bi bi-megaphone"></i> Campañas</a>
         <a href="ventas.html" id="navSales" class="${isVentas ? 'active' : ''}" ${displayStyle}><i class="bi bi-currency-dollar"></i> Ventas</a>
         <hr class="text-white-50">
         <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>

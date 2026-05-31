@@ -352,6 +352,20 @@
           }
         });
 
+        // Hydrate campaigns
+        const campaignsInsts = activeHomepageLayout.filter(item => item.name === 'campaigns');
+        if (campaignsInsts.length > 0) {
+          try {
+            let campRes = await API.get('/campanas.php?active=1');
+            let campanasActivas = campRes.success ? (campRes.data || []) : [];
+            campaignsInsts.forEach(inst => {
+              renderCampaigns(campanasActivas, inst.id);
+            });
+          } catch (campErr) {
+            console.error('Error al hidratar campañas:', campErr);
+          }
+        }
+
         sortAndRender();
 
         // 6. Si existe restoreCart de cart.js para persistencia de carrito, inicializar
@@ -408,6 +422,58 @@
             </div>
           </article>
         `).join('') || '<div class="text-muted py-3">No hay tiendas activas.</div>';
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function renderCampaigns(campanas, layoutId) {
+      const suffix = layoutId ? `-${layoutId}` : '';
+      const container = document.getElementById(`campaignsContainer${suffix}`);
+      if (container) {
+        if (campanas.length === 0) {
+          container.innerHTML = '<div class="text-muted py-3 px-2">No hay campañas especiales activas en este momento.</div>';
+          return;
+        }
+
+        container.innerHTML = campanas.map(c => {
+          let imgUrl = getImgUrl(c.imagen, 1);
+          let headerHtml = c.imagen
+            ? `<div class="ratio ratio-21 border-bottom" style="height: 140px; background: url('${imgUrl}?t=${Date.now()}') center/cover no-repeat;"></div>`
+            : `<div class="ratio ratio-21 border-bottom d-flex align-items-center justify-content-center" style="height: 140px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white;">
+                 <div class="text-center w-100 py-4"><i class="bi bi-megaphone fs-1"></i></div>
+               </div>`;
+
+          let dateText = '';
+          if (c.fecha_inicio || c.fecha_fin) {
+            dateText = `<div class="text-muted small mt-1"><i class="bi bi-calendar3 me-1"></i> Del ${c.fecha_inicio || 'Siempre'} al ${c.fecha_fin || 'Siempre'}</div>`;
+          } else {
+            dateText = `<div class="text-muted small mt-1"><i class="bi bi-calendar3 me-1"></i> Vigencia permanente</div>`;
+          }
+
+          return `
+            <article class="card store-card position-relative" onclick="location.href='campana.html?id=${c.id}'" style="width: 300px; flex: 0 0 auto;">
+              ${headerHtml}
+              <div class="card-body d-flex flex-column justify-content-between" style="min-height: 180px;">
+                <div>
+                  <h5 class="fw-bold mb-2 text-dark text-truncate" title="${escapeHtml(c.nombre)}">${escapeHtml(c.nombre)}</h5>
+                  <p class="text-muted small mb-2 text-truncate-3" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; height: 3.6rem; line-height: 1.2;">
+                    ${escapeHtml(c.descripcion || 'Sin descripción.')}
+                  </p>
+                </div>
+                <div>
+                  ${dateText}
+                  <a href="campana.html?id=${c.id}" class="btn btn-sm btn-outline-primary w-100 fw-bold rounded-pill py-2 mt-3" onclick="event.stopPropagation()">
+                    <i class="bi bi-eye"></i> Ver campaña
+                  </a>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join('');
       }
     }
 

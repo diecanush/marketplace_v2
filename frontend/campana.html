@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cargando Campaña...</title>
+  
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Custom Style -->
+  <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
+        <span class="brand-logo">AS</span>Artesanías Sur
+      </a>
+      <button class="navbar-toggler border-0" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div id="navbarNav" class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto ms-lg-3">
+          <li class="nav-item"><a class="nav-link" href="index.html#tiendas">Tiendas</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#categorias">Categorías</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#ofertas">Ofertas</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 flex-column flex-lg-row w-100 w-lg-auto mt-2 mt-lg-0">
+          <div class="search-container w-100 w-lg-auto">
+            <i class="bi bi-search search-icon"></i>
+            <input id="searchInput" class="form-control" placeholder="Buscar en esta campaña..." onkeyup="buscarLocal()">
+          </div>
+          <button class="btn btn-outline-light d-flex align-items-center gap-2 mt-2 mt-lg-0 w-100 w-lg-auto justify-content-center" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
+            <i class="bi bi-cart3"></i> Carrito
+            <span id="cartCount" class="badge text-bg-warning rounded-pill">0</span>
+          </button>
+          <div id="authBtnContainer" class="w-100 w-lg-auto mt-2 mt-lg-0">
+            <a class="btn btn-light w-100" href="login.html">Ingresar</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Campaign Header Area -->
+  <header id="campaignHeader" class="py-5" style="background: linear-gradient(rgba(44, 36, 32, 0.5), rgba(44, 36, 32, 0.85)), url('https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1600&q=80') center/cover; margin-bottom: 2rem;">
+    <div class="container text-white py-4">
+      <div id="head">
+        <h1 class="display-4 fw-bold" id="campaignName">Cargando...</h1>
+        <p class="lead" id="campaignDesc">Por favor, espera un momento.</p>
+        <div id="campaignMeta" class="mt-2 text-white-50"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Products Section -->
+  <main class="container py-2">
+    <div id="msg"></div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 bg-white p-3 rounded-4 shadow-sm border">
+      <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-megaphone-fill text-primary me-2"></i>Productos en Campaña</h4>
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-muted"><i class="bi bi-sort-down"></i> Ordenar por:</span>
+        <select id="sortSelect" class="form-select form-select-sm rounded-3 border-secondary-subtle" onchange="sortAndRenderLocal()" style="width: 180px;">
+          <option value="default">Recomendados</option>
+          <option value="price-asc">Precio: Menor a Mayor</option>
+          <option value="price-desc">Precio: Mayor a Menor</option>
+          <option value="name-asc">Nombre: A - Z</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Campaign Products Grid -->
+    <div id="productos" class="row g-4 mb-5">
+      <div class="col-12 text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando productos...</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white-50 py-4 mt-5 border-top border-secondary">
+    <div class="container text-center">
+      <p class="mb-1 fw-bold text-white">Artesanías Sur &copy; 2026</p>
+      <p class="small mb-0">Apoyando el comercio justo y el talento artesano.</p>
+    </div>
+  </footer>
+
+  <!-- Offcanvas Slide-out Cart -->
+  <div class="offcanvas offcanvas-end offcanvas-cart" tabindex="-1" id="cartOffcanvas" aria-labelledby="cartOffcanvasLabel">
+    <div class="offcanvas-header shadow-sm">
+      <h5 class="offcanvas-title fw-bold" id="cartOffcanvasLabel"><i class="bi bi-cart3 text-primary"></i> Mi Carrito</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div id="cartItems">
+        <!-- Cart Items list -->
+      </div>
+      <div id="emptyCart" class="text-center py-5">
+        <i class="bi bi-cart-x text-muted" style="font-size: 3rem;"></i>
+        <p class="text-muted mt-3">Aún no has agregado productos al carrito.</p>
+        <button class="btn btn-sm btn-outline-primary rounded-pill mt-2" data-bs-dismiss="offcanvas">Seguir Comprando</button>
+      </div>
+      
+      <!-- Checkout Form -->
+      <div id="checkoutFormContainer" class="mt-4 pt-3 border-top" style="display: none;">
+        <h6 class="fw-bold mb-3"><i class="bi bi-person-lines-fill"></i> Datos de contacto</h6>
+        <div class="mb-2">
+          <input id="cliNombre" class="form-control rounded-3" placeholder="Tu nombre completo" required>
+        </div>
+        <div class="mb-2">
+          <input id="cliTel" class="form-control rounded-3" placeholder="Teléfono de contacto" required>
+        </div>
+        <div class="mb-2">
+          <input id="cliEmail" class="form-control rounded-3" placeholder="Email (opcional)" type="email">
+        </div>
+        <div class="mb-3">
+          <textarea id="obs" class="form-control rounded-3" placeholder="Notas sobre el envío u observaciones del pedido..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="offcanvas-footer shadow-lg">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted font-title">Total estimado:</span>
+        <span class="fs-3 fw-bold text-primary" id="cartTotalSum">$0</span>
+      </div>
+      <div class="d-grid gap-2">
+        <button class="btn btn-dark py-2" id="btnCheckout" onclick="checkout()">Enviar pedido por WhatsApp</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="Cart.clear()">Vaciar carrito</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Detail Modal -->
+  <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0" style="border-radius: var(--border-radius-lg); overflow: hidden;">
+        <div class="position-relative">
+          <img id="modalProductImg" src="" class="w-100" style="height: 280px; object-fit: cover;">
+          <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white p-2 rounded-circle shadow-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <span class="badge bg-soft-primary text-primary mb-2" id="modalProductCategory">Categoría</span>
+          <h3 class="fw-bold mb-1" id="modalProductName">Nombre del Producto</h3>
+          <p class="text-muted small mb-3" id="modalProductStore">Vendido por: <span class="text-primary fw-600" id="modalProductStoreName">Tienda</span></p>
+          <hr class="my-3">
+          <p class="mb-4 text-secondary" id="modalProductDesc">Descripción detallada del producto.</p>
+          
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+              <span class="text-muted small d-block">Precio</span>
+              <span class="fs-3 fw-bold text-primary" id="modalProductPrice">$0</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div class="cart-quantity-control">
+                <button class="cart-quantity-btn" onclick="decrementModalQty()">-</button>
+                <span class="px-3 fw-bold" id="modalProductQty">1</span>
+                <button class="cart-quantity-btn" onclick="incrementModalQty()">+</button>
+              </div>
+              <button class="btn btn-dark px-4" id="modalProductAddBtn">Agregar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Imports -->
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/cart.js"></script>
+
+  <script>
+    const campaignId = new URLSearchParams(location.search).get('id');
+    let campaignData = null;
+    let campaignProducts = [];
+    let currentModalProduct = null;
+    let modalQty = 1;
+
+    // Check user auth status
+    function checkAuth() {
+      let u = API.user();
+      let container = document.getElementById('authBtnContainer');
+      if (u) {
+        let dashboardPath = u.rol === 'admin' ? 'admin/dashboard.html' : 'panel/dashboard.html';
+        container.innerHTML = `
+          <div class="dropdown">
+            <button class="btn btn-light dropdown-toggle w-100 d-flex align-items-center justify-content-center gap-1" type="button" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle"></i> ${u.nombre}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-1">
+              <li><a class="dropdown-menu-item px-3 py-2 d-block small" href="${dashboardPath}"><i class="bi bi-speedometer2"></i> Mi Panel</a></li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li><a class="dropdown-menu-item px-3 py-2 d-block small text-danger" href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right"></i> Salir</a></li>
+            </ul>
+          </div>
+        `;
+      }
+    }
+
+    async function load() {
+      checkAuth();
+      if (!campaignId) {
+        document.getElementById('productos').innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-danger rounded-4 border-0 shadow-sm">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i> ID de campaña no provisto o no válido.
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // Consultar endpoint con ?all=1 para obtener todos los productos activos y tiendas asociadas
+      let res = await API.get(`/campanas.php?id=${campaignId}&all=1`, true);
+      if (!res.success) {
+        document.getElementById('productos').innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-danger rounded-4 border-0 shadow-sm">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i> ${res.message || 'Campaña no encontrada.'}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      campaignData = res.data;
+      campaignProducts = campaignData.productos || [];
+
+      // Actualizar metadatos de la cabecera
+      document.title = `${campaignData.nombre} - Artesanías Sur`;
+      document.getElementById('campaignName').textContent = campaignData.nombre;
+      document.getElementById('campaignDesc').textContent = campaignData.descripcion || 'Campaña especial de temporada.';
+      
+      let dateText = '';
+      if (campaignData.fecha_inicio || campaignData.fecha_fin) {
+        dateText = `<i class="bi bi-calendar3 me-1"></i> Del ${campaignData.fecha_inicio || 'Siempre'} al ${campaignData.fecha_fin || 'Siempre'}`;
+      } else {
+        dateText = `<i class="bi bi-calendar3 me-1"></i> Vigencia permanente`;
+      }
+      
+      const todayStr = new Date().toISOString().split('T')[0];
+      const isUpcoming = campaignData.fecha_inicio && campaignData.fecha_inicio > todayStr;
+      const statusBadge = isUpcoming
+        ? '<span class="badge bg-warning text-dark ms-2">Próximamente</span>'
+        : '<span class="badge bg-success ms-2">Activa</span>';
+
+      document.getElementById('campaignMeta').innerHTML = dateText + statusBadge;
+
+      // Configurar banner de fondo si está disponible
+      if (campaignData.imagen) {
+        let bannerUrl = getImgUrl(campaignData.imagen, 1);
+        document.getElementById('campaignHeader').style.backgroundImage = `linear-gradient(rgba(44, 36, 32, 0.5), rgba(44, 36, 32, 0.85)), url('${bannerUrl}?t=${Date.now()}')`;
+      } else {
+        document.getElementById('campaignHeader').style.background = 'linear-gradient(135deg, var(--primary), var(--accent))';
+      }
+
+      sortAndRenderLocal();
+    }
+
+    function card(p) {
+      // Inyectar tienda_nombre de la respuesta para que Cart pueda renderizar la tienda
+      let obj = JSON.stringify({
+        id: p.id,
+        nombre: p.nombre,
+        precio: p.precio,
+        tienda: p.tienda_nombre || 'Artesano',
+        imagen: p.imagen
+      }).replaceAll("'", "&apos;");
+
+      return `
+        <div class="col-md-3 col-sm-6">
+          <article class="card product-card" onclick="viewProduct(${p.id})">
+            <div class="position-relative">
+              <img src="${getImgUrl(p.imagen, 1)}" alt="${p.nombre}">
+              ${p.oferta == 1 ? '<span class="position-absolute top-0 end-0 badge bg-danger m-2">Oferta</span>' : ''}
+              ${p.destacado == 1 ? '<span class="position-absolute top-0 start-0 badge bg-warning text-dark m-2">Destacado</span>' : ''}
+            </div>
+            <div class="card-body d-flex flex-column justify-content-between">
+              <div>
+                <span class="text-muted small mb-1"><i class="bi bi-shop"></i> ${p.tienda_nombre || 'Artesano'}</span>
+                <h6 class="fw-bold text-truncate mb-2" title="${p.nombre}">${p.nombre}</h6>
+              </div>
+              <div>
+                <div class="d-flex align-items-center justify-content-between mt-2">
+                  <span class="price">${money(p.precio)}</span>
+                  <button class="btn btn-sm btn-dark" onclick="event.stopPropagation(); Cart.add(${obj})">
+                    <i class="bi bi-plus-lg"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      `;
+    }
+
+    function sortAndRenderLocal() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      let filtered = campaignProducts;
+
+      // Buscar localmente por texto
+      if (q) {
+        filtered = filtered.filter(p => 
+          (p.nombre + (p.descripcion || '') + (p.tienda_nombre || '')).toLowerCase().includes(q)
+        );
+      }
+
+      // Ordenamiento
+      const sortVal = document.getElementById('sortSelect').value;
+      if (sortVal === 'price-asc') {
+        filtered.sort((a, b) => Number(a.precio) - Number(b.precio));
+      } else if (sortVal === 'price-desc') {
+        filtered.sort((a, b) => Number(b.precio) - Number(a.precio));
+      } else if (sortVal === 'name-asc') {
+        filtered.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      } else {
+        // Orden default: recomendados / destacados
+        filtered.sort((a, b) => Number(b.destacado || 0) - Number(a.destacado || 0));
+      }
+
+      const grid = document.getElementById('productos');
+      grid.innerHTML = filtered.map(card).join('') || `
+        <div class="col-12 text-center py-5 text-muted bg-white border rounded-4 shadow-sm">
+          <i class="bi bi-search display-3 d-block mb-3 text-muted"></i>
+          <p class="fs-5 mb-0">No se encontraron productos en esta campaña.</p>
+        </div>
+      `;
+    }
+
+    function buscarLocal() {
+      sortAndRenderLocal();
+    }
+
+    // Modal de Detalles de Producto
+    let productModalInstance = null;
+
+    function viewProduct(pid) {
+      const prod = campaignProducts.find(p => +p.id === +pid);
+      if (!prod) return;
+
+      currentModalProduct = prod;
+      modalQty = 1;
+
+      document.getElementById('modalProductImg').src = getImgUrl(prod.imagen, 1);
+      document.getElementById('modalProductName').textContent = prod.nombre;
+      document.getElementById('modalProductCategory').textContent = prod.categoria_id ? 'Categoría' : 'Artesanía';
+      document.getElementById('modalProductDesc').textContent = prod.descripcion || 'Esta pieza única está elaborada a mano por artesanos locales, utilizando técnicas tradicionales y materiales de alta calidad de la región patagónica.';
+      document.getElementById('modalProductPrice').textContent = money(prod.precio);
+      document.getElementById('modalProductQty').textContent = modalQty;
+      
+      const storeName = document.getElementById('modalProductStoreName');
+      storeName.textContent = prod.tienda_nombre || 'Artesano local';
+      
+      // Permitir navegar a la tienda si se cliquea el nombre de la tienda
+      const storeLink = document.getElementById('modalProductStore');
+      storeLink.style.cursor = 'pointer';
+      storeLink.onclick = () => {
+        if (productModalInstance) productModalInstance.hide();
+        location.href = `tienda.html?id=${prod.tienda_id}`;
+      };
+
+      // Configurar botón de agregar del modal
+      const addBtn = document.getElementById('modalProductAddBtn');
+      addBtn.onclick = () => {
+        let obj = {
+          id: prod.id,
+          nombre: prod.nombre,
+          precio: prod.precio,
+          tienda: prod.tienda_nombre || 'Artesano',
+          imagen: prod.imagen
+        };
+        // Agregar la cantidad seleccionada
+        for (let i = 0; i < modalQty; i++) {
+          Cart.add(obj);
+        }
+        if (!productModalInstance) {
+          productModalInstance = bootstrap.Modal.getOrCreateInstance(document.getElementById('productModal'));
+        }
+        productModalInstance.hide();
+      };
+
+      productModalInstance = bootstrap.Modal.getOrCreateInstance(document.getElementById('productModal'));
+      productModalInstance.show();
+    }
+
+    function incrementModalQty() {
+      modalQty++;
+      document.getElementById('modalProductQty').textContent = modalQty;
+    }
+
+    function decrementModalQty() {
+      if (modalQty > 1) {
+        modalQty--;
+        document.getElementById('modalProductQty').textContent = modalQty;
+      }
+    }
+
+    // Checkout de Carrito por WhatsApp
+    async function checkout() {
+      let items = Cart.items();
+      if (!items.length) return alert('Por favor, agrega productos al carrito.');
+      
+      let nombre = document.getElementById('cliNombre').value.trim();
+      let tel = document.getElementById('cliTel').value.trim();
+      let email = document.getElementById('cliEmail').value.trim();
+      let observaciones = document.getElementById('obs').value.trim();
+
+      if (!nombre || !tel) {
+        alert('Nombre y Teléfono son obligatorios para enviar tu pedido.');
+        return;
+      }
+
+      // Enviar pedido al backend (pedidos.php soporta múltiples tiendas)
+      let r = await API.post('/pedidos.php', {
+        cliente: { nombre, telefono: tel, email },
+        observaciones: observaciones,
+        items: items.map(x => ({ producto_id: x.id, cantidad: x.cantidad }))
+      }, true);
+      
+      if (!r.success) return alert(r.message);
+
+      // Generar mensaje estructurado de WhatsApp
+      let message = `*Nuevo Pedido - Campaña Especial - Artesanías Sur*\n\n`;
+      message += `*Cliente:* ${nombre}\n`;
+      message += `*Teléfono:* ${tel}\n`;
+      if (email) message += `*Email:* ${email}\n`;
+      if (observaciones) message += `*Observaciones:* ${observaciones}\n`;
+      message += `\n*Detalle del Pedido:*\n`;
+      
+      let totalSum = 0;
+      items.forEach(it => {
+        let subtotal = Number(it.precio) * it.cantidad;
+        totalSum += subtotal;
+        message += `- ${it.nombre} (${it.tienda}) x${it.cantidad} : ${money(subtotal)}\n`;
+      });
+      message += `\n*Total:* ${money(totalSum)}`;
+
+      Cart.clear();
+      
+      alert('¡Pedido registrado correctamente en el sistema! Te redirigiremos para enviar el detalle por WhatsApp.');
+      
+      let encodedMsg = encodeURIComponent(message);
+      // Redirigir a la API de WhatsApp sin destinatario fijo para pedidos multi-tienda (el usuario elige destinatario)
+      window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
+      
+      location.reload();
+    }
+
+    load();
+  </script>
+</body>
+</html>
