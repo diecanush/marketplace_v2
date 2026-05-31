@@ -113,6 +113,15 @@
                 </div>
               </div>
 
+              <!-- Campañas Disponibles -->
+              <div class="col-12 mt-3">
+                <label class="form-label fw-bold small text-dark d-block">Participar en Campañas Disponibles</label>
+                <div id="campanasCheckboxes" class="d-flex flex-wrap gap-3 p-3 bg-white rounded-3 border" style="max-height: 180px; overflow-y: auto;">
+                  <span class="text-muted small">Cargando campañas...</span>
+                </div>
+                <div class="form-text">El producto se listará automáticamente en las campañas seleccionadas durante su vigencia.</div>
+              </div>
+
               <div class="col-12 mt-4 d-flex gap-2">
                 <button class="btn btn-dark px-4 py-2" id="saveBtn">Guardar Producto</button>
                 <button type="button" class="btn btn-outline-secondary px-4 py-2" id="cancelBtn" onclick="resetForm();" style="display: none;">Cancelar</button>
@@ -165,6 +174,62 @@
       let r = await API.get('/categorias.php');
       categoria_id.innerHTML = '<option value="">Selecciona una categoría...</option>' + 
         (r.data || []).map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+    }
+
+    let activeCampaigns = [];
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    async function loadCampaigns() {
+      const container = document.getElementById('campanasCheckboxes');
+      try {
+        let r = await API.get('/campanas.php', true);
+        if (r.success) {
+          const today = new Date().setHours(0,0,0,0);
+          activeCampaigns = (r.data || []).filter(c => {
+            const isEnabled = parseInt(c.activa) === 1;
+            const isNotExpired = !c.fecha_fin || new Date(c.fecha_fin) >= today;
+            return isEnabled && isNotExpired;
+          });
+
+          // Obtener los productos asociados a cada campaña activa en paralelo
+          await Promise.all(activeCampaigns.map(async (c) => {
+            let detail = await API.get(`/campanas.php?id=${c.id}&all=1`, true);
+            if (detail.success && detail.data && detail.data.productos) {
+              c.productIds = detail.data.productos.map(p => parseInt(p.id));
+            } else {
+              c.productIds = [];
+            }
+          }));
+
+          renderCampaignCheckboxes();
+        } else {
+          container.innerHTML = '<span class="text-danger small">Error al cargar campañas especiales.</span>';
+        }
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = '<span class="text-danger small">Error al conectar para cargar campañas.</span>';
+      }
+    }
+
+    function renderCampaignCheckboxes() {
+      const container = document.getElementById('campanasCheckboxes');
+      if (activeCampaigns.length === 0) {
+        container.innerHTML = '<span class="text-muted small">No hay campañas especiales activas o futuras.</span>';
+        return;
+      }
+
+      container.innerHTML = activeCampaigns.map(c => `
+        <div class="form-check me-3">
+          <input class="form-check-input campaign-checkbox" type="checkbox" value="${c.id}" id="camp-${c.id}">
+          <label class="form-check-label small text-dark" for="camp-${c.id}">
+            <strong>${escapeHtml(c.nombre)}</strong>
+          </label>
+        </div>
+      `).join('');
     }
 
     async function load() {
@@ -244,6 +309,14 @@
       } else {
         document.getElementById('imagenPreviewContainer').style.display = 'none';
       }
+
+      // Marcar campañas en las que el producto ya participa
+      activeCampaigns.forEach(c => {
+        const cb = document.getElementById('camp-' + c.id);
+        if (cb) {
+          cb.checked = c.productIds && c.productIds.includes(parseInt(p.id));
+        }
+      });
       
       document.getElementById('cancelBtn').style.display = 'inline-block';
       scrollTo({ top: 0, behavior: 'smooth' });
@@ -258,6 +331,9 @@
       document.getElementById('imagenPreview').src = '';
       croppedBase64 = '';
       document.getElementById('cancelBtn').style.display = 'none';
+
+      // Desmarcar todos los checkboxes de campañas
+      document.querySelectorAll('.campaign-checkbox').forEach(cb => cb.checked = false);
     }
 
     f.onsubmit = async e => {
@@ -279,14 +355,74 @@
         activo: activo.checked
       };
       
-      let r = id.value 
-        ? await API.put('/productos.php?id=' + id.value, d)
+      const isEdit = !!id.value;
+      const originalId = id.value;
+
+      let r = isEdit 
+        ? await API.put('/productos.php?id=' + originalId, d)
         : await API.post('/productos.php', d, true);
         
+      if (!r.success) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Guardar Producto';
+        return alert(r.message);
+      }
+
+      // Obtener el ID final del producto
+      const pid = isEdit ? parseInt(originalId) : parseInt(r.id);
+
+      // Guardar asociaciones a campañas
+      let campaignErrors = [];
+      let promises = [];
+
+      activeCampaigns.forEach(c => {
+        const cb = document.getElementById('camp-' + c.id);
+        if (!cb) return;
+        const isChecked = cb.checked;
+        const wasChecked = c.productIds && c.productIds.includes(pid);
+
+        if (isChecked && !wasChecked) {
+          promises.push(
+            API.post('/campana_productos.php', { campana_id: c.id, producto_id: pid }, true)
+              .then(res => {
+                if (res.success) {
+                  if (!c.productIds) c.productIds = [];
+                  c.productIds.push(pid);
+                } else {
+                  campaignErrors.push(`No se pudo agregar a campaña "${c.nombre}": ${res.message}`);
+                }
+              })
+              .catch(err => {
+                campaignErrors.push(`Error de conexión con campaña "${c.nombre}"`);
+              })
+          );
+        } else if (!isChecked && wasChecked) {
+          promises.push(
+            API.del(`/campana_productos.php?campana_id=${c.id}&producto_id=${pid}`)
+              .then(res => {
+                if (res.success) {
+                  c.productIds = c.productIds.filter(id => id !== pid);
+                } else {
+                  campaignErrors.push(`No se pudo remover de campaña "${c.nombre}": ${res.message}`);
+                }
+              })
+              .catch(err => {
+                campaignErrors.push(`Error de conexión con campaña "${c.nombre}"`);
+              })
+          );
+        }
+      });
+
+      if (promises.length > 0) {
+        await Promise.all(promises);
+      }
+
       saveBtn.disabled = false;
       saveBtn.textContent = 'Guardar Producto';
 
-      if (!r.success) return alert(r.message);
+      if (campaignErrors.length > 0) {
+        alert('Producto guardado, pero ocurrieron algunos problemas con las campañas:\n' + campaignErrors.join('\n'));
+      }
       
       resetForm();
       load();
@@ -392,6 +528,7 @@
     };
 
     cats();
+    loadCampaigns();
     load();
   </script>
 </body>

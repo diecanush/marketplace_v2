@@ -56,6 +56,7 @@ const Auth = {
       let isVentas = path.includes('/ventas.html');
       let isSolicitudes = path.includes('/solicitudes.html');
       let isLayout = path.includes('/layout.html');
+      let isCampanas = path.includes('/campanas.html');
 
       nav.innerHTML = `
         <a href="dashboard.html" class="${isDashboard ? 'active' : ''}"><i class="bi bi-speedometer2"></i> Inicio</a>
@@ -65,6 +66,7 @@ const Auth = {
         <a href="ventas.html" class="${isVentas ? 'active' : ''}"><i class="bi bi-receipt"></i> Ventas</a>
         <a href="solicitudes.html" class="${isSolicitudes ? 'active' : ''}"><i class="bi bi-send-check"></i> Solicitudes <span id="navPendingBadge" class="badge text-bg-warning rounded-pill" style="display:none;">0</span></a>
         <a href="layout.html" class="${isLayout ? 'active' : ''}"><i class="bi bi-grid-1x2"></i> Diseño Home</a>
+        <a href="campanas.html" class="${isCampanas ? 'active' : ''}"><i class="bi bi-megaphone"></i> Campañas</a>
         <hr class="text-white-50">
         <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
         <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
@@ -78,6 +80,7 @@ const Auth = {
       let isTienda = path.includes('/tienda.html');
       let isProductos = path.includes('/productos.html');
       let isVentas = path.includes('/ventas.html');
+      let isCampanas = path.includes('/campanas.html');
 
       const isSeller = u.rol === 'vendedor' || u.rol === 'admin';
       const displayStyle = isSeller ? '' : 'style="display: none !important;"';
@@ -86,6 +89,7 @@ const Auth = {
         <a href="dashboard.html" class="${isDashboard ? 'active' : ''}"><i class="bi bi-speedometer2"></i> Inicio</a>
         <a href="tienda.html" id="navShop" class="${isTienda ? 'active' : ''}" ${displayStyle}><i class="bi bi-palette"></i> Diseño de tienda</a>
         <a href="productos.html" id="navProducts" class="${isProductos ? 'active' : ''}" ${displayStyle}><i class="bi bi-grid"></i> Productos</a>
+        <a href="campanas.html" id="navCampanas" class="${isCampanas ? 'active' : ''}" ${displayStyle}><i class="bi bi-megaphone"></i> Campañas</a>
         <a href="ventas.html" id="navSales" class="${isVentas ? 'active' : ''}" ${displayStyle}><i class="bi bi-currency-dollar"></i> Ventas</a>
         <hr class="text-white-50">
         <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>

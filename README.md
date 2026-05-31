@@ -29,19 +29,13 @@ C:\xampp\htdocs\marketplace_v2
 database_migrations.sql
 ```
 
-4. Crear el archivo de credenciales desde la plantilla:
-
-```txt
-api/config/db.example.php -> api/config/db.php
-```
-
-5. Revisar credenciales en:
+4. Revisar credenciales en:
 
 ```txt
 api/config/db.php
 ```
 
-6. Abrir:
+5. Abrir:
 
 ```txt
 http://localhost/marketplace_v2/frontend/index.html

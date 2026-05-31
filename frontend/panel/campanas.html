@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campañas - Panel Vendedor</title>
+  
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Custom Style -->
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-md-3 col-lg-2 side p-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+          <span class="brand-logo mb-0">AS</span>
+          <h5 class="mb-0 side-title">Artesanías Sur</h5>
+        </div>
+        <div class="small text-white-50 mb-4 px-2 border-bottom border-secondary pb-3">
+          <i class="bi bi-person-circle text-accent"></i> <span id="userBox">Cargando...</span>
+        </div>
+        <nav class="nav flex-column">
+          <!-- Autopopulated by Auth.paint() -->
+          <a href="dashboard.html"><i class="bi bi-speedometer2"></i> Inicio</a>
+          <a href="tienda.html"><i class="bi bi-palette"></i> Diseño de tienda</a>
+          <a href="productos.html"><i class="bi bi-grid"></i> Productos</a>
+          <a href="campanas.html" class="active"><i class="bi bi-megaphone"></i> Campañas</a>
+          <a href="ventas.html"><i class="bi bi-currency-dollar"></i> Ventas</a>
+          <hr class="text-white-50">
+          <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
+          <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-10 p-4 bg-light" style="min-height: 100vh;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h1 class="h2 mb-1">Campañas Especiales</h1>
+            <p class="text-muted mb-0">Participa con tus productos en los eventos y promociones del marketplace.</p>
+          </div>
+        </div>
+        
+        <div id="msg"></div>
+
+        <!-- Grid de Campañas -->
+        <div class="row g-4" id="campaignsGrid">
+          <!-- Se cargará dinámicamente -->
+          <div class="col-12 text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando campañas...</span>
+            </div>
+            <p class="text-muted mt-2">Cargando campañas del sistema...</p>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal de Gestión de Productos -->
+  <div class="modal fade" id="modalGestionarProductos" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header border-bottom-0 p-4 pb-0">
+          <div>
+            <h5 class="modal-title fw-bold text-dark" id="modalTitle">Gestionar Productos</h5>
+            <p class="text-muted small mb-0" id="modalSub"></p>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        
+        <div class="modal-body p-4">
+          <!-- Buscador interno -->
+          <div class="mb-3">
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+              <input type="text" id="searchProducts" class="form-control border-start-0 rounded-end-3" placeholder="Buscar producto por nombre...">
+            </div>
+          </div>
+          
+          <!-- Lista de Productos -->
+          <div id="productListContainer" class="list-group rounded-3 overflow-hidden shadow-sm" style="max-height: 380px; overflow-y: auto;">
+            <!-- Carga dinámica -->
+          </div>
+        </div>
+        
+        <div class="modal-footer border-top-0 p-4 pt-0">
+          <button type="button" class="btn btn-dark px-4 py-2 rounded-pill fw-bold" data-bs-dismiss="modal">Listo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  
+  <script>
+    Auth.role(['vendedor', 'admin']);
+    Auth.paint();
+
+    let myProducts = [];
+    let activeCampaigns = [];
+    let currentCampaign = null;
+    let productsModal = null;
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    async function init() {
+      try {
+        productsModal = new bootstrap.Modal(document.getElementById('modalGestionarProductos'));
+        
+        // Registrar el evento del input de búsqueda en tiempo real
+        document.getElementById('searchProducts').addEventListener('input', renderModalProducts);
+        
+        // Al cerrar el modal, refrescar la grilla principal para actualizar los contadores
+        document.getElementById('modalGestionarProductos').addEventListener('hidden.bs.modal', () => {
+          renderCampaigns();
+        });
+
+        await loadData();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('campaignsGrid').innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-danger rounded-4 border-0 shadow-sm">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i> Error al conectar con el servidor. Por favor, reintente más tarde.
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    async function loadData() {
+      // 1. Obtener todas las campañas de la API
+      const campaignsRes = await API.get('/campanas.php', true);
+      if (!campaignsRes.success) {
+        return showError('campaignsGrid', campaignsRes);
+      }
+
+      // Filtrar campañas: activas y no expiradas
+      const today = new Date().setHours(0,0,0,0);
+      activeCampaigns = (campaignsRes.data || []).filter(c => {
+        const isEnabled = parseInt(c.activa) === 1;
+        const isNotExpired = !c.fecha_fin || new Date(c.fecha_fin) >= today;
+        return isEnabled && isNotExpired;
+      });
+
+      // 2. Obtener productos propios del vendedor
+      const productsRes = await API.get('/productos.php?mine=1', true);
+      myProducts = productsRes.success ? (productsRes.data || []) : [];
+      const myProductIds = myProducts.map(p => parseInt(p.id));
+
+      // 3. En paralelo, obtener detalles de las relaciones de cada campaña activa
+      await Promise.all(activeCampaigns.map(async (camp) => {
+        const detailRes = await API.get(`/campanas.php?id=${camp.id}&all=1`, true);
+        if (detailRes.success && detailRes.data && detailRes.data.productos) {
+          const campaignProductIds = detailRes.data.productos.map(p => parseInt(p.id));
+          // Filtrar las asociaciones que correspondan a productos del vendedor actual
+          camp.my_associated_product_ids = campaignProductIds.filter(pid => myProductIds.includes(pid));
+          camp.my_products_count = camp.my_associated_product_ids.length;
+        } else {
+          camp.my_associated_product_ids = [];
+          camp.my_products_count = 0;
+        }
+      }));
+
+      renderCampaigns();
+    }
+
+    function renderCampaigns() {
+      const grid = document.getElementById('campaignsGrid');
+      
+      if (activeCampaigns.length === 0) {
+        grid.innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-info rounded-4 border-0 shadow-sm py-4">
+              <i class="bi bi-info-circle-fill me-2"></i> No hay campañas especiales activas o programadas en este momento.
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = activeCampaigns.map(c => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const isUpcoming = c.fecha_inicio && c.fecha_inicio > todayStr;
+        
+        const badgeHtml = isUpcoming
+          ? '<span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill"><i class="bi bi-clock-history me-1"></i>Próximamente</span>'
+          : '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill"><i class="bi bi-patch-check-fill me-1"></i>Activa ahora</span>';
+
+        const dateRangeHtml = c.fecha_inicio || c.fecha_fin
+          ? `<i class="bi bi-calendar3 me-1"></i> Del ${c.fecha_inicio || 'Siempre'} al ${c.fecha_fin || 'Siempre'}`
+          : '<i class="bi bi-calendar3 me-1"></i> Vigencia permanente';
+
+        const imgUrl = getImgUrl(c.imagen, 2);
+        const headerHtml = c.imagen
+          ? `<div class="ratio ratio-21 border-bottom" style="height: 150px; background: url('${imgUrl}?t=${Date.now()}') center/cover no-repeat;"></div>`
+          : `<div class="ratio ratio-21 border-bottom d-flex align-items-center justify-content-center" style="height: 150px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white;">
+               <div class="text-center w-100 py-4"><i class="bi bi-megaphone fs-1"></i></div>
+             </div>`;
+
+        return `
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden d-flex flex-column justify-content-between">
+              <div>
+                ${headerHtml}
+                <div class="p-4">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h5 class="fw-bold mb-0 text-dark text-truncate" style="max-width: 70%;" title="${escapeHtml(c.nombre)}">${escapeHtml(c.nombre)}</h5>
+                    ${badgeHtml}
+                  </div>
+                  <p class="text-muted small mb-3 text-truncate-3" style="min-height: 48px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                    ${escapeHtml(c.descripcion || 'Sin descripción.')}
+                  </p>
+                  <div class="text-muted small mb-2 d-flex align-items-center">
+                    ${dateRangeHtml}
+                  </div>
+                  <div class="mt-3 p-2 bg-light rounded-3 d-flex justify-content-between align-items-center">
+                    <span class="small text-muted"><i class="bi bi-box-seam me-1"></i>Mis productos asociados:</span>
+                    <strong class="text-primary fs-6">${c.my_products_count}</strong>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="p-4 pt-0">
+                <button class="btn btn-dark w-100 py-2 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2" onclick="openProductSelector(${c.id})">
+                  <i class="bi bi-plus-circle"></i> Gestionar Productos
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openProductSelector(campaignId) {
+      currentCampaign = activeCampaigns.find(c => c.id === campaignId);
+      if (!currentCampaign) return;
+
+      document.getElementById('modalTitle').textContent = `Participar en: ${currentCampaign.nombre}`;
+      document.getElementById('modalSub').textContent = `Selecciona los productos que deseas incluir en esta campaña.`;
+      document.getElementById('searchProducts').value = '';
+
+      renderModalProducts();
+      productsModal.show();
+    }
+
+    function renderModalProducts() {
+      const container = document.getElementById('productListContainer');
+      const searchQuery = document.getElementById('searchProducts').value.toLowerCase().trim();
+
+      if (myProducts.length === 0) {
+        container.innerHTML = `
+          <div class="p-4 text-center bg-light text-muted">
+            <i class="bi bi-box-seam fs-2 mb-2 d-block"></i>
+            Aún no has agregado productos a tu tienda.<br>
+            <a href="productos.html" class="btn btn-sm btn-outline-primary mt-3 px-3 rounded-pill fw-bold">Ir a Productos</a>
+          </div>
+        `;
+        return;
+      }
+
+      // Filtrar productos del vendedor
+      const filtered = myProducts.filter(p => p.nombre.toLowerCase().includes(searchQuery));
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="p-4 text-center bg-light text-muted">
+            No se encontraron productos coincidentes con "${escapeHtml(searchQuery)}".
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(p => {
+        const isChecked = currentCampaign.my_associated_product_ids.includes(parseInt(p.id));
+        const imgUrl = getImgUrl(p.imagen, 2);
+        
+        return `
+          <div class="list-group-item d-flex align-items-center justify-content-between p-3" id="prod-row-${p.id}">
+            <div class="d-flex align-items-center gap-3">
+              <img src="${imgUrl}?t=${Date.now()}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover;">
+              <div>
+                <h6 class="fw-bold mb-0 text-dark">${escapeHtml(p.nombre)}</h6>
+                <span class="text-muted small">${money(p.precio)}</span>
+                <span class="status-msg ms-2 text-success small fw-bold" id="status-msg-${p.id}" style="display: none;">¡Guardado!</span>
+              </div>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input product-toggle" type="checkbox" role="switch" 
+                     id="toggle-${p.id}" data-pid="${p.id}" ${isChecked ? 'checked' : ''} 
+                     onchange="handleToggleProduct(this, ${p.id})">
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function handleToggleProduct(checkbox, productId) {
+      const isChecked = checkbox.checked;
+      checkbox.disabled = true;
+
+      const row = document.getElementById(`prod-row-${productId}`);
+      const statusMsg = document.getElementById(`status-msg-${productId}`);
+      
+      // Mostrar spinner inline o texto temporal de guardando
+      statusMsg.textContent = 'Guardando...';
+      statusMsg.className = 'status-msg ms-2 text-warning small';
+      statusMsg.style.display = 'inline';
+
+      try {
+        let r;
+        if (isChecked) {
+          r = await API.post('/campana_productos.php', {
+            campana_id: currentCampaign.id,
+            producto_id: productId
+          }, true);
+        } else {
+          r = await API.del(`/campana_productos.php?campana_id=${currentCampaign.id}&producto_id=${productId}`);
+        }
+
+        if (r && r.success) {
+          // Operación exitosa
+          if (isChecked) {
+            if (!currentCampaign.my_associated_product_ids.includes(productId)) {
+              currentCampaign.my_associated_product_ids.push(productId);
+            }
+          } else {
+            currentCampaign.my_associated_product_ids = currentCampaign.my_associated_product_ids.filter(id => id !== productId);
+          }
+          currentCampaign.my_products_count = currentCampaign.my_associated_product_ids.length;
+
+          // Mostrar mensaje de éxito temporal
+          statusMsg.textContent = '¡Guardado!';
+          statusMsg.className = 'status-msg ms-2 text-success small fw-bold';
+          setTimeout(() => {
+            if (statusMsg) statusMsg.style.display = 'none';
+          }, 1500);
+
+        } else {
+          throw new Error(r.message || 'Error en la respuesta de la API');
+        }
+
+      } catch (err) {
+        console.error(err);
+        // Revertir estado del checkbox
+        checkbox.checked = !isChecked;
+
+        // Mostrar mensaje de error temporal
+        statusMsg.textContent = 'Error';
+        statusMsg.className = 'status-msg ms-2 text-danger small fw-bold';
+        setTimeout(() => {
+          if (statusMsg) statusMsg.style.display = 'none';
+        }, 3000);
+      } finally {
+        checkbox.disabled = false;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

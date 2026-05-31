@@ -1,1 +1,1 @@
-keep
+# Keep this directory tracked by git but ignore user uploaded files

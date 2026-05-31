@@ -136,6 +136,29 @@ INSERT IGNORE INTO homepage_components (id, name, file_path, default_config) VAL
 (5, 'products', 'components/products.html', '{"title": "Nuestros Productos"}'),
 (6, 'seller_cta', 'components/seller_cta.html', '{"image_url": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=1200&q=80", "badge": "¿Eres Artesano?", "title": "Vende tus artesanías en Artesanías Sur", "description": "Crea tu tienda virtual hoy mismo, llega a más personas de la Patagonia y gestiona tus productos fácilmente.", "button_text": "Solicitar ser Vendedor"}');
 
+CREATE TABLE IF NOT EXISTS campanas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(150) NOT NULL,
+  descripcion TEXT NULL,
+  imagen VARCHAR(255) NULL,
+  activa TINYINT(1) DEFAULT 1,
+  fecha_inicio DATE NULL,
+  fecha_fin DATE NULL,
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS campana_productos (
+  campana_id INT NOT NULL,
+  producto_id INT NOT NULL,
+  PRIMARY KEY (campana_id, producto_id),
+  FOREIGN KEY (campana_id) REFERENCES campanas(id) ON DELETE CASCADE,
+  FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO homepage_components (name, file_path, default_config) VALUES
+('campaigns', 'components/campaigns.html', '{"title": "Campañas Especiales", "subtitle": "Eventos y promociones de temporada"}');
+
+
 INSERT IGNORE INTO homepage_layout (id, component_id, is_enabled, order_index, config_payload) VALUES
 (1, 1, 1, 1, '{"image_url": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1600&q=80", "badge": "100% Hecho a Mano", "title": "Diseño local, alma patagónica", "description": "Conecta directamente con artesanos y adquiere piezas únicas con historia.", "button_text": "Explorar tiendas", "button_link": "#tiendas"}'),
 (2, 2, 1, 2, '{"title": "Categorías"}'),

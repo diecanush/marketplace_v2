@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campañas - Panel Admin</title>
+  
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Custom Style -->
+  <link href="../assets/css/style.css" rel="stylesheet">
+  <!-- Cropper.js CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <aside class="col-md-3 col-lg-2 side p-3">
+        <div class="d-flex align-items-center mb-4 px-2">
+          <span class="brand-logo mb-0">AS</span>
+          <h5 class="mb-0 side-title">Artesanías Sur</h5>
+        </div>
+        <div class="small text-white-50 mb-4 px-2 border-bottom border-secondary pb-3">
+          <i class="bi bi-shield-lock text-accent"></i> <span id="userBox">Cargando...</span>
+        </div>
+        <nav class="nav flex-column">
+          <!-- Autopopulated by Auth.paint() -->
+          <a href="dashboard.html"><i class="bi bi-speedometer2"></i> Inicio</a>
+          <a href="usuarios.html"><i class="bi bi-people"></i> Usuarios</a>
+          <a href="tiendas.html"><i class="bi bi-shop"></i> Tiendas</a>
+          <a href="categorias.html"><i class="bi bi-tags"></i> Categorías</a>
+          <a href="ventas.html"><i class="bi bi-receipt"></i> Ventas</a>
+          <a href="solicitudes.html"><i class="bi bi-send-check"></i> Solicitudes <span id="navPendingBadge" class="badge text-bg-warning rounded-pill" style="display:none;">0</span></a>
+          <a href="layout.html"><i class="bi bi-grid-1x2"></i> Diseño Home</a>
+          <a href="campanas.html" class="active"><i class="bi bi-megaphone"></i> Campañas</a>
+          <hr class="text-white-50">
+          <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
+          <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-10 p-4 bg-light" style="min-height: 100vh;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h1 class="h2 mb-0">Gestión de Campañas</h1>
+          <button class="btn btn-dark d-flex align-items-center gap-1" id="toggleFormBtn" onclick="toggleForm()">
+            <i class="bi bi-plus-lg"></i> Nueva Campaña
+          </button>
+        </div>
+        
+        <div id="msg"></div>
+
+        <!-- Form Card (Oculto por defecto) -->
+        <div class="card border-0 rounded-4 shadow-sm mb-4" id="formCard" style="display: none;">
+          <div class="card-body p-4">
+            <h4 class="fw-bold mb-3" id="formTitle">Agregar Nueva Campaña</h4>
+            <form id="f" class="row g-3">
+              <input type="hidden" id="id">
+              
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label fw-bold small text-dark">Nombre de la Campaña</label>
+                  <input id="nombre" class="form-control rounded-3" placeholder="Ej: Invierno Patagónico, Black Friday" required>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="form-label fw-bold small text-dark">Descripción</label>
+                  <textarea id="descripcion" class="form-control rounded-3" placeholder="Detalles de la campaña, beneficios, fechas o alcances" rows="4"></textarea>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold small text-dark">Fecha de Inicio</label>
+                    <input id="fecha_inicio" type="date" class="form-control rounded-3">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold small text-dark">Fecha de Finalización</label>
+                    <input id="fecha_fin" type="date" class="form-control rounded-3">
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold small text-dark">Banner de Campaña (Proporción 2:1)</label>
+                  <div class="d-flex align-items-center gap-3">
+                    <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-bold" onclick="triggerFileInput()">
+                      <i class="bi bi-upload"></i> Explorar Imagen
+                    </button>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                    <input type="hidden" id="imagen">
+                    
+                    <div id="imagePreviewContainer" style="display: none; position: relative;">
+                      <img id="imagePreview" src="" class="rounded-3 border" style="max-height: 80px; object-fit: contain;">
+                      <button type="button" class="btn btn-danger btn-sm rounded-circle p-1 position-absolute top-0 start-100 translate-middle" onclick="removeImage()" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 10px;">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-text">Si no se provee imagen, se usará un banner genérico estructurado.</div>
+                </div>
+
+                <div class="mb-3 pt-2">
+                  <div class="form-check form-switch mb-0">
+                    <input id="activa" class="form-check-input" type="checkbox" role="switch" checked>
+                    <label class="form-check-label fw-bold small" for="activa">Campaña Activa para el Público</label>
+                  </div>
+                  <div class="form-text">Las campañas inactivas no se muestran en el sitio público.</div>
+                </div>
+              </div>
+
+              <div class="col-12 mt-4 d-flex gap-2 border-top pt-3">
+                <button class="btn btn-dark px-4 py-2" id="saveBtn">Guardar Campaña</button>
+                <button type="button" class="btn btn-outline-secondary px-4 py-2" id="cancelBtn" onclick="toggleForm()">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Campaigns List -->
+        <h4 class="fw-bold mb-3 text-dark"><i class="bi bi-megaphone-fill text-primary me-2"></i>Campañas Registradas</h4>
+        <div class="row g-4" id="list">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal de Recorte Cropper -->
+  <div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalTitle" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header border-bottom-0 p-4 pb-0">
+          <h5 class="modal-title fw-bold text-dark" id="cropperModalTitle"><i class="bi bi-crop text-primary"></i> Recortar Banner de Campaña (2:1)</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="img-container" style="max-height: 450px; overflow: hidden; border-radius: 12px; background: #f8f9fa;">
+            <img id="cropperImage" src="" style="max-width: 100%;">
+          </div>
+        </div>
+        <div class="modal-footer border-top-0 p-4 pt-0 d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary px-4 py-2" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-dark px-4 py-2" id="cropperConfirmBtn">Confirmar y Recortar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  
+  <script>
+    Auth.role(['admin']);
+    Auth.paint();
+
+    let cropper = null;
+    let cropperModal = null;
+    let campaignsList = [];
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    async function load() {
+      // Conteo de solicitudes pendientes para el sidebar
+      let pendingRes = await API.get('/solicitudes.php?pending_count=1', true);
+      if (pendingRes.success) {
+        let badge = document.getElementById('navPendingBadge');
+        if (pendingRes.count > 0) {
+          badge.textContent = pendingRes.count;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+
+      let r = await API.get('/campanas.php', true);
+      if (!r.success) return showError('msg', r);
+      
+      campaignsList = r.data || [];
+      const listContainer = document.getElementById('list');
+      
+      listContainer.innerHTML = campaignsList.map(c => {
+        let activeBadge = c.activa == 1 
+          ? '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Activa</span>'
+          : '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill">Inactiva</span>';
+        
+        let dateText = '';
+        if (c.fecha_inicio || c.fecha_fin) {
+          dateText = `<div class="text-muted small mt-1"><i class="bi bi-calendar3 me-1"></i> ${c.fecha_inicio || 'Siempre'} al ${c.fecha_fin || 'Siempre'}</div>`;
+        } else {
+          dateText = `<div class="text-muted small mt-1"><i class="bi bi-calendar3 me-1"></i> Vigencia permanente</div>`;
+        }
+
+        let imgUrl = getImgUrl(c.imagen, 2);
+        let headerHtml = c.imagen 
+          ? `<div class="ratio ratio-21 border-bottom" style="height: 140px; background: url('${imgUrl}?t=${Date.now()}') center/cover no-repeat;"></div>`
+          : `<div class="ratio ratio-21 border-bottom d-flex align-items-center justify-content-center bg-soft-primary" style="height: 140px; background: linear-gradient(135deg, #d38d6b, #af4220); color: white;">
+               <div class="text-center w-100 py-4"><i class="bi bi-megaphone fs-1"></i></div>
+             </div>`;
+             
+        return `
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border border-0 rounded-4 overflow-hidden d-flex flex-column justify-content-between">
+              <div>
+                ${headerHtml}
+                <div class="p-4">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h5 class="fw-bold mb-0 text-dark text-truncate" style="max-width: 70%;">${escapeHtml(c.nombre)}</h5>
+                    ${activeBadge}
+                  </div>
+                  <p class="text-muted small mb-2 text-truncate-3" style="min-height: 48px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                    ${escapeHtml(c.descripcion || 'Sin descripción.')}
+                  </p>
+                  ${dateText}
+                  <div class="text-muted small mt-2">
+                    <i class="bi bi-grid-3x3-gap me-1"></i> Productos: <strong>${c.total_productos}</strong>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="p-4 pt-0">
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                  <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 fw-bold rounded-pill px-3" onclick="editCampaign(${c.id})">
+                    <i class="bi bi-pencil"></i> Editar
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1 fw-bold rounded-pill px-3" onclick="delCampaign(${c.id})">
+                    <i class="bi bi-trash"></i> Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('') || '<div class="col-12"><div class="alert alert-info rounded-4 border-0 shadow-sm">No hay campañas registradas.</div></div>';
+    }
+
+    // Modal de recorte Cropper.js handlers
+    function triggerFileInput() {
+      document.getElementById('fileInput').click();
+    }
+
+    document.getElementById('fileInput').onchange = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      let reader = new FileReader();
+      reader.onload = function(evt) {
+        let cropImg = document.getElementById('cropperImage');
+        cropImg.onload = null;
+        cropImg.src = evt.target.result;
+        
+        if (!cropperModal) {
+          cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
+        }
+        cropperModal.show();
+      };
+      reader.readAsDataURL(file);
+    };
+
+    function initCropper() {
+      let cropImg = document.getElementById('cropperImage');
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+      
+      cropper = new Cropper(cropImg, {
+        aspectRatio: 2, // 2:1
+        viewMode: 1,
+        dragMode: 'move',
+        autoCropArea: 0.9,
+        restore: false,
+        guides: true,
+        center: true,
+        highlight: false,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        toggleDragModeOnDblclick: false
+      });
+    }
+
+    document.getElementById('cropperModal').addEventListener('shown.bs.modal', function () {
+      let cropImg = document.getElementById('cropperImage');
+      if (cropImg.naturalWidth > 0) {
+        initCropper();
+      } else {
+        cropImg.onload = function() {
+          initCropper();
+          cropImg.onload = null;
+        };
+      }
+    });
+
+    document.getElementById('cropperModal').addEventListener('hidden.bs.modal', function () {
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+      document.getElementById('cropperImage').src = '';
+      document.getElementById('fileInput').value = '';
+    });
+
+    document.getElementById('cropperConfirmBtn').onclick = function() {
+      if (!cropper) return;
+      
+      let canvas = cropper.getCroppedCanvas({
+        width: 1000,
+        height: 500,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+      });
+      
+      let croppedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+      
+      document.getElementById('imagePreview').src = croppedBase64;
+      document.getElementById('imagePreviewContainer').style.display = 'block';
+      document.getElementById('imagen').value = croppedBase64;
+      
+      cropperModal.hide();
+    };
+
+    function removeImage() {
+      document.getElementById('imagePreview').src = '';
+      document.getElementById('imagePreviewContainer').style.display = 'none';
+      document.getElementById('imagen').value = '';
+      document.getElementById('fileInput').value = '';
+    }
+
+    // CRUD Form actions
+    function toggleForm() {
+      const card = document.getElementById('formCard');
+      const btn = document.getElementById('toggleFormBtn');
+      if (card.style.display === 'none') {
+        card.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-dash-lg"></i> Ocultar Formulario';
+        btn.classList.replace('btn-dark', 'btn-outline-dark');
+        resetForm();
+      } else {
+        card.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-plus-lg"></i> Nueva Campaña';
+        btn.classList.replace('btn-outline-dark', 'btn-dark');
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('formTitle').textContent = 'Agregar Nueva Campaña';
+      document.getElementById('f').reset();
+      document.getElementById('id').value = '';
+      document.getElementById('activa').checked = true;
+      removeImage();
+    }
+
+    function editCampaign(cid) {
+      const c = campaignsList.find(x => x.id == cid);
+      if (!c) return;
+
+      const card = document.getElementById('formCard');
+      if (card.style.display === 'none') {
+        toggleForm();
+      }
+
+      document.getElementById('formTitle').textContent = 'Editar Campaña';
+      document.getElementById('id').value = c.id;
+      document.getElementById('nombre').value = c.nombre || '';
+      document.getElementById('descripcion').value = c.descripcion || '';
+      document.getElementById('fecha_inicio').value = c.fecha_inicio || '';
+      document.getElementById('fecha_fin').value = c.fecha_fin || '';
+      document.getElementById('activa').checked = c.activa == 1;
+
+      if (c.imagen) {
+        document.getElementById('imagePreview').src = getImgUrl(c.imagen, 2);
+        document.getElementById('imagePreviewContainer').style.display = 'block';
+        document.getElementById('imagen').value = ''; // Solo se envia si se modifica
+      } else {
+        removeImage();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('f').onsubmit = async e => {
+      e.preventDefault();
+      
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Guardando...`;
+
+      let d = {
+        nombre: document.getElementById('nombre').value.trim(),
+        descripcion: document.getElementById('descripcion').value.trim(),
+        fecha_inicio: document.getElementById('fecha_inicio').value || null,
+        fecha_fin: document.getElementById('fecha_fin').value || null,
+        activa: document.getElementById('activa').checked,
+        imagen: document.getElementById('imagen').value
+      };
+      
+      const cid = document.getElementById('id').value;
+      let r = cid 
+        ? await API.put('/campanas.php?id=' + cid, d)
+        : await API.post('/campanas.php', d, true);
+        
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Guardar Campaña';
+
+      if (!r.success) {
+        alert(r.message || 'Error al guardar la campaña');
+        return;
+      }
+      
+      toggleForm();
+      load();
+    };
+
+    async function delCampaign(cid) {
+      if (confirm('¿Seguro que deseas eliminar esta campaña? Se borrará su banner y se desasociarán todos los productos vinculados (los productos no se eliminarán).')) {
+        let r = await API.del('/campanas.php?id=' + cid);
+        if (!r.success) {
+          alert(r.message || 'Error al eliminar campaña');
+        }
+        load();
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>

@@ -1,10 +1,9 @@
 <?php
 class Database {
-  private $host = 'localhost';
-  private $db_name = 'your_database_name';
-  private $username = 'your_database_user';
-  private $password = 'your_database_password';
-
+  private $host = 'TU_HOST_AQUI'; // Ej: localhost o mysql.hostinger.com
+  private $db_name = 'TU_BASE_DATOS_AQUI';
+  private $username = 'TU_USUARIO_AQUI';
+  private $password = 'TU_CONTRASEÑA_AQUI';
   public function connect() {
     try {
       return new PDO(
