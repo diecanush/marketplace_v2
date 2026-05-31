@@ -119,7 +119,10 @@
             </td>
             <td style="padding: 1rem;" class="text-muted small">${regDate}</td>
             <td class="text-end" style="padding: 1rem;">
-              <button class="btn btn-sm btn-dark" onclick="save(${u.id})"><i class="bi bi-save"></i> Guardar</button>
+              <div class="d-flex justify-content-end gap-1">
+                <button class="btn btn-sm btn-dark" onclick="save(${u.id})"><i class="bi bi-save"></i> Guardar</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="del(${u.id})"><i class="bi bi-trash"></i></button>
+              </div>
             </td>
           </tr>
         `;
@@ -146,6 +149,18 @@
       
       alert('¡Usuario actualizado con éxito!');
       load();
+    }
+
+    async function del(id) {
+      if (confirm('¿Seguro que deseas eliminar este usuario? Si es un vendedor, se eliminará su tienda y todos sus productos asociados de forma permanente.')) {
+        let r = await API.del('/usuarios.php?id=' + id);
+        if (!r.success) {
+          alert(r.message);
+        } else {
+          alert('¡Usuario eliminado con éxito!');
+        }
+        load();
+      }
     }
 
     load();

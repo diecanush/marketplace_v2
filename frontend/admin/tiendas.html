@@ -138,7 +138,10 @@
               </div>
             </td>
             <td class="text-end" style="padding: 1rem;">
-              <button class="btn btn-sm btn-dark" onclick="save(${t.id})"><i class="bi bi-save"></i> Guardar</button>
+              <div class="d-flex justify-content-end gap-1">
+                <button class="btn btn-sm btn-dark" onclick="save(${t.id})"><i class="bi bi-save"></i> Guardar</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="del(${t.id})"><i class="bi bi-trash"></i></button>
+              </div>
             </td>
           </tr>
         `;
@@ -175,6 +178,18 @@
       
       alert('¡Tienda guardada con éxito!');
       load();
+    }
+
+    async function del(id) {
+      if (confirm('¿Seguro que deseas eliminar esta tienda? Se borrarán de forma permanente todos los productos y el catálogo asociados a ella.')) {
+        let r = await API.del('/tiendas.php?id=' + id);
+        if (!r.success) {
+          alert(r.message);
+        } else {
+          alert('¡Tienda eliminada con éxito!');
+        }
+        load();
+      }
     }
 
     load();

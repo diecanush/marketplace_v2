@@ -128,4 +128,15 @@ if ($method === 'PUT') {
     
     json_response(['success' => true]); 
 }
+
+if ($method === 'DELETE') {
+    if ($u['rol'] !== 'admin') {
+        json_response(['success' => false, 'message' => 'No autorizado.'], 403);
+    }
+    $id = (int)($_GET['id'] ?? 0);
+    $s = $db->prepare('DELETE FROM tiendas WHERE id = ?');
+    $s->execute([$id]);
+    json_response(['success' => true]);
+}
+
 json_response(['success' => false, 'message' => 'Método no permitido.'], 405);
