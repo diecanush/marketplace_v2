@@ -157,13 +157,6 @@ if ($method === 'POST') {
         json_response(['success' => false, 'message' => 'ID de componente no válido.'], 422);
     }
 
-    // Prevención de múltiples instancias del mismo tipo en Etapa 1
-    $check = $db->prepare("SELECT id FROM homepage_layout WHERE component_id = ?");
-    $check->execute([$component_id]);
-    if ($check->fetch()) {
-        json_response(['success' => false, 'message' => 'Este componente ya está en uso en el diseño.'], 409);
-    }
-
     // Obtener default_config del catálogo
     $stmt = $db->prepare("SELECT default_config FROM homepage_components WHERE id = ?");
     $stmt->execute([$component_id]);

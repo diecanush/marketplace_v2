@@ -245,22 +245,18 @@
         window.adminLayoutData = layout; // Guardar globalmente para el modal de edición
         window.adminComponentsData = catalog; // Guardar catálogo de componentes
         
-        // Filtrar componentes que ya están instanciados en el layout
-        const instancedComponentIds = layout.map(item => Number(item.component_id));
-        const availableComponents = catalog.filter(c => !instancedComponentIds.includes(Number(c.id)));
-
-        // Rellenar selector de agregar sección
+        // Rellenar selector de agregar sección (Catálogo completo para permitir múltiples instancias)
         const select = document.getElementById('componentSelect');
         const btnAdd = document.getElementById('btnAddSection');
         if (select) {
-          if (availableComponents.length === 0) {
-            select.innerHTML = '<option value="" selected disabled>Todos los componentes del catálogo ya están agregados</option>';
+          if (catalog.length === 0) {
+            select.innerHTML = '<option value="" selected disabled>No hay componentes disponibles en el catálogo</option>';
             select.disabled = true;
             btnAdd.disabled = true;
           } else {
             select.innerHTML = `
               <option value="" selected disabled>Seleccionar componente...</option>
-              ${availableComponents.map(c => `<option value="${c.id}">${c.name.toUpperCase().replace('_', ' ')} (${c.name})</option>`).join('')}
+              ${catalog.map(c => `<option value="${c.id}">${c.name.toUpperCase().replace('_', ' ')} (${c.name})</option>`).join('')}
             `;
             select.disabled = false;
             btnAdd.disabled = false;
