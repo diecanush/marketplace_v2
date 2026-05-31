@@ -147,4 +147,55 @@ if ($method === 'PUT') {
     }
 }
 
+if ($method === 'POST') {
+    $u = auth();
+    role($u, ['admin']);
+
+    $d = body();
+    $component_id = isset($d['component_id']) ? (int)$d['component_id'] : 0;
+    if ($component_id <= 0) {
+        json_response(['success' => false, 'message' => 'ID de componente no válido.'], 422);
+    }
+
+    // Prevención de múltiples instancias del mismo tipo en Etapa 1
+    $check = $db->prepare("SELECT id FROM homepage_layout WHERE component_id = ?");
+    $check->execute([$component_id]);
+    if ($check->fetch()) {
+        json_response(['success' => false, 'message' => 'Este componente ya está en uso en el diseño.'], 409);
+    }
+
+    // Obtener default_config del catálogo
+    $stmt = $db->prepare("SELECT default_config FROM homepage_components WHERE id = ?");
+    $stmt->execute([$component_id]);
+    $comp = $stmt->fetch();
+    if (!$comp) {
+        json_response(['success' => false, 'message' => 'Componente no encontrado en el catálogo.'], 404);
+    }
+
+    // Calcular MAX(order_index)
+    $maxOrder = (int)$db->query("SELECT MAX(order_index) FROM homepage_layout")->fetchColumn();
+    $nextOrder = $maxOrder + 1;
+
+    // Insertar en homepage_layout
+    $ins = $db->prepare("INSERT INTO homepage_layout (component_id, is_enabled, order_index, config_payload) VALUES (?, 1, ?, ?)");
+    $ins->execute([$component_id, $nextOrder, $comp['default_config']]);
+
+    json_response(['success' => true, 'id' => (int)$db->lastInsertId()], 201);
+}
+
+if ($method === 'DELETE') {
+    $u = auth();
+    role($u, ['admin']);
+
+    $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+    if ($id <= 0) {
+        json_response(['success' => false, 'message' => 'ID de instancia no válido.'], 422);
+    }
+
+    $s = $db->prepare("DELETE FROM homepage_layout WHERE id = ?");
+    $s->execute([$id]);
+
+    json_response(['success' => true]);
+}
+
 json_response(['success' => false, 'message' => 'Método no permitido.'], 405);

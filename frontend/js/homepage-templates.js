@@ -134,8 +134,9 @@
       `;
     },
 
-    categories: function(payload) {
+    categories: function(payload, layoutId) {
       const title = escapeHtml(getVal(payload, 'title'));
+      const suffix = layoutId ? `-${layoutId}` : '';
 
       // Style variables with safety fallbacks
       const bg_color = escapeHtml(payload?.style_background_color || '#f8f9fa');
@@ -152,16 +153,17 @@
           <div class="section-title ${alignClass}" style="text-align: ${text_align};">
             <h2 class="${title_size} fw-bold" style="color: ${title_color} !important; font-family: ${formatFont(title_font)} !important;">${title}</h2>
           </div>
-          <div class="scroll-row" id="chipsCategorias">
+          <div class="scroll-row" id="chipsCategorias${suffix}">
             <!-- Rendered via JS -->
           </div>
         </section>
       `;
     },
 
-    stores: function(payload) {
+    stores: function(payload, layoutId) {
       const title = escapeHtml(getVal(payload, 'title'));
       const subtitle = escapeHtml(getVal(payload, 'subtitle'));
+      const suffix = layoutId ? `-${layoutId}` : '';
 
       // Style variables with safety fallbacks
       const bg_color = escapeHtml(payload?.style_background_color || '#ffffff');
@@ -178,20 +180,21 @@
       const alignClass = text_align === 'left' ? 'text-start' : (text_align === 'right' ? 'text-end' : 'text-center');
 
       return `
-        <section id="tiendas" class="mb-5 p-4 rounded-4" style="background-color: ${bg_color};">
+        <section id="tiendas${suffix}" class="mb-5 p-4 rounded-4" style="background-color: ${bg_color};">
           <div class="section-title ${alignClass} mb-4" style="text-align: ${text_align};">
             <h2 class="${title_size} fw-bold mb-1" style="color: ${title_color} !important; font-family: ${formatFont(title_font)} !important;">${title}</h2>
             <p style="color: ${text_color} !important; font-family: ${formatFont(text_font)} !important;" class="mb-0 ${text_size}">${subtitle}</p>
           </div>
-          <div class="scroll-row" id="storesContainer">
+          <div class="scroll-row" id="storesContainer${suffix}">
             <!-- Rendered via JS -->
           </div>
         </section>
       `;
     },
 
-    offers: function(payload) {
+    offers: function(payload, layoutId) {
       const title = escapeHtml(getVal(payload, 'title'));
+      const suffix = layoutId ? `-${layoutId}` : '';
 
       // Style variables with safety fallbacks
       const bg_color = escapeHtml(payload?.style_background_color || '#f8f9fa');
@@ -221,19 +224,20 @@
           </div>
         </div>
 
-        <section id="ofertas" class="mb-5 p-4 rounded-4" style="background-color: ${bg_color};">
+        <section id="ofertas${suffix}" class="mb-5 p-4 rounded-4" style="background-color: ${bg_color};">
           <div class="section-title ${alignClass}" style="text-align: ${text_align};">
             <h2 class="${title_size} fw-bold" style="color: ${title_color} !important; font-family: ${formatFont(title_font)} !important;">${title}</h2>
           </div>
-          <div class="scroll-row" id="offersContainer">
+          <div class="scroll-row" id="offersContainer${suffix}">
             <!-- Rendered via JS -->
           </div>
         </section>
       `;
     },
 
-    products: function(payload) {
+    products: function(payload, layoutId) {
       const title = escapeHtml(getVal(payload, 'title'));
+      const suffix = layoutId ? `-${layoutId}` : '';
 
       // Style variables with safety fallbacks
       const bg_color = escapeHtml(payload?.style_background_color || '#ffffff');
@@ -246,11 +250,11 @@
       const alignClass = text_align === 'left' ? 'text-start' : (text_align === 'right' ? 'text-end' : 'text-center');
 
       return `
-        <section id="categorias" class="mb-5 p-4 rounded-4" style="background-color: ${bg_color};">
+        <section id="categorias${suffix}" class="mb-5 p-4 rounded-4" style="background-color: ${bg_color};">
           <div class="section-title ${alignClass}" style="text-align: ${text_align};">
             <h2 class="${title_size} fw-bold" style="color: ${title_color} !important; font-family: ${formatFont(title_font)} !important;">${title}</h2>
           </div>
-          <div id="categoriesContainer">
+          <div id="productsContainer${suffix}">
             <!-- Rendered via JS -->
           </div>
         </section>

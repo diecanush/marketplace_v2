@@ -78,6 +78,27 @@
         
         <div id="msg"></div>
 
+        <!-- Add Section Component Selector -->
+        <div class="card border-0 rounded-4 shadow-sm mb-4">
+          <div class="card-body p-3">
+            <div class="row align-items-center g-3">
+              <div class="col-md-7 col-lg-8">
+                <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
+                  <span class="fw-bold text-dark text-nowrap"><i class="bi bi-plus-circle text-primary"></i> Agregar Sección:</span>
+                  <select id="componentSelect" class="form-select rounded-3 border-secondary-subtle" disabled>
+                    <option value="" selected disabled>Cargando componentes disponibles...</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-5 col-lg-4 text-md-end">
+                <button class="btn btn-dark w-100 rounded-pill fw-bold" id="btnAddSection" onclick="addSection()" disabled>
+                  <i class="bi bi-plus-lg"></i> Agregar al Diseño
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="card border-0 rounded-4 shadow-sm">
           <div class="card-body p-4">
             <div class="table-responsive">
@@ -90,7 +111,7 @@
                     <th>Clave</th>
                     <th style="width: 120px;" class="text-center">Orden</th>
                     <th style="width: 150px;" class="text-center">Estado</th>
-                    <th style="width: 150px;" class="text-end">Contenido</th>
+                    <th style="width: 250px;" class="text-end">Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="layoutTableBody">
@@ -220,8 +241,32 @@
         }
 
         const layout = res.layout || [];
+        const catalog = res.components || [];
         window.adminLayoutData = layout; // Guardar globalmente para el modal de edición
-        window.adminComponentsData = res.components || []; // Guardar catálogo de componentes
+        window.adminComponentsData = catalog; // Guardar catálogo de componentes
+        
+        // Filtrar componentes que ya están instanciados en el layout
+        const instancedComponentIds = layout.map(item => Number(item.component_id));
+        const availableComponents = catalog.filter(c => !instancedComponentIds.includes(Number(c.id)));
+
+        // Rellenar selector de agregar sección
+        const select = document.getElementById('componentSelect');
+        const btnAdd = document.getElementById('btnAddSection');
+        if (select) {
+          if (availableComponents.length === 0) {
+            select.innerHTML = '<option value="" selected disabled>Todos los componentes del catálogo ya están agregados</option>';
+            select.disabled = true;
+            btnAdd.disabled = true;
+          } else {
+            select.innerHTML = `
+              <option value="" selected disabled>Seleccionar componente...</option>
+              ${availableComponents.map(c => `<option value="${c.id}">${c.name.toUpperCase().replace('_', ' ')} (${c.name})</option>`).join('')}
+            `;
+            select.disabled = false;
+            btnAdd.disabled = false;
+          }
+        }
+
         const tbody = document.getElementById('layoutTableBody');
         
         if (layout.length === 0) {
@@ -268,9 +313,14 @@
                 </div>
               </td>
               <td class="text-end">
-                <button class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold" onclick="openEditModal(${item.id})">
-                  <i class="bi bi-pencil-square"></i> Editar
-                </button>
+                <div class="d-flex justify-content-end gap-2">
+                  <button class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold" onclick="openEditModal(${item.id})">
+                    <i class="bi bi-pencil-square"></i> Editar
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger rounded-pill px-2.5" onclick="deleteSection(${item.id}, '${item.name}')" title="Eliminar del diseño">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
               </td>
             </tr>
           `;
@@ -424,6 +474,50 @@
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-save"></i> Guardar Orden';
+      }
+    }
+
+    // Agregar sección al layout
+    async function addSection() {
+      const select = document.getElementById('componentSelect');
+      const val = select.value;
+      if (!val) return;
+
+      const btn = document.getElementById('btnAddSection');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Agregando...';
+
+      try {
+        let res = await API.post('/homepage.php', { component_id: Number(val) }, true);
+        if (res.success) {
+          showToast('Componente agregado con éxito al diseño.', 'success');
+          await loadLayout();
+        } else {
+          showToast('Error al agregar el componente: ' + res.message, 'danger');
+        }
+      } catch (e) {
+        showToast('Error de red al agregar componente.', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-plus-lg"></i> Agregar al Diseño';
+      }
+    }
+
+    // Quitar sección del layout con confirmación
+    async function deleteSection(id, name) {
+      const label = name.toUpperCase().replace('_', ' ');
+      if (confirm(`¿Seguro que deseas quitar la sección "${label}" del diseño?\n(Esta acción eliminará el contenido y estilos modificados de esta instancia en la home. No se eliminará la plantilla base del catálogo).`)) {
+        try {
+          let res = await API.del(`/homepage.php?id=${id}`);
+          if (res.success) {
+            showToast('Sección quitada del diseño con éxito.', 'success');
+            await loadLayout();
+          } else {
+            showToast('Error al quitar la sección: ' + res.message, 'danger');
+          }
+        } catch (e) {
+          showToast('Error de red al quitar la sección.', 'danger');
+        }
       }
     }
 
