@@ -1,0 +1,3 @@
+# Force PHP 8.0 on cPanel/EasyApache hosting.
+AddHandler application/x-httpd-ea-php80 .php .php8 .phtml
+
