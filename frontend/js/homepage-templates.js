@@ -305,6 +305,38 @@
           </div>
         </section>
       `;
+    },
+
+    campaigns: function(payload, layoutId) {
+      const title = escapeHtml(getVal(payload, 'title') || 'Campañas Especiales');
+      const subtitle = escapeHtml(getVal(payload, 'subtitle') || 'Eventos y promociones de temporada');
+      const suffix = layoutId ? `-${layoutId}` : '';
+
+      // Style variables with safety fallbacks
+      const bg_color = escapeHtml(payload?.style_background_color || '#ffffff');
+      const text_align = escapeHtml(payload?.style_text_align || 'left');
+      
+      const title_color = escapeHtml(payload?.style_title_color || '#212529');
+      const title_font = escapeHtml(payload?.style_title_font_family || 'Outfit');
+      const title_size = escapeHtml(payload?.style_title_size || 'fs-2');
+
+      const text_color = escapeHtml(payload?.style_text_color || '#6c757d');
+      const text_font = escapeHtml(payload?.style_text_font_family || 'Inter');
+      const text_size = escapeHtml(payload?.style_text_size || 'fs-4');
+
+      const alignClass = text_align === 'left' ? 'text-start' : (text_align === 'right' ? 'text-end' : 'text-center');
+
+      return `
+        <section id="campanas${suffix}" class="mb-5 p-4 rounded-4" style="background-color: ${bg_color};">
+          <div class="section-title ${alignClass} mb-4" style="text-align: ${text_align};">
+            <h2 class="${title_size} fw-bold mb-1" style="color: ${title_color} !important; font-family: ${formatFont(title_font)} !important;">${title}</h2>
+            <p style="color: ${text_color} !important; font-family: ${formatFont(text_font)} !important;" class="mb-0 ${text_size}">${subtitle}</p>
+          </div>
+          <div class="scroll-row" id="campaignsContainer${suffix}">
+            <div class="text-muted py-3 px-2">No hay campañas especiales activas en este momento.</div>
+          </div>
+        </section>
+      `;
     }
   };
 })();

@@ -32,21 +32,27 @@ if ($method === 'GET') {
         
         json_response(['success' => true, 'data' => $campana]);
     } else {
-        // Listado de campañas
-        $sql = "SELECT * FROM campanas";
-        $params = [];
+        // Listado de campañas con conteo de productos asociados
+        $sql = "SELECT c.*, COUNT(cp.producto_id) AS total_productos 
+                FROM campanas c 
+                LEFT JOIN campana_productos cp ON cp.campana_id = c.id";
         
         if (isset($_GET['active']) && $_GET['active'] == 1) {
-            $sql .= " WHERE activa = 1 
-                      AND (fecha_inicio IS NULL OR fecha_inicio <= CURDATE()) 
-                      AND (fecha_fin IS NULL OR fecha_fin >= CURDATE())";
+            $sql .= " WHERE c.activa = 1 
+                      AND (c.fecha_inicio IS NULL OR c.fecha_inicio <= CURDATE()) 
+                      AND (c.fecha_fin IS NULL OR c.fecha_fin >= CURDATE())";
         }
         
-        $sql .= " ORDER BY fecha_creacion DESC";
+        $sql .= " GROUP BY c.id ORDER BY c.fecha_creacion DESC";
         $stmt = $db->prepare($sql);
-        $stmt->execute($params);
+        $stmt->execute([]);
         
-        json_response(['success' => true, 'data' => $stmt->fetchAll()]);
+        $campanas = $stmt->fetchAll();
+        foreach ($campanas as &$camp) {
+            $camp['total_productos'] = (int)$camp['total_productos'];
+        }
+        
+        json_response(['success' => true, 'data' => $campanas]);
     }
 }
 

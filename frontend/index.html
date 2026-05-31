@@ -285,22 +285,30 @@
       // Guardar en la variable global
       activeHomepageLayout = layout;
 
-      // 2. Recorrer y compilar de manera síncrona
+      // 2. Recorrer y compilar de manera síncrona con aislamiento de errores
       let html = '';
       layout.forEach(item => {
-        const renderer = window.homepageTemplates[item.name];
-        if (typeof renderer !== 'function') {
-          console.warn(`Plantilla no encontrada para el componente: ${item.name}`);
-          return;
+        try {
+          if (!window.homepageTemplates) {
+            console.error('La librería homepageTemplates no está inicializada.');
+            return;
+          }
+          const renderer = window.homepageTemplates[item.name];
+          if (typeof renderer !== 'function') {
+            console.warn(`Plantilla no encontrada para el componente: ${item.name}`);
+            return;
+          }
+          
+          // Pasar el item.id al renderer para generar IDs únicos
+          let compiled = renderer(item.config_payload, item.id);
+          // Para componentes que no son Hero, los envolvemos en la grilla y espaciados container de Bootstrap
+          if (item.name !== 'hero') {
+            compiled = `<div class="container py-2">${compiled}</div>`;
+          }
+          html += compiled;
+        } catch (err) {
+          console.error(`Error al renderizar el componente dinámico [${item.name}]:`, err);
         }
-        
-        // Pasar el item.id al renderer para generar IDs únicos
-        let compiled = renderer(item.config_payload, item.id);
-        // Para componentes que no son Hero, los envolvemos en la grilla y espaciados container de Bootstrap
-        if (item.name !== 'hero') {
-          compiled = `<div class="container py-2">${compiled}</div>`;
-        }
-        html += compiled;
       });
 
       // 3. Single DOM Write e inyección única
@@ -330,14 +338,16 @@
         // 5. Invocar sub-renderizadores con filter() y forEach() para todas las instancias de cada tipo
         const categoriesInsts = activeHomepageLayout.filter(item => item.name === 'categories');
         categoriesInsts.forEach(inst => {
-          if (document.getElementById(`chipsCategorias-${inst.id}`)) {
+          const suffix = inst.id ? `-${inst.id}` : '';
+          if (document.getElementById(`chipsCategorias${suffix}`)) {
             renderCategories(categorias, inst.id);
           }
         });
 
         const storesInsts = activeHomepageLayout.filter(item => item.name === 'stores');
         storesInsts.forEach(inst => {
-          if (document.getElementById(`storesContainer-${inst.id}`)) {
+          const suffix = inst.id ? `-${inst.id}` : '';
+          if (document.getElementById(`storesContainer${suffix}`)) {
             renderStores(tiendas, inst.id);
           }
         });
@@ -471,8 +481,9 @@
       // Hydrate all Stores instances
       const storesInsts = activeHomepageLayout.filter(item => item.name === 'stores');
       storesInsts.forEach(inst => {
-        const storesContainerEl = document.getElementById(`storesContainer-${inst.id}`);
-        const tiendasEl = document.getElementById(`tiendas-${inst.id}`);
+        const suffix = inst.id ? `-${inst.id}` : '';
+        const storesContainerEl = document.getElementById(`storesContainer${suffix}`);
+        const tiendasEl = document.getElementById(`tiendas${suffix}`);
         
         if (q) {
           if (tiendasEl) tiendasEl.style.display = filteredStores.length ? 'block' : 'none';
@@ -502,7 +513,8 @@
       const filteredOffers = filteredProducts.filter(p => p.oferta == 1);
       const offersInsts = activeHomepageLayout.filter(item => item.name === 'offers');
       offersInsts.forEach(inst => {
-        const offersContainerEl = document.getElementById(`offersContainer-${inst.id}`);
+        const suffix = inst.id ? `-${inst.id}` : '';
+        const offersContainerEl = document.getElementById(`offersContainer${suffix}`);
         if (offersContainerEl) {
           offersContainerEl.innerHTML = filteredOffers.map(card).join('') || '<div class="text-muted py-3 px-2">No hay ofertas que coincidan con la búsqueda.</div>';
         }
@@ -511,7 +523,8 @@
       // Render Categorized Products
       const productsInsts = activeHomepageLayout.filter(item => item.name === 'products');
       productsInsts.forEach(inst => {
-        const categoriesContainerEl = document.getElementById(`productsContainer-${inst.id}`);
+        const suffix = inst.id ? `-${inst.id}` : '';
+        const categoriesContainerEl = document.getElementById(`productsContainer${suffix}`);
         if (categoriesContainerEl) {
           const activeCats = selectedCategory === 'all' ? categorias : categorias.filter(c => +c.id === +selectedCategory);
           
@@ -641,6 +654,37 @@
       
       location.reload();
     }
+
+    // Interceptar clicks de navegación superior para soportar IDs dinámicos y estáticos
+    document.addEventListener('click', function(e) {
+      const anchor = e.target.closest('a');
+      if (!anchor) return;
+      
+      const href = anchor.getAttribute('href');
+      if (href === '#tiendas' || href === '#categorias' || href === '#ofertas') {
+        e.preventDefault();
+        const targetPrefix = href.substring(1); // 'tiendas', 'categorias', 'ofertas'
+        
+        let targetEl = null;
+        if (targetPrefix === 'categorias') {
+          // Categorías puede referirse al chip de categorías (categories) o al catálogo de productos (products)
+          targetEl = document.querySelector('[id^="chipsCategorias"], [id^="categorias"]');
+        } else {
+          targetEl = document.querySelector(`[id^="${targetPrefix}"]`);
+        }
+        
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth' });
+          
+          // Actualizar clase activa en navbar
+          document.querySelectorAll('.navbar-nav .nav-link').forEach(el => el.classList.remove('active'));
+          const navLink = anchor.classList.contains('nav-link') ? anchor : document.querySelector(`.navbar-nav .nav-link[href="${href}"]`);
+          if (navLink) {
+            navLink.classList.add('active');
+          }
+        }
+      }
+    });
 
     initDynamicHomepage();
   </script>

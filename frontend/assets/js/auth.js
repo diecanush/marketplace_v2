@@ -56,6 +56,7 @@ const Auth = {
       let isVentas = path.includes('/ventas.html');
       let isSolicitudes = path.includes('/solicitudes.html');
       let isLayout = path.includes('/layout.html');
+      let isCampanas = path.includes('/campanas.html');
 
       nav.innerHTML = `
         <a href="dashboard.html" class="${isDashboard ? 'active' : ''}"><i class="bi bi-speedometer2"></i> Inicio</a>
@@ -65,6 +66,7 @@ const Auth = {
         <a href="ventas.html" class="${isVentas ? 'active' : ''}"><i class="bi bi-receipt"></i> Ventas</a>
         <a href="solicitudes.html" class="${isSolicitudes ? 'active' : ''}"><i class="bi bi-send-check"></i> Solicitudes <span id="navPendingBadge" class="badge text-bg-warning rounded-pill" style="display:none;">0</span></a>
         <a href="layout.html" class="${isLayout ? 'active' : ''}"><i class="bi bi-grid-1x2"></i> Diseño Home</a>
+        <a href="campanas.html" class="${isCampanas ? 'active' : ''}"><i class="bi bi-megaphone"></i> Campañas</a>
         <hr class="text-white-50">
         <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
         <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
