@@ -309,7 +309,7 @@ a:hover {
   }
 }
 
-.store-card, .product-card {
+.store-card {
   flex: 0 0 auto;
   border: 0;
   border-radius: var(--border-radius-lg);
@@ -318,29 +318,106 @@ a:hover {
   background: var(--card-bg);
   transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   border: 1px solid rgba(44, 36, 32, 0.04);
-}
-.store-card {
   width: 280px;
   cursor: pointer;
 }
-.product-card {
-  width: 240px;
-}
-.store-card:hover, .product-card:hover {
+.store-card:hover {
   transform: translateY(-10px);
   box-shadow: 0 20px 40px -15px rgba(44, 36, 32, 0.16), 0 4px 10px rgba(44, 36, 32, 0.04);
   border-color: rgba(44, 36, 32, 0.12);
 }
-.store-card img, .product-card img {
+.store-card img {
   width: 100%;
   height: 180px;
   object-fit: cover;
   transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), filter 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
-.store-card:hover img, .product-card:hover img {
+.store-card:hover img {
   transform: scale(1.06);
   filter: brightness(1.04);
 }
+
+/* Product Cards Premium & Compact Styling (1:1 Aspect Ratio, Contained) */
+.product-card {
+  width: 240px; /* Fixed desktop width */
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: 0 8px 24px -8px rgba(44, 36, 32, 0.08), 0 1px 3px rgba(44, 36, 32, 0.03);
+  background: var(--card-bg);
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  border: 1px solid rgba(44, 36, 32, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 30px -12px rgba(44, 36, 32, 0.15), 0 4px 10px rgba(44, 36, 32, 0.04);
+  border-color: rgba(44, 36, 32, 0.1);
+}
+
+/* 1:1 Aspect Ratio Square Image Container */
+.product-card .position-relative {
+  position: relative !important;
+  width: 100% !important;
+  padding-top: 100% !important; /* 1:1 Aspect Ratio */
+  overflow: hidden !important;
+  background-color: #FAF8F5 !important; /* Soft neutral background (sand/cream) */
+  border-radius: 17px 17px 0 0 !important;
+}
+.product-card .position-relative img {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important; /* Centered, un-deformed, whole product visible */
+  object-position: center !important;
+  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), filter 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+}
+.product-card:hover .position-relative img {
+  transform: scale(1.04) !important; /* Gentle scale for contained images */
+  filter: brightness(1.02) !important;
+}
+
+/* Compact Card Body */
+.product-card .card-body {
+  padding: 0.65rem !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+.product-card h6, .product-card h5 {
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.25rem !important;
+  line-height: 1.25 !important;
+  color: var(--text-dark) !important;
+}
+.product-card .text-muted.small {
+  font-size: 0.72rem !important;
+  margin-bottom: 0.25rem !important;
+  display: block;
+}
+.product-card p.text-muted {
+  font-size: 0.72rem !important;
+  margin-bottom: 0.35rem !important;
+  line-height: 1.2 !important;
+}
+.product-card .price {
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  color: var(--primary) !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+.product-card .btn-dark {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  border-radius: var(--border-radius-sm) !important;
+}
+
 .store-badge {
   position: absolute;
   top: 0.95rem;
@@ -545,6 +622,69 @@ a:hover {
   color: #c0392b;
 }
 
+/* Product Detail Modal Premium Styling */
+#productModal .modal-content > .position-relative {
+  background-color: #FAF8F5 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  position: relative !important;
+  width: 100% !important;
+}
+
+#productModal #modalProductImg {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+/* Mobile: Aspect Ratio 4:5 */
+@media (max-width: 767.98px) {
+  #productModal .modal-content > .position-relative {
+    aspect-ratio: 4 / 5 !important;
+  }
+}
+
+/* Desktop: Side-by-side design to prevent screen overflow */
+@media (min-width: 768px) {
+  #productModal .modal-dialog {
+    max-width: 820px !important; /* Premium wide modal dialog */
+  }
+  #productModal .modal-content {
+    flex-direction: row !important;
+  }
+  #productModal .modal-content > .position-relative {
+    width: 45% !important;
+    flex: 0 0 45% !important;
+    min-height: 480px !important;
+    border-radius: var(--border-radius-lg) 0 0 var(--border-radius-lg) !important;
+  }
+  #productModal .modal-body {
+    width: 55% !important;
+    flex: 0 0 55% !important;
+    padding: 2.25rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+  }
+  /* Reposition close button to the top right of the modal body container */
+  #productModal .btn-close {
+    position: absolute !important;
+    top: 1.25rem !important;
+    right: 1.25rem !important;
+    left: auto !important;
+    z-index: 1051 !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}
+
 /* Responsive Overrides */
 @media(max-width: 768px) {
   .hero-img {
@@ -571,7 +711,28 @@ a:hover {
     width: 240px;
   }
   .product-card {
-    width: 200px;
+    width: 170px !important;
+  }
+  .product-card .card-body {
+    padding: 0.5rem !important;
+  }
+  .product-card h6, .product-card h5 {
+    font-size: 0.78rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+  .product-card .text-muted.small {
+    font-size: 0.65rem !important;
+  }
+  .product-card p.text-muted {
+    font-size: 0.65rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+  .product-card .price {
+    font-size: 0.9rem !important;
+  }
+  .product-card .btn-dark {
+    padding: 0.15rem 0.4rem !important;
+    font-size: 0.7rem !important;
   }
   .offcanvas-cart {
     width: 100% !important;
