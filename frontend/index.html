@@ -383,7 +383,7 @@
       const container = document.getElementById(`chipsCategorias${suffix}`);
       if (container) {
         container.innerHTML = cats.map(c => `
-          <a class="category-chip" href="#cat-${c.id}" onclick="filterByCategory(${c.id}); return false;" id="chip-${c.id}">
+          <a class="category-chip" href="categoria.html?id=${c.id}" id="chip-${c.id}">
             <i class="bi ${c.icono || 'bi-tag'}"></i> ${c.nombre}
           </a>
         `).join('');
