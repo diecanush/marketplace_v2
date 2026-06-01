@@ -154,6 +154,34 @@
     </div>
   </div>
 
+  <!-- Store Detail Modal -->
+  <div class="modal fade" id="storeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0" style="border-radius: var(--border-radius-lg); overflow: hidden;">
+        <div class="position-relative">
+          <img id="modalStoreImg" src="" alt="Tienda">
+          <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white p-2 rounded-circle shadow-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <span class="badge bg-soft-warning text-warning mb-2" id="modalStoreRubro">Rubro</span>
+          <h3 class="fw-bold mb-1" id="modalStoreName">Nombre de la Tienda</h3>
+          <hr class="my-3">
+          <p class="mb-4 text-secondary" id="modalStoreDesc">Descripción de la tienda.</p>
+          
+          <div class="d-flex gap-2 mb-4" id="modalStoreSocials">
+            <!-- Dynamic WhatsApp/Instagram buttons -->
+          </div>
+          
+          <div class="d-grid gap-2">
+            <a href="#" id="modalStoreBtn" class="btn btn-dark py-2.5 rounded-pill fw-bold font-body text-center">
+              <i class="bi bi-shop me-1"></i> Ver Catálogo de Tienda
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- JS Imports -->
   <script src="assets/js/api.js?v=1.0.3"></script>
   <script src="assets/js/auth.js?v=1.0.1"></script>
@@ -395,8 +423,10 @@
       const container = document.getElementById(`storesContainer${suffix}`);
       if (container) {
         container.innerHTML = stores.map(t => `
-          <article class="card store-card position-relative" onclick="location.href='tienda.html?id=${t.id}'">
-            <img src="${getImgUrl(t.imagen, 1)}" alt="${t.nombre}" loading="lazy">
+          <article class="card store-card position-relative" onclick="viewStore(${t.id})">
+            <div class="store-img-container">
+              <img src="${getImgUrl(t.imagen, 1)}" alt="${t.nombre}" loading="lazy">
+            </div>
             <span class="store-badge">${t.rubro || 'General'}</span>
             <div class="card-body d-flex flex-column justify-content-between" style="min-height: 180px;">
               <div>
@@ -405,7 +435,7 @@
               </div>
               <div>
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                  <span class="text-primary fw-600 small">Ver Tienda <i class="bi bi-arrow-right"></i></span>
+                  <span class="text-primary fw-600 small">Ver Detalles <i class="bi bi-arrow-right"></i></span>
                   ${t.destacado == 1 ? '<span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill" style="font-size: 0.7rem;">Destacada</span>' : ''}
                 </div>
                 <div class="d-flex gap-2 mt-2 pt-2 border-top" onclick="event.stopPropagation()">
@@ -614,6 +644,40 @@
 
     function buscar() {
       sortAndRender();
+    }
+
+    // Modal store details logic
+    function viewStore(tid) {
+      const store = tiendas.find(t => +t.id === +tid);
+      if (!store) return;
+
+      document.getElementById('modalStoreImg').src = getImgUrl(store.imagen, 1);
+      document.getElementById('modalStoreName').textContent = store.nombre;
+      document.getElementById('modalStoreRubro').textContent = store.rubro || 'General';
+      document.getElementById('modalStoreDesc').textContent = store.descripcion || 'Esta tienda ofrece excelentes productos artesanales de fabricación local y comercio justo.';
+      
+      const modalStoreBtn = document.getElementById('modalStoreBtn');
+      modalStoreBtn.href = `tienda.html?id=${store.id}`;
+
+      // Populate social links in modal
+      const socialsContainer = document.getElementById('modalStoreSocials');
+      let socialsHtml = '';
+      if (store.whatsapp) {
+        socialsHtml += `
+          <a href="https://wa.me/${store.whatsapp}" target="_blank" class="btn btn-outline-success d-inline-flex align-items-center gap-1" style="font-size: 0.85rem; font-weight: 500; padding: 0.35rem 0.75rem; border-radius: var(--border-radius-sm);">
+            <i class="bi bi-whatsapp"></i> WhatsApp
+          </a>`;
+      }
+      if (store.instagram) {
+        socialsHtml += `
+          <a href="https://instagram.com/${store.instagram}" target="_blank" class="btn btn-outline-danger d-inline-flex align-items-center gap-1" style="font-size: 0.85rem; font-weight: 500; padding: 0.35rem 0.75rem; border-radius: var(--border-radius-sm);">
+            <i class="bi bi-instagram"></i> Instagram
+          </a>`;
+      }
+      socialsContainer.innerHTML = socialsHtml;
+
+      const myModal = new bootstrap.Modal(document.getElementById('storeModal'));
+      myModal.show();
     }
 
     // Modal product details logic
