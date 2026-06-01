@@ -278,7 +278,7 @@
         <div class="col-md-3 col-sm-6">
           <article class="card product-card" onclick="viewProduct(${p.id})">
             <div class="position-relative">
-              <img src="${getImgUrl(p.imagen, 1)}" alt="${p.nombre}">
+              <img src="${getImgUrl(p.imagen, 1)}" alt="${p.nombre}" loading="lazy">
               ${p.oferta == 1 ? '<span class="position-absolute top-0 end-0 badge bg-danger m-2">Oferta</span>' : ''}
               ${p.destacado == 1 ? '<span class="position-absolute top-0 start-0 badge bg-warning text-dark m-2">Destacado</span>' : ''}
             </div>
