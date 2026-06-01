@@ -326,6 +326,19 @@ a:hover {
   box-shadow: 0 20px 40px -15px rgba(44, 36, 32, 0.16), 0 4px 10px rgba(44, 36, 32, 0.04);
   border-color: rgba(44, 36, 32, 0.12);
 }
+
+/* Compact Store Card Styles specific to stores listings */
+[id^="storesContainer"] .store-card .card-body {
+  padding: 0.65rem 0.75rem !important;
+}
+[id^="storesContainer"] .store-card h5 {
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.25rem !important;
+  color: var(--text-dark) !important;
+  line-height: 1.2 !important;
+}
+
 .store-card img, .store-card .store-img-container img {
   width: 100%;
   height: 100%;
