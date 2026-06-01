@@ -15,6 +15,10 @@
   --border-radius-md: 12px;
   --border-radius-sm: 8px;
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --card-shadow: 0 10px 30px -10px rgba(44, 36, 32, 0.08), 0 1px 3px rgba(44, 36, 32, 0.03);
+  --card-shadow-hover: 0 20px 40px -15px rgba(44, 36, 32, 0.16), 0 4px 10px rgba(44, 36, 32, 0.04);
+  --btn-shadow: 0 4px 12px rgba(175, 66, 32, 0.2);
+  --btn-shadow-hover: 0 6px 16px rgba(175, 66, 32, 0.25);
 }
 
 /* Global Styles */
@@ -183,12 +187,14 @@ a:hover {
   font-weight: 600;
   border-radius: var(--border-radius-md);
   transition: var(--transition-smooth);
+  box-shadow: var(--btn-shadow, none);
 }
 .btn-dark:hover, .btn-dark:focus {
   background-color: var(--primary-hover) !important;
   border-color: var(--primary-hover) !important;
   color: #fff !important;
   transform: translateY(-1px);
+  box-shadow: var(--btn-shadow-hover, none);
 }
 .btn-outline-light {
   border-radius: var(--border-radius-md);
@@ -314,7 +320,7 @@ a:hover {
   border: 0;
   border-radius: var(--border-radius-lg);
   overflow: hidden;
-  box-shadow: 0 10px 30px -10px rgba(44, 36, 32, 0.08), 0 1px 3px rgba(44, 36, 32, 0.03);
+  box-shadow: var(--card-shadow);
   background: var(--card-bg);
   transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   border: 1px solid rgba(44, 36, 32, 0.04);
@@ -323,7 +329,7 @@ a:hover {
 }
 .store-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 20px 40px -15px rgba(44, 36, 32, 0.16), 0 4px 10px rgba(44, 36, 32, 0.04);
+  box-shadow: var(--card-shadow-hover);
   border-color: rgba(44, 36, 32, 0.12);
 }
 
@@ -367,7 +373,7 @@ a:hover {
   border: 0;
   border-radius: var(--border-radius-lg);
   overflow: hidden;
-  box-shadow: 0 8px 24px -8px rgba(44, 36, 32, 0.08), 0 1px 3px rgba(44, 36, 32, 0.03);
+  box-shadow: var(--card-shadow);
   background: var(--card-bg);
   transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   border: 1px solid rgba(44, 36, 32, 0.04);
@@ -376,7 +382,7 @@ a:hover {
 }
 .product-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 16px 30px -12px rgba(44, 36, 32, 0.15), 0 4px 10px rgba(44, 36, 32, 0.04);
+  box-shadow: var(--card-shadow-hover);
   border-color: rgba(44, 36, 32, 0.1);
 }
 

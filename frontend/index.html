@@ -182,13 +182,19 @@
     </div>
   </div>
 
-  <!-- JS Imports -->
   <script src="assets/js/api.js?v=1.0.3"></script>
   <script src="assets/js/auth.js?v=1.0.1"></script>
   <script src="assets/js/cart.js"></script>
+  <script src="js/home-themes.js"></script>
   <script src="js/homepage-templates.js"></script>
   
   <script>
+    // Aplicar plantilla activa al cargar la página
+    const activeThemeId = localStorage.getItem('home_theme') || 'tierra_artesanal';
+    if (window.applyTheme) {
+      window.applyTheme(activeThemeId, document.documentElement);
+    }
+
     let productos = [], tiendas = [], categorias = [], ofertas = [];
     let selectedCategory = 'all';
     let currentModalProduct = null;
