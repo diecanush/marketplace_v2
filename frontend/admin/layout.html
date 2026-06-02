@@ -334,67 +334,69 @@
                   <!-- Dynamic Theme Cards Rendered via Javascript -->
                 </div>
 
-                <hr class="my-4">
-                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-plus-circle-fill text-success me-2"></i>Crear Plantilla Personalizada</h5>
-                <div class="card border-0 rounded-4 shadow-sm p-4 bg-white">
-                  <div class="row g-3">
-                    <div class="col-md-6">
-                      <label class="form-label small fw-bold text-secondary">Nombre de la Plantilla</label>
-                      <input id="customThemeName" class="form-control rounded-3" placeholder="Mi Plantilla Personalizada" value="Mi Diseño">
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label small fw-bold text-secondary">Color Dominante (60% - Botones, Acentos principales)</label>
-                      <input type="color" id="customColor60" class="form-control form-control-color w-100 rounded-3" value="#af4220" style="height: 38px;">
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label small fw-bold text-secondary">Color Secundario (30% - Fondos generales)</label>
-                      <input type="color" id="customColor30" class="form-control form-control-color w-100 rounded-3" value="#FAF8F5" style="height: 38px;">
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label small fw-bold text-secondary">Color Acento (10% - Insignias, Precios)</label>
-                      <input type="color" id="customColor10" class="form-control form-control-color w-100 rounded-3" value="#dfa84a" style="height: 38px;">
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label small fw-bold text-secondary">Color de Texto</label>
-                      <input type="color" id="customColorText" class="form-control form-control-color w-100 rounded-3" value="#2C2420" style="height: 38px;">
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label small fw-bold text-secondary">Fondo de Tarjetas (Product/Store Cards)</label>
-                      <input type="color" id="customColorCardBg" class="form-control form-control-color w-100 rounded-3" value="#FFFFFF" style="height: 38px;">
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label small fw-bold text-secondary">Bordes redondeados de Tarjeta</label>
-                      <select id="customCardRadius" class="form-select rounded-3">
-                        <option value="4px">4px (Mínimo)</option>
-                        <option value="8px">8px (Moderno)</option>
-                        <option value="16px" selected>16px (Redondeado)</option>
-                        <option value="24px">24px (Muy redondeado)</option>
-                      </select>
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label small fw-bold text-secondary">Sombra de Tarjetas</label>
-                      <select id="customCardShadow" class="form-select rounded-3">
-                        <option value="none">Sin sombra</option>
-                        <option value="0 2px 8px rgba(0,0,0,0.05)">Sombra leve</option>
-                        <option value="0 10px 30px -10px rgba(0,0,0,0.08)" selected>Sombra suave premium</option>
-                        <option value="0 8px 30px rgba(0,0,0,0.3)">Sombra intensa oscura</option>
-                      </select>
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label small fw-bold text-secondary">Borde de Tarjetas</label>
-                      <select id="customCardBorder" class="form-select rounded-3">
-                        <option value="none">Sin borde</option>
-                        <option value="1px solid rgba(0,0,0,0.04)" selected>Borde fino gris claro</option>
-                        <option value="1px solid rgba(255,255,255,0.08)">Borde fino blanco (oscuro)</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="text-end mt-3">
-                    <button type="button" class="btn btn-success px-4 rounded-pill fw-bold" onclick="saveCustomTheme()">
-                      <i class="bi bi-check-circle-fill me-1"></i> Crear y Aplicar Plantilla
-                    </button>
-                  </div>
-                </div>
+                 <hr class="my-4">
+                 <div id="customThemeFormContainer">
+                   <h5 class="fw-bold mb-3 text-dark" id="customThemeTitle"><i class="bi bi-plus-circle-fill text-success me-2"></i>Crear Plantilla Personalizada</h5>
+                   <div class="card border-0 rounded-4 shadow-sm p-4 bg-white">
+                     <div class="row g-3">
+                       <div class="col-md-6">
+                         <label class="form-label small fw-bold text-secondary">Nombre de la Plantilla</label>
+                         <input id="customThemeName" class="form-control rounded-3" placeholder="Mi Plantilla Personalizada" value="Mi Diseño">
+                       </div>
+                       <div class="col-md-6">
+                         <label class="form-label small fw-bold text-secondary">Color Dominante (60% - Botones, Acentos principales)</label>
+                         <input type="color" id="customColor60" class="form-control form-control-color w-100 rounded-3" value="#af4220" style="height: 38px;">
+                       </div>
+                       <div class="col-md-6">
+                         <label class="form-label small fw-bold text-secondary">Color Secundario (30% - Fondos generales)</label>
+                         <input type="color" id="customColor30" class="form-control form-control-color w-100 rounded-3" value="#FAF8F5" style="height: 38px;">
+                       </div>
+                       <div class="col-md-6">
+                         <label class="form-label small fw-bold text-secondary">Color Acento (10% - Insignias, Precios)</label>
+                         <input type="color" id="customColor10" class="form-control form-control-color w-100 rounded-3" value="#dfa84a" style="height: 38px;">
+                       </div>
+                       <div class="col-md-6">
+                         <label class="form-label small fw-bold text-secondary">Color de Texto</label>
+                         <input type="color" id="customColorText" class="form-control form-control-color w-100 rounded-3" value="#2C2420" style="height: 38px;">
+                       </div>
+                       <div class="col-md-6">
+                         <label class="form-label small fw-bold text-secondary">Fondo de Tarjetas (Product/Store Cards)</label>
+                         <input type="color" id="customColorCardBg" class="form-control form-control-color w-100 rounded-3" value="#FFFFFF" style="height: 38px;">
+                       </div>
+                       <div class="col-md-4">
+                         <label class="form-label small fw-bold text-secondary">Bordes redondeados de Tarjeta</label>
+                         <select id="customCardRadius" class="form-select rounded-3">
+                           <option value="4px">4px (Mínimo)</option>
+                           <option value="8px">8px (Moderno)</option>
+                           <option value="16px" selected>16px (Redondeado)</option>
+                           <option value="24px">24px (Muy redondeado)</option>
+                         </select>
+                       </div>
+                       <div class="col-md-4">
+                         <label class="form-label small fw-bold text-secondary">Sombra de Tarjetas</label>
+                         <select id="customCardShadow" class="form-select rounded-3">
+                           <option value="none">Sin sombra</option>
+                           <option value="0 2px 8px rgba(0,0,0,0.05)">Sombra leve</option>
+                           <option value="0 10px 30px -10px rgba(0,0,0,0.08)" selected>Sombra suave premium</option>
+                           <option value="0 8px 30px rgba(0,0,0,0.3)">Sombra intensa oscura</option>
+                         </select>
+                       </div>
+                       <div class="col-md-4">
+                         <label class="form-label small fw-bold text-secondary">Borde de Tarjetas</label>
+                         <select id="customCardBorder" class="form-select rounded-3">
+                           <option value="none">Sin borde</option>
+                           <option value="1px solid rgba(0,0,0,0.04)" selected>Borde fino gris claro</option>
+                           <option value="1px solid rgba(255,255,255,0.08)">Borde fino blanco (oscuro)</option>
+                         </select>
+                       </div>
+                     </div>
+                     <div class="text-end mt-3">
+                       <button type="button" id="btnSubmitCustomTheme" class="btn btn-success px-4 rounded-pill fw-bold" onclick="saveCustomTheme()">
+                         <i class="bi bi-check-circle-fill me-1"></i> Crear y Aplicar Plantilla
+                       </button>
+                     </div>
+                   </div>
+                 </div>
               </div>
               <div class="modal-footer border-0 bg-light" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
                 <button type="button" class="btn btn-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cerrar</button>
@@ -868,6 +870,9 @@
                   <div class="d-flex align-items-center gap-2">
                     ${isActive ? '<span class="badge bg-primary rounded-pill text-white" style="font-size: 0.7rem;">Activa</span>' : ''}
                     ${themeId.startsWith('custom_') ? `
+                      <button type="button" class="btn btn-sm text-primary p-0 border-0 bg-transparent me-2" onclick="editCustomTheme(event, '${themeId}')" title="Editar plantilla" style="font-size: 0.85rem; line-height: 1;">
+                        <i class="bi bi-pencil-fill"></i>
+                      </button>
                       <button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent" onclick="deleteCustomTheme(event, '${themeId}')" title="Eliminar plantilla" style="font-size: 0.85rem; line-height: 1;">
                         <i class="bi bi-trash3-fill"></i>
                       </button>
@@ -911,6 +916,8 @@
       }
     }
 
+    let editingThemeId = null;
+
     function saveCustomTheme() {
       const name = document.getElementById('customThemeName').value.trim() || 'Mi Plantilla Personalizada';
       const c60 = document.getElementById('customColor60').value;
@@ -922,13 +929,15 @@
       const cardShadow = document.getElementById('customCardShadow').value;
       const cardBorder = document.getElementById('customCardBorder').value;
 
-      // Unique ID for the theme
-      const themeId = 'custom_' + Date.now();
+      // Use existing ID if editing, otherwise generate a new one
+      const themeId = editingThemeId || 'custom_' + Date.now();
 
       const newTheme = {
         id: themeId,
         name: name,
-        description: 'Plantilla personalizada creada el ' + new Date().toLocaleDateString(),
+        description: editingThemeId 
+          ? 'Plantilla personalizada editada el ' + new Date().toLocaleDateString()
+          : 'Plantilla personalizada creada el ' + new Date().toLocaleDateString(),
         preview: {
           dominant: c60,
           secondary: c30,
@@ -977,7 +986,7 @@
         console.error(e);
       }
 
-      // Add new theme
+      // Save/Overwrite theme
       customThemes[themeId] = newTheme;
       localStorage.setItem('custom_themes', JSON.stringify(customThemes));
 
@@ -987,13 +996,90 @@
       // Select/Apply the theme
       selectTheme(themeId);
 
+      // Reset editing state and form fields
+      resetCustomThemeForm();
+
       // Re-render the list inside modal
       openThemesModal();
+    }
+
+    function editCustomTheme(event, themeId) {
+      if (event) event.stopPropagation();
+      const theme = window.homepageThemes[themeId];
+      if (!theme) return;
+
+      editingThemeId = themeId;
+
+      // Update form header
+      document.getElementById('customThemeTitle').innerHTML = '<i class="bi bi-pencil-square text-primary me-2"></i>Editar Plantilla Personalizada';
+      
+      // Load values into form fields
+      document.getElementById('customThemeName').value = theme.name;
+      document.getElementById('customColor60').value = theme.variables['--theme-60'];
+      document.getElementById('customColor30').value = theme.variables['--theme-30'];
+      document.getElementById('customColor10').value = theme.variables['--theme-10'];
+      document.getElementById('customColorText').value = theme.variables['--theme-text'];
+      document.getElementById('customColorCardBg').value = theme.variables['--card-bg'];
+      document.getElementById('customCardRadius').value = theme.variables['--card-radius'];
+      document.getElementById('customCardShadow').value = theme.variables['--card-shadow'];
+      document.getElementById('customCardBorder').value = theme.variables['--card-border'];
+
+      // Update submit button text and color
+      const submitBtn = document.getElementById('btnSubmitCustomTheme');
+      submitBtn.innerHTML = '<i class="bi bi-save2-fill me-1"></i> Guardar Cambios';
+      submitBtn.classList.remove('btn-success');
+      submitBtn.classList.add('btn-primary');
+
+      // Add a "Cancel Edit" button if it doesn't exist
+      if (!document.getElementById('btnCancelCustomEdit')) {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.id = 'btnCancelCustomEdit';
+        cancelBtn.className = 'btn btn-outline-secondary px-4 rounded-pill fw-bold me-2';
+        cancelBtn.innerHTML = 'Cancelar Edición';
+        cancelBtn.onclick = resetCustomThemeForm;
+        submitBtn.parentNode.insertBefore(cancelBtn, submitBtn);
+      }
+
+      // Scroll form into view
+      document.getElementById('customThemeFormContainer').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetCustomThemeForm() {
+      editingThemeId = null;
+
+      // Reset form title
+      document.getElementById('customThemeTitle').innerHTML = '<i class="bi bi-plus-circle-fill text-success me-2"></i>Crear Plantilla Personalizada';
+      
+      // Reset values
+      document.getElementById('customThemeName').value = 'Mi Plantilla Personalizada';
+      document.getElementById('customColor60').value = '#af4220';
+      document.getElementById('customColor30').value = '#FAF8F5';
+      document.getElementById('customColor10').value = '#dfa84a';
+      document.getElementById('customColorText').value = '#2C2420';
+      document.getElementById('customColorCardBg').value = '#FFFFFF';
+      document.getElementById('customCardRadius').value = '16px';
+      document.getElementById('customCardShadow').value = '0 10px 30px -10px rgba(0,0,0,0.08)';
+      document.getElementById('customCardBorder').value = '1px solid rgba(0,0,0,0.04)';
+
+      // Reset submit button
+      const submitBtn = document.getElementById('btnSubmitCustomTheme');
+      submitBtn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Crear y Aplicar Plantilla';
+      submitBtn.classList.remove('btn-primary');
+      submitBtn.classList.add('btn-success');
+
+      // Remove cancel button
+      const cancelBtn = document.getElementById('btnCancelCustomEdit');
+      if (cancelBtn) cancelBtn.remove();
     }
 
     function deleteCustomTheme(event, themeId) {
       if (event) event.stopPropagation();
       if (!confirm('¿Seguro que deseas eliminar esta plantilla personalizada?')) return;
+
+      if (editingThemeId === themeId) {
+        resetCustomThemeForm();
+      }
 
       // Load custom themes from localStorage
       let customThemes = {};
