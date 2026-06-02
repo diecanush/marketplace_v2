@@ -322,16 +322,78 @@
         </div>
         <!-- Themes Selection Modal -->
         <div class="modal fade" id="themesModal" tabindex="-1" aria-labelledby="themesModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
               <div class="modal-header bg-dark text-white border-0" style="border-top-left-radius: 16px; border-top-right-radius: 16px;">
                 <h5 class="modal-title fw-bold" id="themesModalLabel"><i class="bi bi-palette-fill text-warning me-2"></i>Aplicar Plantilla Visual</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <div class="modal-body p-4 bg-light">
+              <div class="modal-body p-4 bg-light" style="max-height: 70vh; overflow-y: auto;">
                 <p class="text-muted mb-4">Selecciona una plantilla predefinida para cambiar instantáneamente la paleta de colores, sombras, bordes y el estilo visual general de la página de inicio pública.</p>
-                <div class="row g-3" id="themes-list-container">
+                <div class="row g-3 mb-4" id="themes-list-container">
                   <!-- Dynamic Theme Cards Rendered via Javascript -->
+                </div>
+
+                <hr class="my-4">
+                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-plus-circle-fill text-success me-2"></i>Crear Plantilla Personalizada</h5>
+                <div class="card border-0 rounded-4 shadow-sm p-4 bg-white">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold text-secondary">Nombre de la Plantilla</label>
+                      <input id="customThemeName" class="form-control rounded-3" placeholder="Mi Plantilla Personalizada" value="Mi Diseño">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold text-secondary">Color Dominante (60% - Botones, Acentos principales)</label>
+                      <input type="color" id="customColor60" class="form-control form-control-color w-100 rounded-3" value="#af4220" style="height: 38px;">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold text-secondary">Color Secundario (30% - Fondos generales)</label>
+                      <input type="color" id="customColor30" class="form-control form-control-color w-100 rounded-3" value="#FAF8F5" style="height: 38px;">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold text-secondary">Color Acento (10% - Insignias, Precios)</label>
+                      <input type="color" id="customColor10" class="form-control form-control-color w-100 rounded-3" value="#dfa84a" style="height: 38px;">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold text-secondary">Color de Texto</label>
+                      <input type="color" id="customColorText" class="form-control form-control-color w-100 rounded-3" value="#2C2420" style="height: 38px;">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold text-secondary">Fondo de Tarjetas (Product/Store Cards)</label>
+                      <input type="color" id="customColorCardBg" class="form-control form-control-color w-100 rounded-3" value="#FFFFFF" style="height: 38px;">
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label small fw-bold text-secondary">Bordes redondeados de Tarjeta</label>
+                      <select id="customCardRadius" class="form-select rounded-3">
+                        <option value="4px">4px (Mínimo)</option>
+                        <option value="8px">8px (Moderno)</option>
+                        <option value="16px" selected>16px (Redondeado)</option>
+                        <option value="24px">24px (Muy redondeado)</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label small fw-bold text-secondary">Sombra de Tarjetas</label>
+                      <select id="customCardShadow" class="form-select rounded-3">
+                        <option value="none">Sin sombra</option>
+                        <option value="0 2px 8px rgba(0,0,0,0.05)">Sombra leve</option>
+                        <option value="0 10px 30px -10px rgba(0,0,0,0.08)" selected>Sombra suave premium</option>
+                        <option value="0 8px 30px rgba(0,0,0,0.3)">Sombra intensa oscura</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label small fw-bold text-secondary">Borde de Tarjetas</label>
+                      <select id="customCardBorder" class="form-select rounded-3">
+                        <option value="none">Sin borde</option>
+                        <option value="1px solid rgba(0,0,0,0.04)" selected>Borde fino gris claro</option>
+                        <option value="1px solid rgba(255,255,255,0.08)">Borde fino blanco (oscuro)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="text-end mt-3">
+                    <button type="button" class="btn btn-success px-4 rounded-pill fw-bold" onclick="saveCustomTheme()">
+                      <i class="bi bi-check-circle-fill me-1"></i> Crear y Aplicar Plantilla
+                    </button>
+                  </div>
                 </div>
               </div>
               <div class="modal-footer border-0 bg-light" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
@@ -803,7 +865,14 @@
               <div class="p-3">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                   <h6 class="fw-bold text-dark mb-0 text-truncate">${theme.name}</h6>
-                  ${isActive ? '<span class="badge bg-primary rounded-pill text-white">Activa</span>' : ''}
+                  <div class="d-flex align-items-center gap-2">
+                    ${isActive ? '<span class="badge bg-primary rounded-pill text-white" style="font-size: 0.7rem;">Activa</span>' : ''}
+                    ${themeId.startsWith('custom_') ? `
+                      <button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent" onclick="deleteCustomTheme(event, '${themeId}')" title="Eliminar plantilla" style="font-size: 0.85rem; line-height: 1;">
+                        <i class="bi bi-trash3-fill"></i>
+                      </button>
+                    ` : ''}
+                  </div>
                 </div>
                 <p class="small text-muted mb-3" style="font-size: 0.75rem; line-height: 1.35; min-height: 2.7rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 1rem;">
                   ${theme.description}
@@ -839,6 +908,116 @@
         
         const themesModal = bootstrap.Modal.getInstance(document.getElementById('themesModal')) || bootstrap.Modal.getOrCreateInstance(document.getElementById('themesModal'));
         if (themesModal) themesModal.hide();
+      }
+    }
+
+    function saveCustomTheme() {
+      const name = document.getElementById('customThemeName').value.trim() || 'Mi Plantilla Personalizada';
+      const c60 = document.getElementById('customColor60').value;
+      const c30 = document.getElementById('customColor30').value;
+      const c10 = document.getElementById('customColor10').value;
+      const cText = document.getElementById('customColorText').value;
+      const cardBg = document.getElementById('customColorCardBg').value;
+      const cardRadius = document.getElementById('customCardRadius').value;
+      const cardShadow = document.getElementById('customCardShadow').value;
+      const cardBorder = document.getElementById('customCardBorder').value;
+
+      // Unique ID for the theme
+      const themeId = 'custom_' + Date.now();
+
+      const newTheme = {
+        id: themeId,
+        name: name,
+        description: 'Plantilla personalizada creada el ' + new Date().toLocaleDateString(),
+        preview: {
+          dominant: c60,
+          secondary: c30,
+          accent: c10,
+          text: cText
+        },
+        variables: {
+          '--theme-60': c60,
+          '--theme-30': c30,
+          '--theme-10': c10,
+          '--theme-text': cText,
+          '--body-bg': c30,
+          '--container-bg': c30,
+          '--navbar-bg': c60,
+          '--navbar-text': '#ffffff',
+          '--card-bg': cardBg,
+          '--card-border': cardBorder,
+          '--card-shadow': cardShadow,
+          '--card-radius': cardRadius,
+          '--card-body-bg': cardBg,
+          '--card-body-text': cText,
+          '--card-body-padding': '0.65rem',
+          '--card-price-color': c60,
+          '--btn-primary-bg': c60,
+          '--btn-primary-text': '#ffffff',
+          '--badge-bg': c10,
+          '--badge-text': cText,
+          '--btn-close-filter': 'none',
+          // Fallbacks/Legacy variables compatibility
+          '--primary': c60,
+          '--accent': c10,
+          '--bg-soft': c30,
+          '--text-dark': cText,
+          '--border-radius-lg': cardRadius,
+          '--border-radius-md': cardRadius,
+          '--border-radius-sm': cardRadius
+        }
+      };
+
+      // Load existing custom themes from localStorage
+      let customThemes = {};
+      try {
+        const stored = localStorage.getItem('custom_themes');
+        if (stored) customThemes = JSON.parse(stored);
+      } catch (e) {
+        console.error(e);
+      }
+
+      // Add new theme
+      customThemes[themeId] = newTheme;
+      localStorage.setItem('custom_themes', JSON.stringify(customThemes));
+
+      // Merge into window.homepageThemes
+      window.homepageThemes[themeId] = newTheme;
+
+      // Select/Apply the theme
+      selectTheme(themeId);
+
+      // Re-render the list inside modal
+      openThemesModal();
+    }
+
+    function deleteCustomTheme(event, themeId) {
+      if (event) event.stopPropagation();
+      if (!confirm('¿Seguro que deseas eliminar esta plantilla personalizada?')) return;
+
+      // Load custom themes from localStorage
+      let customThemes = {};
+      try {
+        const stored = localStorage.getItem('custom_themes');
+        if (stored) customThemes = JSON.parse(stored);
+      } catch (e) {
+        console.error(e);
+      }
+
+      // Delete theme
+      delete customThemes[themeId];
+      localStorage.setItem('custom_themes', JSON.stringify(customThemes));
+
+      // Remove from window.homepageThemes
+      delete window.homepageThemes[themeId];
+
+      // If the deleted theme was the active one, revert to default 'tierra_artesanal'
+      const activeThemeId = localStorage.getItem('home_theme');
+      if (activeThemeId === themeId) {
+        selectTheme('tierra_artesanal');
+      } else {
+        // Re-render the list inside modal
+        openThemesModal();
       }
     }
 

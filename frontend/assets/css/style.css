@@ -35,6 +35,9 @@
   --badge-bg: var(--theme-10);
   --badge-text: #2C2420;
 
+  /* Controls */
+  --btn-close-filter: none;
+
   /* Legacy variables compatibility */
   --primary: var(--theme-60);
   --primary-rgb: 175, 66, 32;
@@ -922,6 +925,52 @@ a:hover {
     padding-top: 1.5rem !important;
     padding-bottom: 1.5rem !important;
   }
+}
+
+/* Product and Store Modals Theme Override */
+#productModal .modal-content,
+#storeModal .modal-content {
+  background-color: var(--card-bg) !important;
+  color: var(--theme-text) !important;
+  border: var(--card-border) !important;
+}
+
+#productModal .modal-content > .position-relative,
+#storeModal .modal-content > .position-relative {
+  background-color: var(--container-bg) !important;
+}
+
+#productModal .text-secondary,
+#productModal .text-muted,
+#storeModal .text-secondary,
+#storeModal .text-muted {
+  color: var(--theme-text) !important;
+  opacity: 0.7;
+}
+
+#productModal #modalProductPrice {
+  color: var(--card-price-color) !important;
+}
+
+/* Modal Buttons Override (Agregar & Ver Catálogo) */
+#productModal .btn-dark,
+#storeModal .btn-dark {
+  background-color: var(--btn-primary-bg) !important;
+  border-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-text) !important;
+}
+#productModal .btn-dark:hover,
+#storeModal .btn-dark:hover {
+  background-color: var(--btn-primary-bg) !important;
+  opacity: 0.9;
+  border-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-text) !important;
+}
+
+/* Close buttons override */
+#productModal .btn-close,
+#storeModal .btn-close {
+  filter: var(--btn-close-filter, none) !important;
 }
 
 

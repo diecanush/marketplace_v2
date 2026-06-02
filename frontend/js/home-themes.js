@@ -36,6 +36,7 @@
         '--btn-primary-text': '#ffffff',
         '--badge-bg': '#dfa84a',
         '--badge-text': '#2C2420',
+        '--btn-close-filter': 'none',
         // Fallbacks/Legacy variables compatibility
         '--primary': '#af4220',
         '--primary-hover': '#8e3215',
@@ -82,6 +83,7 @@
         '--btn-primary-text': '#ffffff',
         '--badge-bg': '#e09f67',
         '--badge-text': '#ffffff',
+        '--btn-close-filter': 'none',
         // Fallbacks/Legacy variables compatibility
         '--primary': '#2d4a43',
         '--primary-hover': '#1e332e',
@@ -128,6 +130,7 @@
         '--btn-primary-text': '#ffffff',
         '--badge-bg': '#fd7e14',
         '--badge-text': '#ffffff',
+        '--btn-close-filter': 'none',
         // Fallbacks/Legacy variables compatibility
         '--primary': '#0d6efd',
         '--primary-hover': '#0b5ed7',
@@ -174,6 +177,7 @@
         '--btn-primary-text': '#121212',
         '--badge-bg': '#d4af37',
         '--badge-text': '#121212',
+        '--btn-close-filter': 'invert(1)',
         // Fallbacks/Legacy variables compatibility
         '--primary': '#c5a880',
         '--primary-hover': '#b0936b',
@@ -203,4 +207,17 @@
 
     return true;
   };
+
+  // Load custom themes from localStorage
+  try {
+    const customThemesJson = localStorage.getItem('custom_themes');
+    if (customThemesJson) {
+      const customThemes = JSON.parse(customThemesJson);
+      Object.keys(customThemes).forEach(themeId => {
+        window.homepageThemes[themeId] = customThemes[themeId];
+      });
+    }
+  } catch (e) {
+    console.error("Error loading custom themes", e);
+  }
 })();
