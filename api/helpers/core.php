@@ -1,5 +1,18 @@
 <?php
-const JWT_SECRET = 'CAMBIAR_CLAVE_SECRETA_MARKETPLACE_V2';
+if (!defined('JWT_SECRET')) {
+  define('JWT_SECRET', getenv('JWT_SECRET') ?: 'CAMBIAR_CLAVE_SECRETA_MARKETPLACE_V2');
+}
+
+// Control crítico de seguridad para entorno de producción
+if (getenv('APP_ENV') === 'production' && JWT_SECRET === 'CAMBIAR_CLAVE_SECRETA_MARKETPLACE_V2') {
+  http_response_code(500);
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode([
+    'success' => false,
+    'message' => 'Error de Seguridad Crítico: JWT_SECRET conserva el valor por defecto en producción. El sistema ha bloqueado las operaciones hasta que se configure una clave secreta segura.'
+  ], JSON_UNESCAPED_UNICODE);
+  exit;
+}
 function json_response($payload,$status=200) { http_response_code($status); header('Content-Type: application/json; charset=utf-8'); echo json_encode($payload, JSON_UNESCAPED_UNICODE); exit; }
 function body() { $d=json_decode(file_get_contents('php://input'), true); return is_array($d)?$d:[]; }
 function method() { $m=$_SERVER['REQUEST_METHOD']; $h=function_exists('getallheaders')?getallheaders():[]; return ($m==='POST' && isset($h['X-HTTP-Method-Override'])) ? strtoupper($h['X-HTTP-Method-Override']) : $m; }
@@ -35,7 +48,7 @@ function save_image_from_base64($img_str, $folder_name) {
     $file_data = base64_decode($parts[1]);
     if ($file_data === false) return '';
     
-    $upload_dir = __DIR__ . '/../../uploads/' . $folder_name;
+    $upload_dir = PATH_UPLOADS . DIRECTORY_SEPARATOR . $folder_name;
     if (!file_exists($upload_dir)) {
       if (!@mkdir($upload_dir, 0755, true)) {
         return '';

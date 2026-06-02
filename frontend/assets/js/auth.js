@@ -7,21 +7,12 @@ const Auth = {
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    // Determinar la ruta relativa correcta al login.html
-    if (location.pathname.includes('/panel/') || location.pathname.includes('/admin/')) {
-      location.href = '../login.html';
-    } else {
-      location.href = 'login.html';
-    }
+    location.href = window.AppConfig ? window.AppConfig.LOGIN_URL : 'login.html';
   },
   
   require() {
     if (!API.token()) {
-      if (location.pathname.includes('/panel/') || location.pathname.includes('/admin/')) {
-        location.href = '../login.html';
-      } else {
-        location.href = 'login.html';
-      }
+      location.href = window.AppConfig ? window.AppConfig.LOGIN_URL : 'login.html';
     }
   },
   
@@ -30,11 +21,7 @@ const Auth = {
     let u = API.user();
     if (!u || !rs.includes(u.rol)) {
       alert('No autorizado');
-      if (location.pathname.includes('/panel/') || location.pathname.includes('/admin/')) {
-        location.href = '../index.html';
-      } else {
-        location.href = 'index.html';
-      }
+      location.href = window.AppConfig ? window.AppConfig.INDEX_URL : 'index.html';
     }
   },
   
@@ -45,9 +32,12 @@ const Auth = {
       e.textContent = `${u.nombre} (${u.rol})`;
     }
 
+    const config = window.AppConfig || {};
+    const currentUrl = window.location.href;
+
     // Renderizado centralizado del sidebar para vistas de admin
     let nav = document.querySelector('aside.side nav.nav');
-    if (nav && u && u.rol === 'admin' && location.pathname.includes('/admin/')) {
+    if (nav && u && u.rol === 'admin' && config.ADMIN_BASE_URL && currentUrl.includes(config.ADMIN_BASE_URL)) {
       let path = location.pathname;
       let isDashboard = path.includes('/dashboard.html');
       let isUsuarios = path.includes('/usuarios.html');
@@ -68,13 +58,13 @@ const Auth = {
         <a href="layout.html" class="${isLayout ? 'active' : ''}"><i class="bi bi-grid-1x2"></i> Diseño Home</a>
         <a href="campanas.html" class="${isCampanas ? 'active' : ''}"><i class="bi bi-megaphone"></i> Campañas</a>
         <hr class="text-white-50">
-        <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
+        <a href="${config.INDEX_URL}"><i class="bi bi-globe"></i> Ver Sitio</a>
         <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
       `;
     }
 
     // Renderizado centralizado del sidebar para vistas de panel (vendedor / cliente)
-    if (nav && u && (location.pathname.includes('/panel/') || location.pathname.endsWith('/panel'))) {
+    if (nav && u && config.PANEL_BASE_URL && (currentUrl.includes(config.PANEL_BASE_URL) || currentUrl.endsWith('/panel') || currentUrl.endsWith('/panel/'))) {
       let path = location.pathname;
       let isDashboard = path.includes('/dashboard.html') || path.endsWith('/panel') || path.endsWith('/panel/');
       let isTienda = path.includes('/tienda.html');
@@ -92,7 +82,7 @@ const Auth = {
         <a href="campanas.html" id="navCampanas" class="${isCampanas ? 'active' : ''}" ${displayStyle}><i class="bi bi-megaphone"></i> Campañas</a>
         <a href="ventas.html" id="navSales" class="${isVentas ? 'active' : ''}" ${displayStyle}><i class="bi bi-currency-dollar"></i> Ventas</a>
         <hr class="text-white-50">
-        <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
+        <a href="${config.INDEX_URL}"><i class="bi bi-globe"></i> Ver Sitio</a>
         <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
       `;
     }

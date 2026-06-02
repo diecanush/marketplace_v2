@@ -8,7 +8,7 @@ function process_uploaded_images($images_array) {
   if (!is_array($images_array)) return [];
   
   $saved_paths = [];
-  $upload_dir = __DIR__ . '/../../uploads/solicitudes';
+  $upload_dir = PATH_UPLOADS . DIRECTORY_SEPARATOR . 'solicitudes';
   
   if (!file_exists($upload_dir)) {
     if (!@mkdir($upload_dir, 0755, true)) {
