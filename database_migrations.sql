@@ -167,4 +167,13 @@ INSERT IGNORE INTO homepage_layout (id, component_id, is_enabled, order_index, c
 (5, 5, 1, 5, '{"title": "Nuestros Productos"}'),
 (6, 6, 1, 6, '{"image_url": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=1200&q=80", "badge": "¿Eres Artesano?", "title": "Vende tus artesanías en Artesanías Sur", "description": "Crea tu tienda virtual hoy mismo, llega a más personas de la Patagonia y gestiona tus productos fácilmente.", "button_text": "Solicitar ser Vendedor"}');
 
+CREATE TABLE IF NOT EXISTS configuraciones_globales (
+  clave VARCHAR(50) PRIMARY KEY,
+  valor TEXT NOT NULL,
+  fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+INSERT IGNORE INTO configuraciones_globales (clave, valor) VALUES 
+('active_theme_id', 'tierra_artesanal'),
+('custom_themes', '{}'),
+('public_navbar_config', '{"logo_url":"","brand_name":"Artesanías Sur","link_inicio":"Inicio","link_tiendas":"Tiendas","link_ofertas":"Ofertas","link_productos":"Productos","font_family":"Outfit","font_size":"0.95rem"}');
