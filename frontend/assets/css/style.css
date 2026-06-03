@@ -666,13 +666,18 @@ a:hover {
   margin-bottom: 0.35rem;
   transition: var(--transition-smooth);
 }
-.side a:hover, .side a.active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+.side a:hover {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 .side a.active {
-  background: var(--primary);
-  box-shadow: 0 4px 12px rgba(175, 66, 32, 0.3);
+  color: #fff !important;
+  background: var(--primary) !important;
+  box-shadow: var(--btn-shadow, none) !important;
+}
+.side a.active:hover {
+  background: var(--primary-hover, var(--primary)) !important;
+  opacity: 0.95;
 }
 
 /* Dashboard Cards & Layout */

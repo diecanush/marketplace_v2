@@ -16,6 +16,41 @@
 
   <!-- Custom Style -->
   <link href="../assets/css/style.css" rel="stylesheet">
+  <script>
+    (function() {
+      const activeTheme = localStorage.getItem('home_theme') || 'tierra_artesanal';
+      const themes = {
+        tierra_artesanal: {
+          '--theme-60': '#af4220', '--theme-30': '#FAF8F5', '--theme-10': '#dfa84a', '--theme-text': '#2C2420',
+          '--primary': '#af4220', '--primary-hover': '#8e3215', '--accent': '#dfa84a', '--bg-soft': '#FAF8F5', '--text-dark': '#2C2420'
+        },
+        minimalista_clara: {
+          '--theme-60': '#2d4a43', '--theme-30': '#fcfcfc', '--theme-10': '#e09f67', '--theme-text': '#1a1d20',
+          '--primary': '#2d4a43', '--primary-hover': '#1e332e', '--accent': '#e09f67', '--bg-soft': '#fcfcfc', '--text-dark': '#1a1d20'
+        },
+        comercial_moderna: {
+          '--theme-60': '#0d6efd', '--theme-30': '#f8f9fa', '--theme-10': '#fd7e14', '--theme-text': '#212529',
+          '--primary': '#0d6efd', '--primary-hover': '#0b5ed7', '--accent': '#fd7e14', '--bg-soft': '#f8f9fa', '--text-dark': '#212529'
+        },
+        elegante_oscura: {
+          '--theme-60': '#c5a880', '--theme-30': '#121212', '--theme-10': '#d4af37', '--theme-text': '#f5f5f7',
+          '--primary': '#c5a880', '--primary-hover': '#b0936b', '--accent': '#d4af37', '--bg-soft': '#121212', '--text-dark': '#f5f5f7'
+        }
+      };
+      let vars = themes[activeTheme];
+      if (!vars && activeTheme.startsWith('custom_')) {
+        try {
+          const custom = JSON.parse(localStorage.getItem('custom_themes') || '{}');
+          if (custom[activeTheme]) vars = custom[activeTheme].variables;
+        } catch(e){}
+      }
+      if (vars) {
+        for (let k in vars) {
+          document.documentElement.style.setProperty(k, vars[k]);
+        }
+      }
+    })();
+  </script>
   <style>
     /* Drag & Drop Visual Styles */
     tr[draggable="true"] {
@@ -154,6 +189,7 @@
           <a href="ventas.html"><i class="bi bi-receipt"></i> Ventas</a>
           <a href="solicitudes.html"><i class="bi bi-send-check"></i> Solicitudes <span id="navPendingBadge" class="badge text-bg-warning rounded-pill" style="display:none;">0</span></a>
           <a href="layout.html" class="active"><i class="bi bi-grid-1x2"></i> Diseño Home</a>
+          <a href="campanas.html"><i class="bi bi-megaphone"></i> Campañas</a>
           <hr class="text-white-50">
           <a href="../index.html"><i class="bi bi-globe"></i> Ver Sitio</a>
           <a href="#" onclick="event.preventDefault(); Auth.logout()"><i class="bi bi-box-arrow-right text-danger"></i> Salir</a>
@@ -182,6 +218,11 @@
           <li class="nav-item" role="presentation">
             <button class="nav-link fw-bold text-dark" id="esqueleto-tab" data-bs-toggle="tab" data-bs-target="#esqueleto-tab-pane" type="button" role="tab" aria-controls="esqueleto-tab-pane" aria-selected="false">
               <i class="bi bi-list-nested text-primary"></i> Esqueleto
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-dark" id="navbar-tab" data-bs-toggle="tab" data-bs-target="#navbar-tab-pane" type="button" role="tab" aria-controls="navbar-tab-pane" aria-selected="false" onclick="initNavbarConfigTab()">
+              <i class="bi bi-window text-primary"></i> Editar Navbar Pública
             </button>
           </li>
         </ul>
@@ -277,6 +318,133 @@
                       <button class="btn btn-dark px-4 rounded-pill fw-bold" id="btnSaveOrder" onclick="saveOrder()">
                         <i class="bi bi-save"></i> Guardar Orden
                       </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 3. Editar Navbar Pública Tab -->
+          <div class="tab-pane fade" id="navbar-tab-pane" role="tabpanel" aria-labelledby="navbar-tab" tabindex="0">
+            <div class="card border-0 rounded-4 shadow-sm mb-4">
+              <div class="card-header bg-white border-bottom py-3">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-window text-primary"></i> Configuración de la Navbar Pública</h5>
+                <small class="text-muted">Personaliza la cabecera que verán tus visitantes en la página principal.</small>
+              </div>
+              <div class="card-body p-4 bg-white">
+                <div class="row">
+                  <!-- Formulario de Configuración -->
+                  <div class="col-lg-5 p-3 border-end">
+                    <form id="navbarConfigForm" onsubmit="event.preventDefault(); saveNavbarConfig();">
+                      <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Nombre de la Marca / Título</label>
+                        <input type="text" id="navBrandName" class="form-control rounded-3" placeholder="Artesanías Sur" oninput="updateNavbarPreviewLive()">
+                      </div>
+                      
+                      <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Logo de la Navbar</label>
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                          <div id="navLogoPreviewContainer" class="border rounded-3 p-2 bg-light d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; overflow: hidden;">
+                            <span class="text-muted small">Sin Logo</span>
+                          </div>
+                          <div class="flex-grow-1">
+                            <input type="file" id="navLogoFile" class="form-control form-control-sm rounded-3 mb-2" accept="image/*" onchange="handleNavbarLogoUpload(this)">
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-2.5" onclick="removeNavbarLogo()">
+                              <i class="bi bi-trash"></i> Quitar Logo
+                            </button>
+                          </div>
+                        </div>
+                        <div id="navLogoFeedback" class="form-text text-danger" style="display: none; font-size: 0.75rem;">El archivo supera el tamaño máximo permitido (200 KB).</div>
+                        <div class="form-text text-muted" style="font-size: 0.75rem;">Tamaño máximo recomendado: 200 KB. Formatos: PNG, JPG, WEBP.</div>
+                      </div>
+
+                      <hr class="my-4 text-muted">
+                      <h6 class="fw-bold mb-3 text-secondary text-uppercase tracking-wider small"><i class="bi bi-link-45deg"></i> Textos de los Enlaces</h6>
+                      
+                      <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Texto para 'Inicio'</label>
+                        <input type="text" id="navLinkInicio" class="form-control rounded-3" placeholder="Inicio" oninput="updateNavbarPreviewLive()">
+                      </div>
+                      
+                      <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Texto para 'Tiendas'</label>
+                        <input type="text" id="navLinkTiendas" class="form-control rounded-3" placeholder="Tiendas" oninput="updateNavbarPreviewLive()">
+                      </div>
+                      
+                      <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Texto para 'Ofertas/Campañas'</label>
+                        <input type="text" id="navLinkOfertas" class="form-control rounded-3" placeholder="Ofertas" oninput="updateNavbarPreviewLive()">
+                      </div>
+                      
+                      <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Texto para 'Productos'</label>
+                        <input type="text" id="navLinkProductos" class="form-control rounded-3" placeholder="Productos" oninput="updateNavbarPreviewLive()">
+                      </div>
+
+                      <hr class="my-4 text-muted">
+                      <h6 class="fw-bold mb-3 text-secondary text-uppercase tracking-wider small"><i class="bi bi-type"></i> Tipografía y Estilo</h6>
+                      
+                      <div class="row g-2">
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label small fw-bold text-secondary">Fuente de la Navbar</label>
+                          <select id="navFontFamily" class="form-select rounded-3" onchange="updateNavbarPreviewLive()">
+                            <option value="Outfit">Outfit (Moderna)</option>
+                            <option value="Inter">Inter (Limpia)</option>
+                            <option value="Montserrat">Montserrat (Llamativa)</option>
+                            <option value="Poppins">Poppins (Redondeada)</option>
+                            <option value="Roboto">Roboto (Clásica)</option>
+                            <option value="Lora">Lora (Elegante Serifa)</option>
+                          </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label small fw-bold text-secondary">Tamaño de Fuente</label>
+                          <select id="navFontSize" class="form-select rounded-3" onchange="updateNavbarPreviewLive()">
+                            <option value="0.8rem">0.8rem (Chico)</option>
+                            <option value="0.9rem">0.9rem (Medio chico)</option>
+                            <option value="0.95rem">0.95rem (Normal)</option>
+                            <option value="1rem">1rem (Medio grande)</option>
+                            <option value="1.1rem">1.1rem (Grande)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="mt-4 d-grid">
+                        <button type="submit" id="btnSaveNavbar" class="btn btn-dark rounded-pill fw-bold py-2">
+                          <i class="bi bi-save2-fill me-1"></i> Guardar Configuración Navbar
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                  
+                  <!-- Previsualización en Vivo de la Navbar -->
+                  <div class="col-lg-7 p-3 bg-light rounded-4 d-flex flex-column" style="min-height: 400px;">
+                    <h6 class="fw-bold mb-3 text-secondary text-uppercase tracking-wider small"><i class="bi bi-eye"></i> Vista Previa de la Navbar</h6>
+                    <div class="border rounded-4 bg-white shadow-sm overflow-hidden p-0 w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-center" style="min-height: 250px;">
+                      <!-- Navbar Mockup Preview Box -->
+                      <div id="navbar-live-preview-box" class="w-100 p-3" style="background-color: var(--body-bg, #FAF8F5);">
+                        <nav class="navbar navbar-expand-lg rounded-3 shadow-xs px-3 py-2" style="background-color: var(--navbar-bg, var(--primary, #af4220)); color: var(--navbar-text, #ffffff); transition: all 0.3s ease;">
+                          <div class="container-fluid d-flex justify-content-between align-items-center">
+                            <span class="navbar-brand d-flex align-items-center gap-2 m-0 p-0" style="color: var(--navbar-text, #ffffff); font-weight: 700; font-family: inherit;">
+                              <img id="previewNavLogo" src="" alt="Logo" style="height: 35px; width: auto; max-width: 120px; object-fit: contain; display: none;">
+                              <span id="previewNavBrandName">Artesanías Sur</span>
+                            </span>
+                            <div class="d-none d-md-flex align-items-center gap-3" id="previewNavLinks" style="font-family: inherit; font-size: inherit;">
+                              <span class="fw-medium text-white-50" style="opacity: 0.9;">Inicio</span>
+                              <span class="fw-medium text-white-50" style="opacity: 0.9;">Tiendas</span>
+                              <span class="fw-medium text-white-50" style="opacity: 0.9;">Ofertas</span>
+                              <span class="fw-medium text-white-50" style="opacity: 0.9;">Productos</span>
+                            </div>
+                            <!-- Burger button mockup (just for visual representation on mobile) -->
+                            <button class="navbar-toggler d-md-none border-0 text-white p-0" type="button" style="color: inherit;">
+                              <i class="bi bi-list fs-3"></i>
+                            </button>
+                          </div>
+                        </nav>
+                      </div>
+                      <div class="text-center text-muted small p-3 bg-white w-100 border-top mt-auto rounded-bottom-4">
+                        <i class="bi bi-info-circle me-1"></i> La navbar mockup se adapta a la paleta de colores del tema visual activo para garantizar la legibilidad y contraste.
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -900,7 +1068,7 @@
       themesModal.show();
     }
 
-    function selectTheme(themeId) {
+    async function selectTheme(themeId) {
       if (window.applyTheme && window.applyTheme(themeId)) {
         localStorage.setItem('home_theme', themeId);
         
@@ -911,7 +1079,20 @@
         
         window.applyTheme(themeId, document.documentElement);
         
-        showToast(`Plantilla "${window.homepageThemes[themeId].name}" aplicada con éxito.`, 'success');
+        // Guardar en base de datos vía API
+        try {
+          let res = await API.put('/configuraciones.php', {
+            active_theme_id: themeId
+          });
+          if (res.success) {
+            showToast(`Plantilla "${window.homepageThemes[themeId].name}" aplicada con éxito.`, 'success');
+          } else {
+            showToast(`Error al guardar plantilla activa en el servidor: ${res.message}`, 'danger');
+          }
+        } catch (err) {
+          console.error("Error saving active theme to server:", err);
+          showToast(`Error de conexión al aplicar plantilla en el servidor.`, 'danger');
+        }
         
         const themesModal = bootstrap.Modal.getInstance(document.getElementById('themesModal')) || bootstrap.Modal.getOrCreateInstance(document.getElementById('themesModal'));
         if (themesModal) themesModal.hide();
@@ -920,7 +1101,7 @@
 
     let editingThemeId = null;
 
-    function saveCustomTheme() {
+    async function saveCustomTheme() {
       const name = document.getElementById('customThemeName').value.trim() || 'Mi Plantilla Personalizada';
       const c60 = document.getElementById('customColor60').value;
       const c30 = document.getElementById('customColor30').value;
@@ -995,8 +1176,21 @@
       // Merge into window.homepageThemes
       window.homepageThemes[themeId] = newTheme;
 
-      // Select/Apply the theme
-      selectTheme(themeId);
+      // Guardar en la base de datos vía API
+      try {
+        let res = await API.put('/configuraciones.php', {
+          custom_themes: customThemes
+        });
+        if (!res.success) {
+          showToast(`Error al guardar plantilla en el servidor: ${res.message}`, 'danger');
+        }
+      } catch (err) {
+        console.error("Error saving custom themes to server:", err);
+        showToast(`Error de conexión al guardar plantilla en el servidor.`, 'danger');
+      }
+
+      // Select/Apply the theme (esto también guarda el active_theme_id en la API)
+      await selectTheme(themeId);
 
       // Reset editing state and form fields
       resetCustomThemeForm();
@@ -1075,7 +1269,7 @@
       if (cancelBtn) cancelBtn.remove();
     }
 
-    function deleteCustomTheme(event, themeId) {
+    async function deleteCustomTheme(event, themeId) {
       if (event) event.stopPropagation();
       if (!confirm('¿Seguro que deseas eliminar esta plantilla personalizada?')) return;
 
@@ -1099,10 +1293,25 @@
       // Remove from window.homepageThemes
       delete window.homepageThemes[themeId];
 
+      // Guardar en la base de datos vía API
+      try {
+        let res = await API.put('/configuraciones.php', {
+          custom_themes: customThemes
+        });
+        if (res.success) {
+          showToast('Plantilla personalizada eliminada del servidor.', 'success');
+        } else {
+          showToast(`Error al eliminar plantilla del servidor: ${res.message}`, 'danger');
+        }
+      } catch (err) {
+        console.error("Error deleting custom theme from server:", err);
+        showToast(`Error de conexión al eliminar plantilla del servidor.`, 'danger');
+      }
+
       // If the deleted theme was the active one, revert to default 'tierra_artesanal'
       const activeThemeId = localStorage.getItem('home_theme');
       if (activeThemeId === themeId) {
-        selectTheme('tierra_artesanal');
+        await selectTheme('tierra_artesanal');
       } else {
         // Re-render the list inside modal
         openThemesModal();
@@ -1144,6 +1353,29 @@
       }
 
       let html = '';
+      if (window.navbarConfig) {
+        const config = window.navbarConfig;
+        const fontStyle = `font-family: '${config.font_family || 'Outfit'}', sans-serif; font-size: ${config.font_size || '0.95rem'};`;
+        
+        html += `
+          <div class="p-2 border-bottom mb-2 bg-white" style="${fontStyle}">
+            <nav class="navbar navbar-expand-lg rounded shadow-xs px-3 py-2" style="background-color: var(--navbar-bg, var(--primary, #af4220)); color: var(--navbar-text, #ffffff); transition: all 0.3s ease;">
+              <div class="container-fluid d-flex justify-content-between align-items-center">
+                <span class="navbar-brand d-flex align-items-center gap-2 m-0 p-0" style="color: var(--navbar-text, #ffffff); font-weight: 700; font-family: inherit; font-size: inherit;">
+                  ${config.logo_url ? `<img src="${config.logo_url}" alt="Logo" style="height: 30px; width: auto; max-width: 100px; object-fit: contain;">` : ''}
+                  <span style="${config.logo_url ? 'font-size: 0.9em;' : ''}">${config.brand_name || 'Artesanías Sur'}</span>
+                </span>
+                <div class="d-none d-md-flex align-items-center gap-3" style="font-family: inherit; font-size: inherit;">
+                  <span class="fw-medium text-white-50" style="opacity: 0.9;">${config.link_inicio || 'Inicio'}</span>
+                  <span class="fw-medium text-white-50" style="opacity: 0.9;">${config.link_tiendas || 'Tiendas'}</span>
+                  <span class="fw-medium text-white-50" style="opacity: 0.9;">${config.link_ofertas || 'Ofertas'}</span>
+                  <span class="fw-medium text-white-50" style="opacity: 0.9;">${config.link_productos || 'Productos'}</span>
+                </div>
+              </div>
+            </nav>
+          </div>
+        `;
+      }
       activeSections.forEach(item => {
         try {
           const renderer = window.homepageTemplates[item.name];
@@ -1342,9 +1574,213 @@
       window.applyTheme(activeThemeId, document.documentElement);
     }
 
+    // Configuration of Navbar Config
+    window.navbarConfig = null;
+
+    async function loadNavbarConfig() {
+      try {
+        let res = await API.get('/configuraciones.php');
+        if (res.success && res.public_navbar_config) {
+          window.navbarConfig = res.public_navbar_config;
+        } else {
+          // Set defaults
+          window.navbarConfig = {
+            logo_url: '',
+            brand_name: 'Artesanías Sur',
+            link_inicio: 'Inicio',
+            link_tiendas: 'Tiendas',
+            link_ofertas: 'Ofertas',
+            link_productos: 'Productos',
+            font_family: 'Outfit',
+            font_size: '0.95rem'
+          };
+        }
+      } catch (err) {
+        console.error("Error loading navbar config:", err);
+      }
+    }
+
+    async function initNavbarConfigTab() {
+      if (!window.navbarConfig) {
+        await loadNavbarConfig();
+      }
+      populateNavbarConfigForm(window.navbarConfig);
+      updateNavbarPreviewLive();
+    }
+
+    function populateNavbarConfigForm(config) {
+      document.getElementById('navBrandName').value = config.brand_name || '';
+      document.getElementById('navLinkInicio').value = config.link_inicio || '';
+      document.getElementById('navLinkTiendas').value = config.link_tiendas || '';
+      document.getElementById('navLinkOfertas').value = config.link_ofertas || '';
+      document.getElementById('navLinkProductos').value = config.link_productos || '';
+      document.getElementById('navFontFamily').value = config.font_family || 'Outfit';
+      document.getElementById('navFontSize').value = config.font_size || '0.95rem';
+
+      // Logo container preview
+      const container = document.getElementById('navLogoPreviewContainer');
+      if (config.logo_url) {
+        container.innerHTML = `<img src="${config.logo_url}" alt="Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+      } else {
+        container.innerHTML = `<span class="text-muted small">Sin Logo</span>`;
+      }
+      document.getElementById('navLogoFeedback').style.display = 'none';
+    }
+
+    function handleNavbarLogoUpload(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      // Validate size <= 200 KB
+      if (file.size > 200 * 1024) {
+        document.getElementById('navLogoFeedback').style.display = 'block';
+        input.value = ''; // clear input
+        return;
+      }
+
+      document.getElementById('navLogoFeedback').style.display = 'none';
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64 = e.target.result;
+        // Update model
+        window.navbarConfig.logo_url = base64;
+        
+        // Update form logo preview
+        const container = document.getElementById('navLogoPreviewContainer');
+        container.innerHTML = `<img src="${base64}" alt="Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+        
+        updateNavbarPreviewLive();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeNavbarLogo() {
+      if (!window.navbarConfig) return;
+      window.navbarConfig.logo_url = '';
+      document.getElementById('navLogoFile').value = '';
+      document.getElementById('navLogoPreviewContainer').innerHTML = `<span class="text-muted small">Sin Logo</span>`;
+      document.getElementById('navLogoFeedback').style.display = 'none';
+      updateNavbarPreviewLive();
+    }
+
+    function updateNavbarPreviewLive() {
+      if (!window.navbarConfig) return;
+
+      const brandName = document.getElementById('navBrandName').value.trim() || 'Artesanías Sur';
+      const linkInicio = document.getElementById('navLinkInicio').value.trim() || 'Inicio';
+      const linkTiendas = document.getElementById('navLinkTiendas').value.trim() || 'Tiendas';
+      const linkOfertas = document.getElementById('navLinkOfertas').value.trim() || 'Ofertas';
+      const linkProductos = document.getElementById('navLinkProductos').value.trim() || 'Productos';
+      const fontFamily = document.getElementById('navFontFamily').value;
+      const fontSize = document.getElementById('navFontSize').value;
+
+      // Update mock elements inside navbar-live-preview-box
+      const previewBox = document.getElementById('navbar-live-preview-box');
+      if (previewBox) {
+        const navEl = previewBox.querySelector('nav');
+        if (navEl) {
+          navEl.style.fontFamily = `'${fontFamily}', sans-serif`;
+          navEl.style.fontSize = fontSize;
+        }
+
+        const previewLogo = document.getElementById('previewNavLogo');
+        if (previewLogo) {
+          if (window.navbarConfig.logo_url) {
+            previewLogo.src = window.navbarConfig.logo_url;
+            previewLogo.style.display = 'inline-block';
+            previewLogo.style.objectFit = 'contain';
+          } else {
+            previewLogo.src = '';
+            previewLogo.style.display = 'none';
+          }
+        }
+
+        const previewBrandName = document.getElementById('previewNavBrandName');
+        if (previewBrandName) {
+          previewBrandName.textContent = brandName;
+        }
+
+        const previewLinks = document.getElementById('previewNavLinks');
+        if (previewLinks) {
+          const linksSpans = previewLinks.querySelectorAll('span');
+          if (linksSpans.length === 4) {
+            linksSpans[0].textContent = linkInicio;
+            linksSpans[1].textContent = linkTiendas;
+            linksSpans[2].textContent = linkOfertas;
+            linksSpans[3].textContent = linkProductos;
+          }
+        }
+      }
+    }
+
+    async function saveNavbarConfig() {
+      const btn = document.getElementById('btnSaveNavbar');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+
+      // Build payload from current fields
+      const payload = {
+        logo_url: window.navbarConfig.logo_url || '',
+        brand_name: document.getElementById('navBrandName').value.trim() || 'Artesanías Sur',
+        link_inicio: document.getElementById('navLinkInicio').value.trim() || 'Inicio',
+        link_tiendas: document.getElementById('navLinkTiendas').value.trim() || 'Tiendas',
+        link_ofertas: document.getElementById('navLinkOfertas').value.trim() || 'Ofertas',
+        link_productos: document.getElementById('navLinkProductos').value.trim() || 'Productos',
+        font_family: document.getElementById('navFontFamily').value,
+        font_size: document.getElementById('navFontSize').value
+      };
+
+      try {
+        let res = await API.put('/configuraciones.php', {
+          public_navbar_config: payload
+        });
+
+        if (res.success) {
+          showToast('Configuración de Navbar guardada con éxito en el servidor MySQL.', 'success');
+          window.navbarConfig = payload;
+          
+          // Re-render overall homepage preview to include the new navbar configuration
+          if (window.adminLayoutData) {
+            renderHomepagePreview(window.adminLayoutData);
+          }
+        } else {
+          showToast('Error al guardar configuración: ' + res.message, 'danger');
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Error de red al intentar guardar en base de datos.', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-save2-fill me-1"></i> Guardar Configuración Navbar';
+      }
+    }
+
+    // Escuchar cuando el tema se haya cargado del servidor MySQL para actualizar la UI del administrador
+    document.addEventListener('themeConfigLoaded', function(e) {
+      const active = e.detail.active_theme_id || 'tierra_artesanal';
+      
+      const previewContainer = document.getElementById('homepage-live-preview');
+      if (previewContainer && window.applyTheme) {
+        window.applyTheme(active, previewContainer);
+      }
+
+      if (e.detail.public_navbar_config) {
+        window.navbarConfig = e.detail.public_navbar_config;
+        if (window.adminLayoutData) {
+          renderHomepagePreview(window.adminLayoutData);
+        }
+      }
+    });
+
     // Inicializar cargas
-    loadCommonStats();
-    loadLayout();
+    async function initAdminLayout() {
+      loadCommonStats();
+      await loadNavbarConfig();
+      await loadLayout();
+    }
+    
+    initAdminLayout();
   </script>
 </body>
 </html>

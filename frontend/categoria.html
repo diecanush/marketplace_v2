@@ -12,22 +12,23 @@
   <!-- Custom Style -->
   <link href="assets/css/style.css" rel="stylesheet">
 </head>
-<body>
+<body class="frontend-body">
 
   <!-- Navigation Bar -->
   <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
     <div class="container">
       <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
-        <span class="brand-logo">AS</span>Artesanías Sur
+        <span class="brand-logo">AS</span><span class="brand-text-span">Artesanías Sur</span>
       </a>
       <button class="navbar-toggler border-0" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div id="navbarNav" class="collapse navbar-collapse">
         <ul class="navbar-nav me-auto ms-lg-3">
-          <li class="nav-item"><a class="nav-link" href="index.html#tiendas">Tiendas</a></li>
-          <li class="nav-item"><a class="nav-link" href="index.html#categorias">Categorías</a></li>
-          <li class="nav-item"><a class="nav-link" href="index.html#ofertas">Ofertas</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html" id="nav-link-inicio">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#tiendas" id="nav-link-tiendas">Tiendas</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#ofertas" id="nav-link-ofertas">Ofertas</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#categorias" id="nav-link-productos">Productos</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2 flex-column flex-lg-row w-100 w-lg-auto mt-2 mt-lg-0">
           <div class="search-container w-100 w-lg-auto">
@@ -184,6 +185,7 @@
   <script src="assets/js/api.js?v=1.0.3"></script>
   <script src="assets/js/auth.js?v=1.0.1"></script>
   <script src="assets/js/cart.js"></script>
+  <script src="js/home-themes.js"></script>
 
   <script>
     const categoryId = new URLSearchParams(location.search).get('id');

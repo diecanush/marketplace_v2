@@ -25,16 +25,17 @@
   <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
     <div class="container">
       <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
-        <span class="brand-logo">AS</span>Artesanías Sur
+        <span class="brand-logo">AS</span><span class="brand-text-span">Artesanías Sur</span>
       </a>
       <button class="navbar-toggler border-0" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div id="navbarNav" class="collapse navbar-collapse">
         <ul class="navbar-nav me-auto ms-lg-3">
-          <li class="nav-item"><a class="nav-link active" href="#tiendas">Tiendas</a></li>
-          <li class="nav-item"><a class="nav-link" href="#categorias">Categorías</a></li>
-          <li class="nav-item"><a class="nav-link" href="#ofertas">Ofertas</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" id="nav-link-inicio">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="#tiendas" id="nav-link-tiendas">Tiendas</a></li>
+          <li class="nav-item"><a class="nav-link" href="#ofertas" id="nav-link-ofertas">Ofertas</a></li>
+          <li class="nav-item"><a class="nav-link" href="#categorias" id="nav-link-productos">Productos</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2 flex-column flex-lg-row w-100 w-lg-auto mt-2 mt-lg-0">
           <div class="search-container w-100 w-lg-auto">
@@ -325,6 +326,10 @@
       let html = '';
       layout.forEach(item => {
         try {
+          const compName = (item.name || '').trim().toLowerCase();
+          if (compName === 'header' || compName === 'navbar') {
+            return; // El header es fijo y se decora de forma global, no se renderiza dinámicamente en el contenedor de secciones
+          }
           if (!window.homepageTemplates) {
             console.error('La librería homepageTemplates no está inicializada.');
             return;
@@ -790,7 +795,13 @@
       if (!anchor) return;
       
       const href = anchor.getAttribute('href');
-      if (href === '#tiendas' || href === '#categorias' || href === '#ofertas') {
+      if (href === '#' || href === '#top') {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.querySelectorAll('.navbar-nav .nav-link').forEach(el => el.classList.remove('active'));
+        const navLink = document.getElementById('nav-link-inicio') || anchor;
+        if (navLink) navLink.classList.add('active');
+      } else if (href === '#tiendas' || href === '#categorias' || href === '#ofertas') {
         e.preventDefault();
         const targetPrefix = href.substring(1); // 'tiendas', 'categorias', 'ofertas'
         

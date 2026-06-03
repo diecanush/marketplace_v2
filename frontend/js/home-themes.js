@@ -208,16 +208,156 @@
     return true;
   };
 
-  // Load custom themes from localStorage
-  try {
-    const customThemesJson = localStorage.getItem('custom_themes');
-    if (customThemesJson) {
-      const customThemes = JSON.parse(customThemesJson);
-      Object.keys(customThemes).forEach(themeId => {
-        window.homepageThemes[themeId] = customThemes[themeId];
-      });
+  window.applyNavbarConfig = function(config) {
+    if (!config) return;
+
+    // 1. Brand name text and/or logo
+    const brandLink = document.querySelector('.navbar-brand');
+    if (brandLink) {
+      let img = brandLink.querySelector('img.navbar-logo-img');
+      let logoSpan = brandLink.querySelector('.brand-logo');
+      
+      let textSpan = brandLink.querySelector('.brand-text-span');
+      if (!textSpan) {
+        textSpan = document.createElement('span');
+        textSpan.className = 'brand-text-span';
+        
+        Array.from(brandLink.childNodes).forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            node.textContent = '';
+          }
+        });
+        brandLink.appendChild(textSpan);
+      }
+      
+      textSpan.textContent = config.brand_name || 'Artesanías Sur';
+
+      if (config.logo_url) {
+        if (logoSpan) logoSpan.style.setProperty('display', 'none', 'important');
+        if (!img) {
+          img = document.createElement('img');
+          img.className = 'navbar-logo-img';
+          img.style.height = '35px';
+          img.style.width = 'auto';
+          img.style.maxWidth = '120px';
+          img.style.objectFit = 'contain';
+          img.style.marginRight = '8px';
+          img.alt = 'Logo';
+          brandLink.insertBefore(img, brandLink.firstChild);
+        }
+        img.src = config.logo_url;
+        img.style.setProperty('display', 'inline-block', 'important');
+      } else {
+        if (img) img.style.setProperty('display', 'none', 'important');
+        if (logoSpan) {
+          logoSpan.style.setProperty('display', 'inline-flex', 'important');
+          const words = (config.brand_name || 'Artesanías Sur').split(' ');
+          const abbreviation = words.map(w => w[0]).join('').substring(0, 2).toUpperCase();
+          logoSpan.textContent = abbreviation;
+        }
+      }
     }
-  } catch (e) {
-    console.error("Error loading custom themes", e);
+
+    // 2. Links texts mapping
+    const linkInicio = document.getElementById('nav-link-inicio');
+    const linkTiendas = document.getElementById('nav-link-tiendas');
+    const linkOfertas = document.getElementById('nav-link-ofertas');
+    const linkProductos = document.getElementById('nav-link-productos');
+
+    if (linkInicio && config.link_inicio) linkInicio.textContent = config.link_inicio;
+    if (linkTiendas && config.link_tiendas) linkTiendas.textContent = config.link_tiendas;
+    if (linkOfertas && config.link_ofertas) linkOfertas.textContent = config.link_ofertas;
+    if (linkProductos && config.link_productos) linkProductos.textContent = config.link_productos;
+
+    // 3. Navbar font style
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+      if (config.font_family) {
+        navbar.style.setProperty('font-family', `'${config.font_family}', sans-serif`, 'important');
+      }
+      if (config.font_size) {
+        navbar.querySelectorAll('.nav-link, .navbar-brand, .navbar-brand span').forEach(el => {
+          el.style.setProperty('font-size', config.font_size, 'important');
+        });
+      }
+    }
+  };
+
+  // Carga e inicialización de temas desde la API (MySQL)
+  window.loadThemeConfig = async function() {
+    let baseUrl = '';
+    if (window.AppConfig && window.AppConfig.API_BASE_URL) {
+      baseUrl = window.AppConfig.API_BASE_URL;
+    } else {
+      // Deducir ruta si no está inicializada
+      const pathname = window.location.pathname.replace(/\\/g, '/');
+      let idx = pathname.indexOf('/frontend/');
+      let folder = idx !== -1 ? pathname.substring(0, idx).split('/').pop() : 'marketplace_v2';
+      baseUrl = window.location.origin + '/' + folder + '/api/routes';
+      if (window.location.protocol === 'file:') {
+        baseUrl = 'http://localhost/' + folder + '/api/routes';
+      }
+    }
+
+    try {
+      // 1. Intentar aplicar inmediatamente la caché de localStorage para evitar parpadeos visuales (FOUC)
+      const cachedActive = localStorage.getItem('home_theme') || 'tierra_artesanal';
+      window.applyTheme(cachedActive, document.documentElement);
+
+      const cachedCustom = localStorage.getItem('custom_themes');
+      if (cachedCustom) {
+        const customThemes = JSON.parse(cachedCustom);
+        Object.keys(customThemes).forEach(themeId => {
+          window.homepageThemes[themeId] = customThemes[themeId];
+        });
+      }
+
+      const cachedNavbar = localStorage.getItem('public_navbar_config');
+      if (cachedNavbar) {
+        try {
+          window.applyNavbarConfig(JSON.parse(cachedNavbar));
+        } catch(e) {}
+      }
+
+      // 2. Consultar la base de datos (fuente de verdad principal)
+      let r = await fetch(baseUrl + '/configuraciones.php');
+      let res = await r.json();
+      if (res.success) {
+        // Cargar temas personalizados de la base de datos
+        if (res.custom_themes) {
+          Object.keys(res.custom_themes).forEach(themeId => {
+            window.homepageThemes[themeId] = res.custom_themes[themeId];
+          });
+          // Actualizar caché local
+          localStorage.setItem('custom_themes', JSON.stringify(res.custom_themes));
+        }
+
+        // Aplicar el tema activo definitivo
+        const activeTheme = res.active_theme_id || 'tierra_artesanal';
+        window.applyTheme(activeTheme, document.documentElement);
+        localStorage.setItem('home_theme', activeTheme); // Actualizar caché
+
+        // Aplicar la navbar
+        if (res.public_navbar_config) {
+          window.applyNavbarConfig(res.public_navbar_config);
+          localStorage.setItem('public_navbar_config', JSON.stringify(res.public_navbar_config));
+        }
+
+        // Disparar evento para que vistas como layout.html actualicen su UI
+        document.dispatchEvent(new CustomEvent('themeConfigLoaded', { detail: res }));
+      }
+    } catch(err) {
+      console.error("Fallo al sincronizar temas con el servidor. Usando fallbacks locales.", err);
+      // Fallback: aplicar tema por defecto si falla la API y no hay caché
+      const currentActive = localStorage.getItem('home_theme') || 'tierra_artesanal';
+      window.applyTheme(currentActive, document.documentElement);
+    }
+  };
+
+  // Autoejecutar la carga
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.loadThemeConfig);
+  } else {
+    window.loadThemeConfig();
   }
 })();

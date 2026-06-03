@@ -38,7 +38,7 @@ const Auth = {
     // Renderizado centralizado del sidebar para vistas de admin
     let nav = document.querySelector('aside.side nav.nav');
     if (nav && u && u.rol === 'admin' && config.ADMIN_BASE_URL && currentUrl.includes(config.ADMIN_BASE_URL)) {
-      let path = location.pathname;
+      let path = location.pathname.toLowerCase();
       let isDashboard = path.includes('/dashboard.html');
       let isUsuarios = path.includes('/usuarios.html');
       let isTiendas = path.includes('/tiendas.html');
@@ -65,7 +65,7 @@ const Auth = {
 
     // Renderizado centralizado del sidebar para vistas de panel (vendedor / cliente)
     if (nav && u && config.PANEL_BASE_URL && (currentUrl.includes(config.PANEL_BASE_URL) || currentUrl.endsWith('/panel') || currentUrl.endsWith('/panel/'))) {
-      let path = location.pathname;
+      let path = location.pathname.toLowerCase();
       let isDashboard = path.includes('/dashboard.html') || path.endsWith('/panel') || path.endsWith('/panel/');
       let isTienda = path.includes('/tienda.html');
       let isProductos = path.includes('/productos.html');

@@ -11,6 +11,41 @@
   
   <!-- Custom Style -->
   <link href="../assets/css/style.css" rel="stylesheet">
+  <script>
+    (function() {
+      const activeTheme = localStorage.getItem('home_theme') || 'tierra_artesanal';
+      const themes = {
+        tierra_artesanal: {
+          '--theme-60': '#af4220', '--theme-30': '#FAF8F5', '--theme-10': '#dfa84a', '--theme-text': '#2C2420',
+          '--primary': '#af4220', '--primary-hover': '#8e3215', '--accent': '#dfa84a', '--bg-soft': '#FAF8F5', '--text-dark': '#2C2420'
+        },
+        minimalista_clara: {
+          '--theme-60': '#2d4a43', '--theme-30': '#fcfcfc', '--theme-10': '#e09f67', '--theme-text': '#1a1d20',
+          '--primary': '#2d4a43', '--primary-hover': '#1e332e', '--accent': '#e09f67', '--bg-soft': '#fcfcfc', '--text-dark': '#1a1d20'
+        },
+        comercial_moderna: {
+          '--theme-60': '#0d6efd', '--theme-30': '#f8f9fa', '--theme-10': '#fd7e14', '--theme-text': '#212529',
+          '--primary': '#0d6efd', '--primary-hover': '#0b5ed7', '--accent': '#fd7e14', '--bg-soft': '#f8f9fa', '--text-dark': '#212529'
+        },
+        elegante_oscura: {
+          '--theme-60': '#c5a880', '--theme-30': '#121212', '--theme-10': '#d4af37', '--theme-text': '#f5f5f7',
+          '--primary': '#c5a880', '--primary-hover': '#b0936b', '--accent': '#d4af37', '--bg-soft': '#121212', '--text-dark': '#f5f5f7'
+        }
+      };
+      let vars = themes[activeTheme];
+      if (!vars && activeTheme.startsWith('custom_')) {
+        try {
+          const custom = JSON.parse(localStorage.getItem('custom_themes') || '{}');
+          if (custom[activeTheme]) vars = custom[activeTheme].variables;
+        } catch(e){}
+      }
+      if (vars) {
+        for (let k in vars) {
+          document.documentElement.style.setProperty(k, vars[k]);
+        }
+      }
+    })();
+  </script>
   <!-- Cropper.js CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
 </head>
@@ -158,6 +193,7 @@
   <script src="../assets/js/app-config.js"></script>
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/auth.js"></script>
+  <script src="../js/home-themes.js"></script>
   
   <script>
     Auth.role(['admin']);
