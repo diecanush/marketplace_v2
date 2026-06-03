@@ -58,7 +58,7 @@ if ($method === 'PUT') {
     }
     
     // Fetch existing details for safe partial updates
-    $existingStmt = $db->prepare('SELECT imagen, banner, config_diseno FROM tiendas WHERE id = ?');
+    $existingStmt = $db->prepare('SELECT imagen, banner, config_diseno, destacado, activa, estado FROM tiendas WHERE id = ?');
     $existingStmt->execute([$id]);
     $existing = $existingStmt->fetch(PDO::FETCH_ASSOC);
     if (!$existing) {
@@ -109,6 +109,11 @@ if ($method === 'PUT') {
     } else {
         $config_diseno_json = $existing['config_diseno'];
     }
+
+    // Seguridad de actualización de estados
+    $destacado = $isAdmin ? (!empty($d['destacado']) ? 1 : 0) : (int)$existing['destacado'];
+    $activa = $isAdmin ? (!empty($d['activa']) ? 1 : 0) : (int)$existing['activa'];
+    $estado = $isAdmin ? ($d['estado'] ?? 'activa') : $existing['estado'];
     
     $s = $db->prepare('UPDATE tiendas SET nombre = ?, rubro = ?, descripcion = ?, imagen = ?, banner = ?, whatsapp = ?, instagram = ?, destacado = ?, activa = ?, estado = ?, config_diseno = ? WHERE id = ?'); 
     $s->execute([
@@ -119,11 +124,10 @@ if ($method === 'PUT') {
         $banner,
         trim($d['whatsapp'] ?? ''),
         trim($d['instagram'] ?? ''),
-        $isAdmin && !empty($d['destacado']) ? 1 : 0,
-        $isAdmin ? (!empty($d['activa']) ? 1 : 0) : 1,
-        $isAdmin ? ($d['estado'] ?? 'activa') : 'activa',
+        $destacado,
+        $activa,
+        $estado,
         $config_diseno_json,
-        $id
     ]); 
     
     json_response(['success' => true]); 
