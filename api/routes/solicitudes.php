@@ -8,14 +8,6 @@ function process_uploaded_images($images_array) {
   if (!is_array($images_array)) return [];
   
   $saved_paths = [];
-  $upload_dir = PATH_UPLOADS . DIRECTORY_SEPARATOR . 'solicitudes';
-  
-  if (!file_exists($upload_dir)) {
-    if (!@mkdir($upload_dir, 0755, true)) {
-      return [];
-    }
-  }
-  
   foreach ($images_array as $img_str) {
     $img_str = trim($img_str);
     if (empty($img_str)) continue;
@@ -26,28 +18,10 @@ function process_uploaded_images($images_array) {
       continue;
     }
     
-    // Si es una imagen en formato data uri base64, decodificarla y guardarla
-    if (strpos($img_str, 'data:image') === 0 && strpos($img_str, ';base64,') !== false) {
-      $parts = explode(',', $img_str);
-      if (count($parts) < 2) continue;
-      
-      $meta = $parts[0];
-      $ext = 'png';
-      if (strpos($meta, 'image/jpeg') !== false || strpos($meta, 'image/jpg') !== false) {
-        $ext = 'jpg';
-      } elseif (strpos($meta, 'image/webp') !== false) {
-        $ext = 'webp';
-      }
-      
-      $file_data = base64_decode($parts[1]);
-      if ($file_data === false) continue;
-      
-      $filename = uniqid('sol_') . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-      $filepath = $upload_dir . '/' . $filename;
-      
-      if (@file_put_contents($filepath, $file_data) !== false) {
-        $saved_paths[] = 'uploads/solicitudes/' . $filename;
-      }
+    // Utilizar la función unificada de guardado y optimización
+    $saved_path = save_image_from_base64($img_str, 'solicitudes');
+    if (!empty($saved_path)) {
+      $saved_paths[] = $saved_path;
     }
   }
   return $saved_paths;

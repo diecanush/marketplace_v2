@@ -4,7 +4,7 @@ const API = { token:()=>localStorage.getItem('token'), user:()=>{try{return JSON
 const money=n=>new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(Number(n||0));
 function showError(id,r){document.getElementById(id).innerHTML=`<div class="alert alert-danger">${r.message}<pre class="small">${r.raw||''}</pre></div>`}
 
-const getImgUrl = (path) => {
+const getImgUrl = (path, size = 'full') => {
   if (!path) return 'https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=800&q=80';
   if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
   
@@ -13,6 +13,16 @@ const getImgUrl = (path) => {
   // Si la ruta ya incluye el prefijo 'uploads/', lo removemos para evitar duplicación
   if (clean.startsWith('uploads/')) {
     clean = clean.substring(8);
+  }
+  
+  // Redirigir a la carpeta correspondiente para miniaturas y tamaños medianos
+  if (size === 'thumb' || size === 'medium') {
+    let parts = clean.split('/');
+    if (parts.length > 1) {
+      let filename = parts.pop();
+      let folder = parts.join('/');
+      clean = `${folder}/${size === 'thumb' ? 'thumbs' : 'medium'}/${filename}`;
+    }
   }
   
   const uploadsBase = window.AppConfig ? window.AppConfig.UPLOADS_BASE_URL : '';
