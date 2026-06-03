@@ -46,3 +46,6 @@ Thumbs.db
 *.njsproj
 *.sln
 *.swp
+
+# Generated release artifacts and packages
+release/
