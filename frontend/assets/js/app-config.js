@@ -9,15 +9,28 @@
   let assetsBaseUrl = '';
   let resolutionError = null;
 
+  // Helper interno de normalización de URLs para evitar dobles barras seguidas
+  // a excepción de las barras del protocolo http:// o https://
+  function normaliseUrl(url) {
+    if (!url) return '';
+    const protocolMatch = url.match(/^(https?:\/\/)/i);
+    if (protocolMatch) {
+      const protocol = protocolMatch[1];
+      const remainder = url.substring(protocol.length);
+      return protocol + remainder.replace(/\/+/g, '/');
+    }
+    return url.replace(/\/+/g, '/');
+  }
+
   try {
     // 1. Cargar overrides del entorno si están definidos en env.js
     const env = window.AppEnv || {};
 
     if (env.BASE_URL) {
-      baseUrl = env.BASE_URL;
-      apiBaseUrl = env.API_BASE_URL || (baseUrl + '/api/routes');
-      uploadsBaseUrl = env.UPLOADS_BASE_URL || (baseUrl + '/uploads');
-      assetsBaseUrl = env.ASSETS_BASE_URL || (baseUrl + '/frontend/assets');
+      baseUrl = normaliseUrl(env.BASE_URL);
+      apiBaseUrl = normaliseUrl(env.API_BASE_URL || (baseUrl + '/api/routes'));
+      uploadsBaseUrl = normaliseUrl(env.UPLOADS_BASE_URL || (baseUrl + '/uploads'));
+      assetsBaseUrl = normaliseUrl(env.ASSETS_BASE_URL || (baseUrl + '/assets'));
     } else {
       const pathname = window.location.pathname.replace(/\\/g, '/');
       const protocol = window.location.protocol;
@@ -58,15 +71,33 @@
           let basePath = pathname.substring(0, idx);
           baseUrl = window.location.origin + basePath;
         } else {
-          // Asumir la raíz del dominio
-          baseUrl = window.location.origin;
+          // Autodetección de subcarpeta (ej. /marketplace/) quitando archivos y carpetas del final
+          let cleanPath = pathname;
+          if (cleanPath.includes('.')) {
+            cleanPath = cleanPath.substring(0, cleanPath.lastIndexOf('/'));
+          }
+          if (cleanPath.endsWith('/')) {
+            cleanPath = cleanPath.slice(0, -1);
+          }
+          let changed = true;
+          while (changed) {
+            changed = false;
+            if (cleanPath.endsWith('/admin')) {
+              cleanPath = cleanPath.slice(0, -6);
+              changed = true;
+            } else if (cleanPath.endsWith('/panel')) {
+              cleanPath = cleanPath.slice(0, -6);
+              changed = true;
+            }
+          }
+          baseUrl = window.location.origin + cleanPath;
         }
       }
 
       // Derivar rutas basadas en la URL base calculada
-      apiBaseUrl = baseUrl + '/api/routes';
-      uploadsBaseUrl = baseUrl + '/uploads';
-      assetsBaseUrl = baseUrl + '/frontend/assets';
+      apiBaseUrl = normaliseUrl(baseUrl + '/api/routes');
+      uploadsBaseUrl = normaliseUrl(baseUrl + '/uploads');
+      assetsBaseUrl = normaliseUrl(baseUrl + '/frontend/assets');
     }
 
     // Validar resolución final
@@ -83,7 +114,7 @@
   const currentPath = window.location.pathname.replace(/\\/g, '/');
   const frontendPath = currentPath.includes('/frontend/') ? '/frontend' : '';
 
-  // Exponer objeto global de configuración con getters para resolver dinámicamente según sesión
+  // Exponer objeto global de configuración
   window.AppConfig = {
     BASE_URL: baseUrl,
     API_BASE_URL: apiBaseUrl,
@@ -91,22 +122,80 @@
     ASSETS_BASE_URL: assetsBaseUrl,
     
     // Rutas fijas del frontend
-    LOGIN_URL: baseUrl + frontendPath + '/login.html',
-    INDEX_URL: baseUrl + frontendPath + '/index.html',
-    ADMIN_BASE_URL: baseUrl + frontendPath + '/admin',
-    PANEL_BASE_URL: baseUrl + frontendPath + '/panel',
+    LOGIN_URL: normaliseUrl(baseUrl + frontendPath + '/login.html'),
+    INDEX_URL: normaliseUrl(baseUrl + frontendPath + '/index.html'),
+    ADMIN_BASE_URL: normaliseUrl(baseUrl + frontendPath + '/admin'),
+    PANEL_BASE_URL: normaliseUrl(baseUrl + frontendPath + '/panel'),
     
     // Getter dinámico para el Dashboard según el rol del usuario autenticado
     get DASHBOARD_URL() {
       try {
         const user = JSON.parse(localStorage.getItem('user'));
         if (user && user.rol === 'admin') {
-          return this.ADMIN_BASE_URL + '/dashboard.html';
+          return normaliseUrl(this.ADMIN_BASE_URL + '/dashboard.html');
         }
       } catch (e) {
         console.error("Error al leer datos de usuario en localStorage", e);
       }
-      return this.PANEL_BASE_URL + '/dashboard.html';
+      return normaliseUrl(this.PANEL_BASE_URL + '/dashboard.html');
+    },
+
+    // 1. Resuelve URL de páginas y recursos estáticos del frontend
+    resolveUrl(path) {
+      if (!path) return this.BASE_URL;
+      if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+        return path;
+      }
+      let clean = path.replace(/^\/+/, '');
+      const hasFrontend = window.location.pathname.replace(/\\/g, '/').includes('/frontend/');
+      if (hasFrontend && !clean.startsWith('frontend/')) {
+        return normaliseUrl(this.BASE_URL + '/frontend/' + clean);
+      }
+      return normaliseUrl(this.BASE_URL + '/' + clean);
+    },
+
+    // 2. Resuelve URL de los endpoints de la API
+    resolveApiUrl(path) {
+      if (!path) return this.API_BASE_URL;
+      if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+        return path;
+      }
+      let clean = path.replace(/^\/+/, '');
+      if (clean.startsWith('api/routes/')) {
+        clean = clean.substring(11);
+      }
+      return normaliseUrl(this.API_BASE_URL + '/' + clean);
+    },
+
+    // 3. Resuelve la URL de las imágenes (productos, tiendas, etc.)
+    resolveImageUrl(path, size = 'full') {
+      if (!path) {
+        return 'https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=800&q=80';
+      }
+      if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+        return path;
+      }
+      let clean = path.replace(/\\/g, '/').replace(/^\/+/, '');
+      if (clean.startsWith('uploads/')) {
+        clean = clean.substring(8);
+      }
+      
+      if (size === 'thumb' || size === 'medium') {
+        let parts = clean.split('/');
+        if (parts.length > 1) {
+          let filename = parts.pop();
+          let folder = parts.join('/');
+          clean = `${folder}/${size === 'thumb' ? 'thumbs' : 'medium'}/${filename}`;
+        } else {
+          clean = `${size === 'thumb' ? 'thumbs' : 'medium'}/${clean}`;
+        }
+      }
+      return normaliseUrl(this.UPLOADS_BASE_URL + '/' + clean);
+    },
+
+    // 4. Realiza una redirección segura a un path del sistema
+    goTo(path) {
+      window.location.href = this.resolveUrl(path);
     },
 
     error: resolutionError
