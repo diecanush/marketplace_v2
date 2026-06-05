@@ -285,20 +285,6 @@
 
   // Carga e inicialización de temas desde la API (MySQL)
   window.loadThemeConfig = async function() {
-    let baseUrl = '';
-    if (window.AppConfig && window.AppConfig.API_BASE_URL) {
-      baseUrl = window.AppConfig.API_BASE_URL;
-    } else {
-      // Deducir ruta si no está inicializada
-      const pathname = window.location.pathname.replace(/\\/g, '/');
-      let idx = pathname.indexOf('/frontend/');
-      let folder = idx !== -1 ? pathname.substring(0, idx).split('/').pop() : 'marketplace_v2';
-      baseUrl = window.location.origin + '/' + folder + '/api/routes';
-      if (window.location.protocol === 'file:') {
-        baseUrl = 'http://localhost/' + folder + '/api/routes';
-      }
-    }
-
     try {
       // 1. Intentar aplicar inmediatamente la caché de localStorage para evitar parpadeos visuales (FOUC)
       const cachedActive = localStorage.getItem('home_theme') || 'tierra_artesanal';
@@ -320,9 +306,15 @@
       }
 
       // 2. Consultar la base de datos (fuente de verdad principal)
-      let r = await fetch(baseUrl + '/configuraciones.php');
-      let res = await r.json();
-      if (res.success) {
+      let res;
+      if (window.API && typeof window.API.get === 'function') {
+        res = await window.API.get('/configuraciones.php');
+      } else if (window.AppConfig && typeof window.AppConfig.resolveApiUrl === 'function') {
+        let r = await fetch(window.AppConfig.resolveApiUrl('/configuraciones.php'));
+        res = await r.json();
+      }
+      
+      if (res && res.success) {
         // Cargar temas personalizados de la base de datos
         if (res.custom_themes) {
           Object.keys(res.custom_themes).forEach(themeId => {

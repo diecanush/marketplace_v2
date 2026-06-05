@@ -118,10 +118,10 @@
     </div>
   </div>
 
-  <script src="assets/js/env.js"></script>
-  <script src="assets/js/app-config.js"></script>
-  <script src="assets/js/api.js"></script>
-  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/env.js?v=20260605"></script>
+  <script src="assets/js/app-config.js?v=20260605"></script>
+  <script src="assets/js/api.js?v=20260605"></script>
+  <script src="assets/js/auth.js?v=20260605"></script>
   <script>
     let submitAction = 'client';
     
@@ -152,15 +152,14 @@
       
       Auth.save(r);
       
+      let targetUrl = 'index.html';
       if (r.user.rol === 'admin') {
-        location.href = 'admin/dashboard.html';
-      } else {
-        if (submitAction === 'vendor') {
-          location.href = 'panel/dashboard.html'; // Redirige directamente al formulario de vendedor
-        } else {
-          location.href = 'index.html'; // Redirige al sitio público
-        }
+        targetUrl = 'admin/dashboard.html';
+      } else if (submitAction === 'vendor') {
+        targetUrl = 'panel/dashboard.html';
       }
+      
+      location.href = window.AppConfig && typeof window.AppConfig.resolveUrl === 'function' ? window.AppConfig.resolveUrl(targetUrl) : targetUrl;
     }
   </script>
 </body>

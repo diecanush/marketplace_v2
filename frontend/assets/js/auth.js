@@ -7,14 +7,28 @@ const Auth = {
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    location.href = window.AppConfig ? window.AppConfig.LOGIN_URL : 'login.html';
-  },
+     location.href = window.AppConfig && typeof window.AppConfig.resolveUrl === 'function'
+    ? window.AppConfig.resolveUrl('login.html')
+    : (
+        window.location.pathname.includes('/admin/') ||
+        window.location.pathname.includes('/panel/')
+          ? '../login.html'
+          : 'login.html'
+      );
+},
   
   require() {
     if (!API.token()) {
-      location.href = window.AppConfig ? window.AppConfig.LOGIN_URL : 'login.html';
-    }
-  },
+      location.href = window.AppConfig && typeof window.AppConfig.resolveUrl === 'function'
+      ? window.AppConfig.resolveUrl('login.html')
+      : (
+          window.location.pathname.includes('/admin/') ||
+          window.location.pathname.includes('/panel/')
+            ? '../login.html'
+            : 'login.html'
+        );
+  }
+},
   
   role(rs) {
     this.require();

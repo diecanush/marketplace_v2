@@ -105,10 +105,10 @@
     </div>
   </div>
 
-  <script src="assets/js/env.js"></script>
-  <script src="assets/js/app-config.js"></script>
-  <script src="assets/js/api.js"></script>
-  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/env.js?v=20260605"></script>
+  <script src="assets/js/app-config.js?v=20260605"></script>
+  <script src="assets/js/api.js?v=20260605"></script>
+  <script src="assets/js/auth.js?v=20260605"></script>
   <script>
     f.onsubmit = async e => {
       e.preventDefault();
@@ -127,7 +127,8 @@
       }
       
       Auth.save(r);
-      location.href = r.user.rol === 'admin' ? 'admin/dashboard.html' : 'panel/dashboard.html';
+      const targetUrl = r.user.rol === 'admin' ? 'admin/dashboard.html' : 'panel/dashboard.html';
+      location.href = window.AppConfig && typeof window.AppConfig.resolveUrl === 'function' ? window.AppConfig.resolveUrl(targetUrl) : targetUrl;
     }
   </script>
 </body>
