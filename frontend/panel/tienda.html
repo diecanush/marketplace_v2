@@ -216,7 +216,7 @@
                 <button type="button" class="btn btn-sm edit-overlay-btn border-secondary-subtle px-3 d-flex align-items-center gap-1" onclick="openAddProductModal()">
                   <i class="bi bi-plus-lg text-success"></i> Agregar Producto
                 </button>
-                <button class="btn btn-sm edit-overlay-btn border-secondary-subtle px-3 d-flex align-items-center gap-1" onclick="openEditStylesModal()">
+                <button class="btn btn-sm edit-overlay-btn border-secondary-subtle px-3 d-flex align-items-center gap-1" onclick="openEditStylesModal()" style="display: none !important;">
                   <i class="bi bi-palette-fill text-danger"></i> Personalizar Colores y Fuentes
                 </button>
               </div>
@@ -601,11 +601,11 @@
         document.head.appendChild(styleEl);
       }
 
-      const styles = draftState.config_diseno;
-      const primary = styles.style_primary_color || '#af4220';
-      const button = styles.style_button_color || '#dfa84a';
-      const text = styles.style_text_color || '#2c2420';
-      const font = styles.style_font_family || 'Outfit';
+      // Ignorar estilos del borrador propio para la previsualización
+      const primary = '#af4220';
+      const button = '#dfa84a';
+      const text = '#2c2420';
+      const font = 'Outfit';
 
       // Load Google Fonts link dynamically
       if (font && font !== 'inherit') {

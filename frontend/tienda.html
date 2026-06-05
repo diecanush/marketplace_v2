@@ -213,7 +213,7 @@
 
     // Dynamic styling and postMessage communication helpers (FASE 5B)
     function applyDynamicStyles(styles) {
-      if (!styles) return;
+      return; // Desactivado: las tiendas no manejan diseño visual propio, heredan el tema global del marketplace.
       let styleEl = document.getElementById('dynamicStoreStyles');
       if (!styleEl) {
         styleEl = document.createElement('style');
@@ -316,7 +316,7 @@
 
     window.addEventListener('message', function(e) {
       if (e.data && e.data.type === 'previewStoreStyles') {
-        applyDynamicStyles(e.data.config_diseno);
+        // applyDynamicStyles(e.data.config_diseno); // Desactivado
         applyDynamicInfo(e.data.storeInfo);
       }
     });
@@ -342,7 +342,7 @@
       shopProducts = p.data || [];
       storeInternalCategories = c.success ? (c.data || []) : [];
       
-      applyDynamicStyles(storeInfo.config_diseno);
+      // applyDynamicStyles(storeInfo.config_diseno); // Desactivado
       
       document.title = `${storeInfo.nombre} - Tienda de Artesanías`;
       
