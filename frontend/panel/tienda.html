@@ -209,7 +209,10 @@
                 <span class="badge bg-primary bg-opacity-10 text-primary mb-1 styles-edit-badge"><i class="bi bi-stars"></i> Muestra de tu Catálogo</span>
                 <h4 class="fw-bold mb-0 text-dark">Estilos de tus Productos</h4>
               </div>
-              <div class="d-flex gap-2">
+              <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn btn-sm edit-overlay-btn border-secondary-subtle px-3 d-flex align-items-center gap-1" onclick="openCategoriesModal()">
+                  <i class="bi bi-tags text-primary"></i> Categorías Internas
+                </button>
                 <button type="button" class="btn btn-sm edit-overlay-btn border-secondary-subtle px-3 d-flex align-items-center gap-1" onclick="openAddProductModal()">
                   <i class="bi bi-plus-lg text-success"></i> Agregar Producto
                 </button>
@@ -397,10 +400,16 @@
               <input id="prodStock" type="number" class="form-control rounded-3" placeholder="Cantidad" required>
             </div>
             
-            <div class="col-md-6">
-              <label class="form-label fw-bold small text-dark">Categoría</label>
+            <div class="col-md-3">
+              <label class="form-label fw-bold small text-dark">Categoría Global</label>
               <select id="prodCategoriaId" class="form-select rounded-3" required>
                 <!-- Categorías pobladas vía JS -->
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-bold small text-dark">Categoría Interna</label>
+              <select id="prodCategoriaTiendaId" class="form-select rounded-3">
+                <!-- Categorías internas pobladas vía JS -->
               </select>
             </div>
 
@@ -464,6 +473,37 @@
         <div class="modal-footer border-top pt-2">
           <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancelar</button>
           <button type="button" class="btn btn-dark btn-sm rounded-pill px-3" id="cropperConfirmBtn">Confirmar y Recortar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Gestionar Categorías Internas -->
+  <div class="modal fade" id="categoriesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header border-bottom pb-2">
+          <h5 class="modal-title fw-bold"><i class="bi bi-tags text-primary"></i> Categorías Internas</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Formulario para agregar -->
+          <form id="formAddCategory" class="d-flex gap-2 mb-3" onsubmit="addCategory(event);">
+            <input type="text" id="newCategoryName" class="form-control rounded-3" placeholder="Nueva categoría (ej: Gorros, Tazas)..." required>
+            <button class="btn btn-dark d-flex align-items-center gap-1 rounded-3" type="submit">
+              <i class="bi bi-plus-lg"></i> Agregar
+            </button>
+          </form>
+          
+          <!-- Lista de categorías -->
+          <div style="max-height: 300px; overflow-y: auto;">
+            <ul class="list-group rounded-3" id="categoriesListContainer">
+              <!-- Cargando dinámicamente -->
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer border-top pt-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cerrar</button>
         </div>
       </div>
     </div>
@@ -797,14 +837,131 @@
 
     // Global variable for categories
     let categoriesList = [];
+    let storeCategories = [];
+
+    async function loadStoreCategories() {
+      try {
+        let r = await API.get('/categorias_tienda.php?mine=1', true);
+        if (r.success) {
+          storeCategories = r.data || [];
+          populateStoreCategoriesDropdown();
+        }
+      } catch (err) {
+        console.error("Error al cargar categorías internas:", err);
+      }
+    }
+
+    function populateStoreCategoriesDropdown() {
+      const selectEl = document.getElementById('prodCategoriaTiendaId');
+      if (selectEl) {
+        selectEl.innerHTML = '<option value="">Sin categoría (Ninguna)</option>' +
+          storeCategories.map(c => `<option value="${c.id}">${escapeHtml(c.nombre)}</option>`).join('');
+      }
+    }
+
+    let categoriesModalInstance = null;
+
+    function openCategoriesModal() {
+      if (!categoriesModalInstance) {
+        categoriesModalInstance = new bootstrap.Modal(document.getElementById('categoriesModal'));
+      }
+      renderCategoriesList();
+      categoriesModalInstance.show();
+    }
+
+    function renderCategoriesList() {
+      const container = document.getElementById('categoriesListContainer');
+      if (storeCategories.length === 0) {
+        container.innerHTML = '<li class="list-group-item text-muted small py-3 text-center">No tenés categorías creadas.</li>';
+        return;
+      }
+      
+      container.innerHTML = storeCategories.map(c => `
+        <li class="list-group-item d-flex justify-content-between align-items-center gap-2 py-2">
+          <span class="text-dark fw-bold" id="cat-text-${c.id}">${escapeHtml(c.nombre)}</span>
+          <div class="d-flex gap-1">
+            <button class="btn btn-sm btn-outline-primary py-1 px-2" onclick="editCategoryName(${c.id}, '${escapeHtml(c.nombre).replaceAll("'", "\\'")}')" title="Editar">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger py-1 px-2" onclick="deleteCategory(${c.id})" title="Eliminar">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    async function addCategory(e) {
+      e.preventDefault();
+      const input = document.getElementById('newCategoryName');
+      const nombre = input.value.trim();
+      if (!nombre) return;
+
+      try {
+        let r = await API.post('/categorias_tienda.php', { nombre }, true);
+        if (r.success) {
+          input.value = '';
+          await loadStoreCategories();
+          renderCategoriesList();
+        } else {
+          alert(r.message || 'Error al agregar categoría.');
+        }
+      } catch (err) {
+        console.error("Error al guardar categoría:", err);
+        alert('Error al conectar con la API.');
+      }
+    }
+
+    async function editCategoryName(id, currentName) {
+      const newName = prompt('Ingrese el nuevo nombre para la categoría:', currentName);
+      if (newName === null) return;
+      const nombre = newName.trim();
+      if (!nombre || nombre === currentName) return;
+
+      try {
+        let r = await API.put(`/categorias_tienda.php?id=${id}`, { nombre });
+        if (r.success) {
+          await loadStoreCategories();
+          renderCategoriesList();
+        } else {
+          alert(r.message || 'Error al editar categoría.');
+        }
+      } catch (err) {
+        console.error("Error al editar categoría:", err);
+        alert('Error al conectar con la API.');
+      }
+    }
+
+    async function deleteCategory(id) {
+      if (confirm('¿Seguro que deseas eliminar esta categoría interna?\nLos productos asociados quedarán como "Sin categoría" (no se borrarán).')) {
+        try {
+          let r = await API.del(`/categorias_tienda.php?id=${id}`);
+          if (r.success) {
+            await loadStoreCategories();
+            renderCategoriesList();
+          } else {
+            alert(r.message || 'Error al eliminar categoría.');
+          }
+        } catch (err) {
+          console.error("Error al eliminar categoría:", err);
+          alert('Error al conectar con la API.');
+        }
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
 
     // Load original store state
     async function load() {
       // Fetch store config, seller products, and categories concurrently
-      let [resStore, resProds, resCats] = await Promise.all([
+      let [resStore, resProds, resCats, resStoreCats] = await Promise.all([
         API.get('/tiendas.php?mine=1', true),
         API.get('/productos.php?mine=1', true),
-        API.get('/categorias.php', true)
+        API.get('/categorias.php', true),
+        API.get('/categorias_tienda.php?mine=1', true)
       ]);
       
       if (!resStore.success) return showError('msg', resStore);
@@ -849,6 +1006,10 @@
         prodCatSelect.innerHTML = '<option value="">Selecciona una categoría...</option>' + 
           categoriesList.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
       }
+
+      // Load internal store categories
+      storeCategories = resStoreCats.success ? (resStoreCats.data || []) : [];
+      populateStoreCategoriesDropdown();
 
       applyDraftToDOM();
       renderCatalogMockup();
@@ -1038,6 +1199,7 @@
       document.getElementById('productModalTitle').innerHTML = '<i class="bi bi-plus-lg text-success"></i> Agregar Producto';
       document.getElementById('prodId').value = '';
       document.getElementById('formProduct').reset();
+      document.getElementById('prodCategoriaTiendaId').value = '';
       document.getElementById('prodImagenPreviewContainer').style.display = 'none';
       document.getElementById('prodImagenPreview').src = '';
       document.getElementById('prodImagen').value = '';
@@ -1058,6 +1220,7 @@
       document.getElementById('prodPrecio').value = p.precio || 0;
       document.getElementById('prodStock').value = p.stock || 0;
       document.getElementById('prodCategoriaId').value = p.categoria_id || '';
+      document.getElementById('prodCategoriaTiendaId').value = p.categoria_tienda_id || '';
       document.getElementById('prodImagen').value = p.imagen || '';
       document.getElementById('prodDescripcion').value = p.descripcion || '';
       document.getElementById('prodOferta').checked = p.oferta == 1;
@@ -1092,6 +1255,7 @@
         precio: document.getElementById('prodPrecio').value,
         stock: document.getElementById('prodStock').value,
         categoria_id: document.getElementById('prodCategoriaId').value || null,
+        categoria_tienda_id: document.getElementById('prodCategoriaTiendaId').value || null,
         imagen: document.getElementById('prodImagen').value,
         descripcion: document.getElementById('prodDescripcion').value.trim(),
         oferta: document.getElementById('prodOferta').checked,

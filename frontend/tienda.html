@@ -56,10 +56,6 @@
     </div>
   </header>
 
-  <!-- Carousel Section -->
-  <section class="container mb-5" id="carouselSection" style="display: none;">
-    <!-- Rendered via JS -->
-  </section>
 
   <!-- Products Section -->
   <main class="container py-2">
@@ -83,8 +79,8 @@
       <!-- Rendered via JS -->
     </div>
 
-    <!-- Shop Products Grid -->
-    <div id="productos" class="row g-4 mb-5">
+    <!-- Shop Products Area -->
+    <div id="productos" class="mb-5">
       <!-- Rendered via JS -->
     </div>
   </main>
@@ -325,17 +321,26 @@
       }
     });
 
+    let storeInternalCategories = [];
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
     async function load() {
       checkAuth();
-      let [t, p] = await Promise.all([
+      let [t, p, c] = await Promise.all([
         API.get('/tiendas.php?id=' + id),
-        API.get('/productos.php?tienda_id=' + id)
+        API.get('/productos.php?tienda_id=' + id),
+        API.get('/categorias_tienda.php?tienda_id=' + id)
       ]);
       
       if (!t.success) return showError('msg', t);
       
       storeInfo = t.data;
       shopProducts = p.data || [];
+      storeInternalCategories = c.success ? (c.data || []) : [];
       
       applyDynamicStyles(storeInfo.config_diseno);
       
@@ -372,87 +377,15 @@
         </div>
       `;
 
-      // Render Carousel of Featured Products
-      let featured = shopProducts.filter(x => x.destacado == 1 || x.oferta == 1);
-      if (featured.length === 0 && shopProducts.length > 0) {
-        featured = shopProducts.slice(0, 3);
-      }
-      renderStoreCarousel(featured);
-
-      // Extract unique categories and render filters
-      let storeCats = [];
-      let seenCats = new Set();
-      shopProducts.forEach(prod => {
-        if (prod.categoria_id && !seenCats.has(prod.categoria_id)) {
-          seenCats.add(prod.categoria_id);
-          storeCats.push({ id: prod.categoria_id, nombre: prod.categoria || 'Otro' });
-        }
-      });
-      renderStoreCategories(storeCats);
+      // Render filters based on internal store categories
+      renderStoreCategories(storeInternalCategories);
 
       sortAndRenderLocal();
     }
 
-    function renderStoreCarousel(products) {
-      const container = document.getElementById('carouselSection');
-      if (!products.length) {
-        container.style.display = 'none';
-        return;
-      }
-      container.style.display = 'block';
-      
-      let indicators = products.map((_, idx) => `
-        <button type="button" data-bs-target="#storeProductsCarousel" data-bs-slide-to="${idx}" class="${idx === 0 ? 'active' : ''}" aria-current="${idx === 0 ? 'true' : 'false'}"></button>
-      `).join('');
-      
-      let slides = products.map((p, idx) => {
-        let label = p.destacado == 1 ? 'Destacado' : (p.oferta == 1 ? 'Oferta' : 'Recomendado');
-        let badgeClass = p.oferta == 1 ? 'bg-danger' : 'bg-soft-primary text-primary';
-        if (p.destacado == 1) badgeClass = 'bg-warning text-dark';
-        
-        return `
-          <div class="carousel-item ${idx === 0 ? 'active' : ''}">
-            <div class="row g-0 bg-white align-items-center rounded-4 overflow-hidden border shadow-sm" style="min-height: 320px;">
-              <div class="col-md-6 p-4 p-md-5">
-                <span class="badge ${badgeClass} mb-2 px-3 py-1.5 rounded-pill text-uppercase fw-bold" style="font-size: 0.75rem;">${label}</span>
-                <h2 class="fw-bold text-dark mb-2 font-title text-truncate-2-lines" title="${p.nombre}">${p.nombre}</h2>
-                <p class="text-muted mb-4 text-truncate-3-lines" style="font-size: 0.9rem;">${p.descripcion || 'Este producto está hecho a mano por mí utilizando materias primas de gran calidad y proces artesanales.'}</p>
-                <div class="d-flex align-items-center gap-3">
-                  <span class="price fs-3">${money(p.precio)}</span>
-                  <button class="btn btn-dark btn-sm px-4 py-2" onclick="viewProduct(${p.id})">Ver Detalles</button>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <img src="${getImgUrl(p.imagen, 1)}" class="w-100" style="height: 320px; object-fit: cover;">
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      container.innerHTML = `
-        <div id="storeProductsCarousel" class="carousel slide" data-bs-ride="carousel">
-          <div class="carousel-indicators">
-            ${indicators}
-          </div>
-          <div class="carousel-inner">
-            ${slides}
-          </div>
-          <button class="carousel-control-prev" type="button" data-bs-target="#storeProductsCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true" style="background-size: 50%;"></span>
-            <span class="visually-hidden">Anterior</span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#storeProductsCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true" style="background-size: 50%;"></span>
-            <span class="visually-hidden">Siguiente</span>
-          </button>
-        </div>
-      `;
-    }
-
     function renderStoreCategories(cats) {
       const container = document.getElementById('storeCategoryChips');
-      if (cats.length <= 1) {
+      if (cats.length === 0) {
         container.style.display = 'none';
         return;
       }
@@ -462,8 +395,8 @@
           Todos
         </button>
       ` + cats.map(c => `
-        <button class="category-chip" onclick="filterByCategoryLocal(${c.id}, this)" id="storeChip-${c.id}">
-          ${c.nombre}
+        <button class="category-chip" id="storeChip-${c.id}" onclick="filterByCategoryLocal(${c.id}, this)">
+          ${escapeHtml(c.nombre)}
         </button>
       `).join('');
     }
@@ -510,11 +443,6 @@
       let q = searchInput.value.toLowerCase().trim();
       let filtered = shopProducts;
 
-      // Filter locally by category
-      if (selectedCategoryLocal !== 'all') {
-        filtered = filtered.filter(p => +p.categoria_id === +selectedCategoryLocal);
-      }
-
       // Filter locally by query
       if (q) {
         filtered = filtered.filter(p => (p.nombre + (p.descripcion || '')).toLowerCase().includes(q));
@@ -533,13 +461,89 @@
         filtered.sort((a, b) => Number(b.destacado || 0) - Number(a.destacado || 0));
       }
 
-      // Render
-      productos.innerHTML = filtered.map(card).join('') || `
-        <div class="col-12 text-center py-5 text-muted bg-white border rounded-4">
-          <i class="bi bi-search display-4"></i>
-          <p class="mt-2 fs-5">No hay productos que coincidan con la búsqueda.</p>
-        </div>
-      `;
+      // Handle Empty State
+      if (filtered.length === 0) {
+        productos.innerHTML = `
+          <div class="text-center py-5 text-muted bg-white border rounded-4 w-100">
+            <i class="bi bi-search display-4"></i>
+            <p class="mt-2 fs-5">No hay productos que coincidan con la búsqueda.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Render - Case A: No internal store categories
+      if (storeInternalCategories.length === 0) {
+        productos.innerHTML = `<div class="row g-4">${filtered.map(card).join('')}</div>`;
+        return;
+      }
+
+      // Render - Case B: Has internal store categories
+      let html = '';
+      
+      if (selectedCategoryLocal === 'all') {
+        // Render each category section sequentially
+        storeInternalCategories.forEach(c => {
+          let inCat = filtered.filter(p => p.categoria_tienda_id && +p.categoria_tienda_id === +c.id);
+          if (inCat.length > 0) {
+            html += `
+              <div class="category-section mb-5">
+                <h4 class="fw-bold mb-3 text-dark font-title border-bottom pb-2 d-flex align-items-center gap-2">
+                  <i class="bi bi-tag text-primary"></i> ${escapeHtml(c.nombre)}
+                  <span class="badge bg-secondary bg-opacity-10 text-secondary fs-6 rounded-pill" style="font-size: 0.8rem;">${inCat.length}</span>
+                </h4>
+                <div class="row g-4">
+                  ${inCat.map(card).join('')}
+                </div>
+              </div>
+            `;
+          }
+        });
+
+        // Render products with no category
+        let noCat = filtered.filter(p => !p.categoria_tienda_id || +p.categoria_tienda_id === 0);
+        if (noCat.length > 0) {
+          html += `
+            <div class="category-section mb-5">
+              <h4 class="fw-bold mb-3 text-dark font-title border-bottom pb-2 d-flex align-items-center gap-2">
+                <i class="bi bi-tag text-muted"></i> Sin categoría
+                <span class="badge bg-secondary bg-opacity-10 text-secondary fs-6 rounded-pill" style="font-size: 0.8rem;">${noCat.length}</span>
+              </h4>
+              <div class="row g-4">
+                ${noCat.map(card).join('')}
+              </div>
+            </div>
+          `;
+        }
+      } else {
+        // Render only the selected category
+        let c = storeInternalCategories.find(cat => +cat.id === +selectedCategoryLocal);
+        if (c) {
+          let inCat = filtered.filter(p => p.categoria_tienda_id && +p.categoria_tienda_id === +c.id);
+          if (inCat.length > 0) {
+            html = `
+              <div class="category-section mb-5">
+                <h4 class="fw-bold mb-3 text-dark font-title border-bottom pb-2 d-flex align-items-center gap-2">
+                  <i class="bi bi-tag text-primary"></i> ${escapeHtml(c.nombre)}
+                  <span class="badge bg-secondary bg-opacity-10 text-secondary fs-6 rounded-pill" style="font-size: 0.8rem;">${inCat.length}</span>
+                </h4>
+                <div class="row g-4">
+                  ${inCat.map(card).join('')}
+                </div>
+              </div>
+            `;
+          } else {
+            html = `
+              <div class="text-center py-5 text-muted bg-white border rounded-4 w-100">
+                <i class="bi bi-search display-4"></i>
+                <p class="mt-2 fs-5">No hay productos en esta categoría que coincidan con la búsqueda.</p>
+              </div>
+            `;
+          }
+        }
+      }
+
+      productos.innerHTML = html;
     }
 
     function buscarLocal() {
@@ -556,7 +560,7 @@
 
       document.getElementById('modalProductImg').src = getImgUrl(prod.imagen, 1);
       document.getElementById('modalProductName').textContent = prod.nombre;
-      document.getElementById('modalProductCategory').textContent = prod.categoria || 'Artesanía';
+      document.getElementById('modalProductCategory').textContent = prod.categoria_tienda_nombre || prod.categoria || 'Artesanía';
       document.getElementById('modalProductDesc').textContent = prod.descripcion || 'Esta pieza única está creada a mano por el artesano en base a materias primas seleccionadas y técnicas tradicionales.';
       document.getElementById('modalProductPrice').textContent = money(prod.precio);
       document.getElementById('modalProductQty').textContent = modalQty;
