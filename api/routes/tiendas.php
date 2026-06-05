@@ -128,6 +128,7 @@ if ($method === 'PUT') {
         $activa,
         $estado,
         $config_diseno_json,
+        $id,
     ]); 
     
     json_response(['success' => true]); 
