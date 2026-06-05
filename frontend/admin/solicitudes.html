@@ -297,7 +297,7 @@
     }
 
     function openReviewModal(id) {
-      let s = allSolicitudes.find(x => x.id === id);
+      let s = allSolicitudes.find(x => +x.id === +id);
       if (!s) return;
       
       document.getElementById('revId').value = s.id;
@@ -337,7 +337,7 @@
       
       toggleFeedbackField();
       
-      const modal = new bootstrap.Modal(document.getElementById('reviewModal'));
+      const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('reviewModal'));
       modal.show();
     }
 
