@@ -47,14 +47,15 @@
     </div>
   </nav>
 
-  <!-- Store Header Area -->
-  <header id="storeHeader" class="py-5" style="background: linear-gradient(rgba(44, 36, 32, 0.4), rgba(44, 36, 32, 0.7)), url('https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1600&q=80') center/cover; margin-bottom: 2rem;">
-    <div class="container text-white py-4">
-      <div id="head">
-        <!-- Rendered via JS -->
-      </div>
+  <!-- Store Header Area (Clean Cover) -->
+  <header id="storeHeader" style="height: 280px; background: url('https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1600&q=80') center/cover; margin-bottom: 1.5rem; border-radius: 0 0 16px 16px;"></header>
+
+  <!-- Store Info Section -->
+  <div class="container mb-4">
+    <div id="head" class="bg-white p-4 rounded-4 shadow-sm border">
+      <!-- Rendered via JS -->
     </div>
-  </header>
+  </div>
 
 
   <!-- Products Section -->
@@ -147,7 +148,7 @@
           <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white p-2 rounded-circle shadow-sm" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-4">
-          <span class="badge bg-soft-primary text-primary mb-2" id="modalProductCategory">Categoría</span>
+          <span class="badge bg-soft-primary text-primary mb-2 d-none" id="modalProductCategory">Categoría</span>
           <h3 class="fw-bold mb-1" id="modalProductName">Nombre del Producto</h3>
           <p class="text-muted small mb-3" id="modalProductStore">Vendido por: <span class="text-primary fw-600" id="modalProductStoreName">Tienda</span></p>
           <hr class="my-3">
@@ -310,7 +311,7 @@
       
       const headerEl = document.getElementById('storeHeader');
       if (headerEl && info.banner) {
-        headerEl.style.background = `linear-gradient(rgba(44, 36, 32, 0.4), rgba(44, 36, 32, 0.7)), url('${getImgUrl(info.banner, 1)}') center/cover`;
+        headerEl.style.background = `url('${getImgUrl(info.banner, 1)}') center/cover`;
       }
     }
 
@@ -352,27 +353,31 @@
         const bannerUrl = storeInfo.banner 
           ? getImgUrl(storeInfo.banner, 1) 
           : 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1600&q=80';
-        headerEl.style.background = `linear-gradient(rgba(44, 36, 32, 0.4), rgba(44, 36, 32, 0.7)), url('${bannerUrl}') center/cover`;
+        headerEl.style.background = `url('${bannerUrl}') center/cover`;
       }
       
-      // Render store details banner
-      let rubroBadge = storeInfo.rubro ? `<span class="badge text-bg-warning rounded-pill py-2 px-3 text-uppercase fw-bold mb-3">${storeInfo.rubro}</span>` : '';
-      let whatsappBtn = storeInfo.whatsapp ? `<a class="btn btn-success d-inline-flex align-items-center gap-2 rounded-3 me-2" target="_blank" href="https://wa.me/${storeInfo.whatsapp}"><i class="bi bi-whatsapp"></i> WhatsApp</a>` : '';
-      let instagramBtn = storeInfo.instagram ? `<a class="btn btn-outline-light d-inline-flex align-items-center gap-2 rounded-3" target="_blank" href="https://instagram.com/${storeInfo.instagram}"><i class="bi bi-instagram"></i> Instagram</a>` : '';
+      // Render store details banner in a compact layout (columna izquierda: logo/nombre/botones, columna derecha: descripción)
+      let whatsappBtn = storeInfo.whatsapp ? `<a class="btn btn-success btn-sm d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 fw-semibold" target="_blank" href="https://wa.me/${storeInfo.whatsapp}"><i class="bi bi-whatsapp"></i> WhatsApp</a>` : '';
+      let instagramBtn = storeInfo.instagram ? `<a class="btn btn-outline-dark btn-sm d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2 fw-semibold" target="_blank" href="https://instagram.com/${storeInfo.instagram}"><i class="bi bi-instagram"></i> Instagram</a>` : '';
       
       head.innerHTML = `
-        <div class="row align-items-center g-4">
-          <div class="col-md-3 text-center text-md-start">
-            <img src="${getImgUrl(storeInfo.imagen, 1)}" class="rounded-circle shadow border border-3 border-white" style="width: 150px; height: 150px; object-fit: cover;">
-          </div>
-          <div class="col-md-9 text-center text-md-start">
-            ${rubroBadge}
-            <h1 class="display-4 fw-bold mb-2">${storeInfo.nombre}</h1>
-            <p class="lead mb-4 text-white-50">${storeInfo.descripcion || 'Bienvenido a mi tienda de productos hechos a mano.'}</p>
-            <div class="d-flex justify-content-center justify-content-md-start flex-wrap gap-2">
+        <div class="row g-4 align-items-start">
+          <!-- Columna izquierda: logo + nombre, y debajo botones -->
+          <div class="col-md-5 text-start">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <img src="${getImgUrl(storeInfo.imagen, 1)}" class="rounded-circle shadow-sm border" style="width: 80px; height: 80px; object-fit: cover;">
+              <h1 class="h2 fw-bold text-dark mb-0 font-title">${storeInfo.nombre}</h1>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
               ${whatsappBtn}
               ${instagramBtn}
             </div>
+          </div>
+          
+          <!-- Columna derecha: descripción / información -->
+          <div class="col-md-7 text-start pt-md-2">
+            <h5 class="fw-bold text-muted small text-uppercase mb-2" style="letter-spacing: 0.5px;">Sobre la tienda</h5>
+            <p class="text-secondary mb-0 font-body" style="font-size: 0.95rem; line-height: 1.6;">${storeInfo.descripcion || 'Bienvenido a mi tienda de productos hechos a mano.'}</p>
           </div>
         </div>
       `;
